@@ -9,7 +9,6 @@ class Tag extends Model
 {
     protected $fillable = [
         'name',
-        'icon_path',
     ];
 
     public function restaurants()

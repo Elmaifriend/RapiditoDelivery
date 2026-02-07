@@ -9,10 +9,7 @@ class Category extends Model
 {
     protected $fillable = [
         'name',
-        'slug',
-        'icon_path',
         'is_active',
-        'order',
     ];
 
     public function restaurants()

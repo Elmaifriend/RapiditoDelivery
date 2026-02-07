@@ -11,12 +11,20 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('tags', function (Blueprint $table) {
+        Schema::create('option_groups', function (Blueprint $table) {
             $table->id();
+
+            $table->foreignId('product_id')->constrained()->cascadeOnDelete();
+
             $table->string('name');
+            $table->unsignedInteger('min')->default(0);
+            $table->unsignedInteger('max')->default(1);
+            $table->boolean('required')->default(false);
+
+            $table->unsignedInteger('position')->default(0);
+
             $table->timestamps();
         });
-
     }
 
     /**
@@ -24,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('tags');
+        Schema::dropIfExists('option_groups');
     }
 };

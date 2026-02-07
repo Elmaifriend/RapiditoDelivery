@@ -18,7 +18,6 @@ class TagFactory extends Factory
 
         return [
             'name' => ucfirst($name),
-            'icon_path' => null,
         ];
     }
 }

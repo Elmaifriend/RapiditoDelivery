@@ -19,8 +19,6 @@ class CategoryFactory extends Factory
 
         return [
             'name' => $name,
-            'slug' => Str::slug($name),
-            'icon_path' => null,
             'is_active' => true,
             'order' => 0,
         ];

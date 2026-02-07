@@ -3,8 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-use Illuminate\Cache\TagSet;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -14,17 +12,18 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        User::firstOrCreate([
+            'name' => 'Admin',
+            'email' => 'admin@admin.com',
+            "password" => "admin"
         ]);
 
         $this->call([
-            RestaurantSeeder::class, 
             CategorySeeder::class,
             TagSeeder::class,
+            RestaurantSeeder::class, 
+            ProductSeeder::class,
+            OptionGroupSeeder::class,
         ]);
     }
 }

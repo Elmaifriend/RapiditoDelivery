@@ -10,6 +10,8 @@ use App\Models\Category;
 
 class Restaurant extends Model
 {
+    use HasFactory;
+    
     protected $fillable = [
         'name',
         'slug',

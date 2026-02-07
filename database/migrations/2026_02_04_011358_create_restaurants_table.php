@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('slug')->unique();
             $table->string('status')->default('active'); // active, inactive, suspended, onboarding
-            $table->foreignId('category_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('category_id')->nullable();
 
             $table->string('country')->default('MX');
             $table->string('state')->nullable();

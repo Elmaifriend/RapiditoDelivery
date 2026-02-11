@@ -24,6 +24,8 @@ class RestaurantForm
                         FileUpload::make('banner_path')
                             ->label('Banner')
                             ->image()
+                            ->disk("r2")
+                            ->visibility("private")
                             ->directory('restaurants/banners'),
                     ]),
 
@@ -33,6 +35,8 @@ class RestaurantForm
                         FileUpload::make('logo_path')
                             ->label('Logo')
                             ->image()
+                            ->disk("r2")
+                            ->visibility("private")
                             ->directory('restaurants/logos'),
 
                         Section::make()
@@ -103,6 +107,8 @@ class RestaurantForm
                             ->columnSpanFull()
                             ->label('Imagen de referencia')
                             ->image()
+                            ->disk("r2")
+                            ->visibility("private")
                             ->directory('restaurants/references'),
                     ]),
 

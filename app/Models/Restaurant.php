@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
 use App\Models\Tag;
 use App\Models\Category;
+use App\Models\Product;
 
 class Restaurant extends Model
 {
@@ -32,6 +33,10 @@ class Restaurant extends Model
         'accepts_delivery',
         'accepts_pickup',
     ];
+
+    public function products(){
+        return $this->hasMany(Product::class, "restaurant_id");
+    }
     
     public function category()
     {

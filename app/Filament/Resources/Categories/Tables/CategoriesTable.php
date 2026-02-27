@@ -15,13 +15,10 @@ class CategoriesTable
             ->columns([
                 TextColumn::make('name')
                     ->label('Nombre')
-                    ->searchable()
-                    ->sortable(),
+                    ->searchable(),
 
                 ToggleColumn::make('is_active')
-                    ->label('Activo')
-                    ->sortable(),
-            ])
-            ->defaultSort('order');
+                    ->label('Activo'),
+            ]);
     }
 }

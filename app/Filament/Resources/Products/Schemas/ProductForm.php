@@ -41,6 +41,7 @@ class ProductForm
                         FileUpload::make('image_path')
                             ->label('Imagen del producto')
                             ->image()
+                            ->openable()
                             ->directory('products')
                             ->imagePreviewHeight(200)
                             ->maxSize(2048),

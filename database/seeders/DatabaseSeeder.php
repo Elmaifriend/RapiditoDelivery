@@ -24,6 +24,10 @@ class DatabaseSeeder extends Seeder
             //RestaurantSeeder::class, 
             //ProductSeeder::class,
             //OptionGroupSeeder::class,
+            OrderSeeder::class,
+            OrderItemSeeder::class,
+            OrderDropoffLocationSeeder::class,
+            CitySeeder::class,
         ]);
     }
 }

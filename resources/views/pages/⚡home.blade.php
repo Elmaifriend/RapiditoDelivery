@@ -2,14 +2,75 @@
 
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use App\Models\ServiceZone;
 
 new #[Title('Home')] class extends Component {
-    //
+
+    public ?float $lat = null;
+    public ?float $lng = null;
+
+    public $city = null;
+    public bool $noService = false;
+    public bool $locationDenied = false;
+
+    protected $listeners = [
+        'locationDetected' => 'setLocation',
+        'locationDenied' => 'handleDenied',
+    ];
+
+    public function handleDenied()
+    {
+        $this->locationDenied = true;
+        $this->noService = false;
+        $this->city = null;
+    }
+
+    public function setLocation($lat, $lng)
+    {
+        $this->lat = $lat;
+        $this->lng = $lng;
+
+        $this->resolveServiceZone();
+    }
+
+    protected function resolveServiceZone()
+    {
+        $zone = ServiceZone::active()
+            ->with('city')
+            ->get()
+            ->first(fn ($zone) => $zone->contains($this->lat, $this->lng));
+
+        if (!$zone) {
+            $this->noService = true;
+            return;
+        }
+
+        $this->city = $zone->city;
+        $this->noService = false;
+    }
 };
 ?>
 
 <div class="flex flex-col gap-4 pt-4">
     {{-- Act only according to that maxim whereby you can, at the same time, will that it should become a universal law. - Immanuel Kant --}}
+
+    @if($locationDenied)
+        <div class="bg-yellow-100 text-yellow-700 p-4 rounded-xl">
+            Necesitamos acceso a tu ubicación para mostrar restaurantes disponibles.
+        </div>
+    @endif
+
+    @if($city)
+        <div class="mx-4 mt-4 rounded-xl bg-green-100 p-4 text-sm text-green-700">
+            Estás en {{ $city->name }}
+        </div>
+    @endif
+
+    @if($noService)
+        <div class="mx-4 mt-4 rounded-xl bg-red-100 p-4 text-sm text-red-600">
+            No tenemos servicio en tu ubicación, estamos trabajando para llegar a tu ciudad.
+        </div>
+    @endif
 
     <a href="{{ route('search') }}" class="mx-4 flex items-center gap-4 rounded-2xl border border-gray-100 bg-white p-4">
         <i class="bxf bx-search text-lg text-red-400"></i>
@@ -83,5 +144,25 @@ new #[Title('Home')] class extends Component {
                 image="https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?auto=format&fit=crop&w=500&q=80" />
         </div>
     </div>
+
+    <script>
+    document.addEventListener('livewire:navigated', () => {
+
+        if (!navigator.geolocation) return;
+
+        navigator.geolocation.getCurrentPosition(
+            function (position) {
+                Livewire.dispatch('locationDetected', [
+                    position.coords.latitude,
+                    position.coords.longitude
+                ]);
+            },
+            function (error) {
+                console.log('Geolocation error:', error);
+                Livewire.dispatch('locationDenied');
+            }
+        );
+    });
+    </script>
 
 </div>

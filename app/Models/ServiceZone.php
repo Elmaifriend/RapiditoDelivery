@@ -46,6 +46,11 @@ class ServiceZone extends Model
         });
     }
 
+    public function deliveryZones()
+    {
+        return $this->hasMany(DeliveryZone::class);
+    }
+
     public function city()
     {
         return $this->belongsTo(City::class);

@@ -19,7 +19,7 @@ class Restaurant extends Model
         'status',
         'category_id',
         'address',
-        'city',
+        'city_id',
         'state',
         'postal_code',
         'country',

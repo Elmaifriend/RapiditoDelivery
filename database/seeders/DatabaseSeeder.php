@@ -19,15 +19,18 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->call([
+            CitySeeder::class,
             CategorySeeder::class,
             TagSeeder::class,
-            //RestaurantSeeder::class, 
-            //ProductSeeder::class,
-            //OptionGroupSeeder::class,
+            RestaurantSeeder::class, 
+            ProductSeeder::class,
+            OptionGroupSeeder::class,
             OrderSeeder::class,
             OrderItemSeeder::class,
             OrderDropoffLocationSeeder::class,
-            CitySeeder::class,
+            ServiceZoneSeeder::class,
+            DeliveryZoneSeeder::class,
+            DeliveryZoneFareSeeder::class,
         ]);
     }
 }

@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Restaurant;
 use App\Models\Category;
+use App\Models\City;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
@@ -23,7 +24,7 @@ class RestaurantFactory extends Factory
             'category_id' => Category::inRandomOrder()->first()->id,
 
             'address' => $this->faker->streetAddress(),
-            'city' => $this->faker->city(),
+            'city_id' => City::inRandomOrder()->first()->id,
             'state' => $this->faker->state(),
             'postal_code' => $this->faker->postcode(),
             'country' => 'MX',

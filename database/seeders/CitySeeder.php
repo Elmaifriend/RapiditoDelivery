@@ -10,15 +10,22 @@ class CitySeeder extends Seeder
     public function run(): void
     {
         City::create([
-            'name' => 'Ciudad de México',
-            'state' => 'CDMX',
+            'name' => 'Tijuana',
+            'state' => 'Baja California',
             'country' => 'Mexico',
             'active' => true,
         ]);
 
         City::create([
-            'name' => 'Querétaro',
-            'state' => 'Querétaro',
+            'name' => 'Tecate',
+            'state' => 'Baja California',
+            'country' => 'Mexico',
+            'active' => true,
+        ]);
+
+        City::create([
+            'name' => 'Puerto Peñasco',
+            'state' => 'Sonora',
             'country' => 'Mexico',
             'active' => true,
         ]);

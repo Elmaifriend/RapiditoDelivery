@@ -17,6 +17,10 @@ class ServiceZone extends Model
         'polygon',
         'active',
         'debug',
+        'min_lat',
+        'max_lat',
+        'min_lng',
+        'max_lng',
     ];
 
     protected $casts = [
@@ -29,7 +33,11 @@ class ServiceZone extends Model
     {
         static::saving(function ($zone) {
 
-            $coordinates = $zone->polygon['coordinates'][0] ?? [];
+            $coordinates = [];
+
+            if ( isset($zone->polygon['features'][0]['geometry']['type']) && $zone->polygon['features'][0]['geometry']['type'] === 'Polygon' ) {
+                $coordinates = $zone->polygon['features'][0]['geometry']['coordinates'][0] ?? [];
+            }
 
             $lats = [];
             $lngs = [];
@@ -63,10 +71,9 @@ class ServiceZone extends Model
     {
         $polygon = new GeoPolygon();
 
-        $coordinates = $this->polygon['coordinates'][0] ?? [];
+        $coordinates = $this->polygon['features'][0]['geometry']['coordinates'][0] ?? [];
 
         foreach ($coordinates as $point) {
-            // GeoJSON = [lng, lat]
             $polygon->addPoint(new Coordinate($point[1], $point[0]));
         }
 
@@ -79,6 +86,16 @@ class ServiceZone extends Model
     public function contains(float $lat, float $lng): bool
     {
         if (!$this->active) {
+            return false;
+        }
+
+        // BBOX check (mucho más rápido)
+        if (
+            $lat < $this->min_lat ||
+            $lat > $this->max_lat ||
+            $lng < $this->min_lng ||
+            $lng > $this->max_lng
+        ) {
             return false;
         }
 

@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             CategorySeeder::class,
             TagSeeder::class,
             RestaurantSeeder::class, 
+            ProductCategorySeeder::class,
             ProductSeeder::class,
             OptionGroupSeeder::class,
             OrderSeeder::class,

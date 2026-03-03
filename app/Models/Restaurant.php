@@ -54,6 +54,11 @@ class Restaurant extends Model
         return $this->belongsToMany(User::class, "restaurant_user", "restaurant_id", "user_id");
     }
 
+    public function productCategories()
+    {
+        return $this->hasMany(ProductCategory::class);
+    }
+
     // Delivery zones (polígonos)
     public function deliveryZones()
     {

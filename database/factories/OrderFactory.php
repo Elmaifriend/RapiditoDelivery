@@ -19,7 +19,7 @@ class OrderFactory extends Factory
 
         return [
             'user_id' => User::factory(),
-            'restaurant_id' => Restaurant::factory(),
+            'restaurant_id' => Restaurant::inRandomOrder()->first()->id,
             'driver_id' => null,
             'status' => OrderStatus::REFUND_PENDING,
             'subtotal' => $subtotal,

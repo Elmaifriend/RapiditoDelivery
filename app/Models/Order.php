@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Enums\OrderStatus;
 
 class Order extends Model
 {
@@ -24,7 +25,13 @@ class Order extends Model
         'subtotal'      => 'decimal:2',
         'delivery_fee'  => 'decimal:2',
         'total'         => 'decimal:2',
+        'status' => OrderStatus::class,
     ];
+
+    public function dropoffLocations()
+    {
+        return $this->hasMany(OrderDropoffLocation::class);
+    }
 
     public function user()
     {

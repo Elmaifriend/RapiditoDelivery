@@ -15,6 +15,11 @@ return new class extends Migration
                 ->constrained()
                 ->cascadeOnDelete();
 
+             $table->foreignId('category_id')
+                ->nullable()
+                ->constrained('product_categories')
+                ->nullOnDelete();
+
             $table->string('name');
             $table->unsignedInteger('sort_order')->default(0);
 

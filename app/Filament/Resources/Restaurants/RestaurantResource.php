@@ -2,10 +2,13 @@
 
 namespace App\Filament\Resources\Restaurants;
 
+use App\Filament\Resources\ProductCategories\Tables\ProductCategoriesTable;
 use App\Filament\Resources\Restaurants\Pages\CreateRestaurant;
 use App\Filament\Resources\Restaurants\Pages\EditRestaurant;
 use App\Filament\Resources\Restaurants\Pages\ListRestaurants;
 use App\Filament\Resources\Restaurants\Pages\ViewRestaurant;
+use App\Filament\Resources\Restaurants\RelationManagers\CategoriesRelationManager;
+use App\Filament\Resources\Restaurants\RelationManagers\ProductCategoriesRelationManager;
 use App\Filament\Resources\Restaurants\RelationManagers\ProductsRelationManager;
 use App\Filament\Resources\Restaurants\Schemas\RestaurantForm;
 use App\Filament\Resources\Restaurants\Schemas\RestaurantInfolist;
@@ -44,6 +47,7 @@ class RestaurantResource extends Resource
     {
         return [
             ProductsRelationManager::class,
+            ProductCategoriesRelationManager::class,
         ];
     }
 

@@ -146,7 +146,7 @@ new #[Title('Home')] class extends Component {
                         :stars="4.0"
                         time="30-40min"
                         :image="$restaurant->banner_path 
-                            ? asset('storage/'.$restaurant->banner_path) 
+                            ? Storage::disk('r2')->temporaryUrl($restaurant->banner_path, now()->addMinutes(10))
                             : asset('images/default-restaurant.jpg')" 
                     />
 

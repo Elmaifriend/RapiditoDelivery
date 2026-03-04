@@ -41,6 +41,7 @@ class ProductCategoriesRelationManager extends RelationManager
         return $table
             ->defaultSort('sort_order')
             ->reorderable('sort_order')
+            ->reorderRecordsTriggerAction(null)
             ->columns([
                 TextColumn::make('name')
                     ->label('Nombre')

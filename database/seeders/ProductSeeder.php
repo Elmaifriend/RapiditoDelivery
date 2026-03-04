@@ -39,7 +39,7 @@ class ProductSeeder extends Seeder
 
                 Product::create([
                     'restaurant_id' => $restaurant->id,
-                    'category_id' => $category->id,
+                    'product_category_id' => $category->id,
                     'name' => $product['name'],
                     'description' => 'Producto disponible en ' . $restaurant->name,
                     'price' => $product['price'],

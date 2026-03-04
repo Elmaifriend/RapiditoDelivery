@@ -21,7 +21,6 @@ class ProductCategoryFactory extends Factory
                 'Postres',
                 'Especialidades',
             ]),
-            'category_id' => ProductCategory::inRandomOrder()->first()->id,
             'sort_order' => fake()->numberBetween(1, 10),
         ];
     }

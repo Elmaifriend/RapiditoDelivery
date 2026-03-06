@@ -23,15 +23,20 @@
     @livewireStyles
 </head>
 
-<body class="flex h-dvh flex-col overflow-hidden bg-gray-100 font-sans text-gray-800">
-    <livewire:header.bar />
+<body class="flex min-h-dvh justify-center bg-gray-100 font-sans text-gray-800">
 
-    <main class="no-scrollbar relative flex-1 overflow-y-auto pb-32">
-        {{ $slot }}
-    </main>
+    <div class="flex h-dvh w-full max-w-[900px] flex-col overflow-hidden bg-white shadow-xl">
 
+        <livewire:header.bar />
 
-    <livewire:nav.bar />
+        <main class="no-scrollbar relative flex-1 overflow-y-auto pb-32">
+            {{ $slot }}
+        </main>
+
+        <livewire:nav.bar />
+
+    </div>
+
     @livewireScripts
 </body>
 

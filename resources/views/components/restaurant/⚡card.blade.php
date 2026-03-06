@@ -3,6 +3,7 @@
 use Livewire\Component;
 
 new class extends Component {
+    public int $restaurantId;
     public string $name;
     public float $stars;
     public string $type;
@@ -11,8 +12,9 @@ new class extends Component {
 };
 ?>
 
-<a href="{{ route('restaurant') }}" wire:navigate
-    class="rounded-4xl overflow-hidden bg-white transition-transform active:scale-90">
+<div>
+{{-- <a href="{{ route('restaurant', ['restaurant' => $restaurantId]) }}" wire:navigate
+    class="rounded-4xl overflow-hidden bg-white transition-transform active:scale-90"> --}}
     <div class="relative flex w-full items-center justify-center">
         <img class="h-46 w-full object-cover object-center" src="{{ $image }}"/>
         <div class="absolute right-4 top-4 flex items-center gap-1 rounded-xl bg-white/80 px-2 py-1 text-xs font-bold">
@@ -32,4 +34,5 @@ new class extends Component {
         <span
             class="self-start rounded-xl bg-gray-100 px-2 py-1 text-xs font-medium text-gray-500">{{ $type }}</span>
     </div>
-</a>
+{{-- </a> --}}
+</div>

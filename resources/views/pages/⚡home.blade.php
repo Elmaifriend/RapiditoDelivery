@@ -139,8 +139,9 @@ new #[Title('Home')] class extends Component {
             <div class="flex flex-col gap-4">
                 @forelse($this->city->restaurants as $restaurant)
                     
-                    <a wire:navigate href="{{ route('restaurant', $restaurant) }}">
+                    <a wire:navigate href="{{ route('restaurant', ['restaurant' => $restaurant->id]) }}">
                         <livewire:restaurant.card
+                            :restaurantId="$restaurant->id"
                             :key="$restaurant->id"
                             :name="$restaurant->name"
                             :type="$restaurant->category?->name ?? 'General'"

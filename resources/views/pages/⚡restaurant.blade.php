@@ -17,13 +17,15 @@ new #[Title('Restaurant')] class extends Component
     }
 };
 
+?>
+
 <div class="min-h-screen bg-gray-50 pb-28">
 
     {{-- HEADER --}}
     <div class="relative h-52 w-full overflow-hidden bg-gray-200">
 
         <img
-            src="{{ $restaurant->banner_path ? Storage::url($restaurant->banner_path) : 'https://images.unsplash.com/photo-1571091718767-18b5b1457add?q=80&w=1000&auto=format&fit=crop' }}"
+            src="{{ $restaurant->banner_path ? Storage::disk('r2')->temporaryUrl($restaurant->banner_path, now()->addMinutes(10)) : 'https://images.unsplash.com/photo-1571091718767-18b5b1457add?q=80&w=1000&auto=format&fit=crop' }}"
             class="h-full w-full object-cover">
 
         <div class="absolute left-0 right-0 top-0 flex items-center justify-between p-4">

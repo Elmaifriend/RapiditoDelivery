@@ -18,5 +18,5 @@ Route::livewire('/', 'pages::home')->name('home');
 Route::livewire('/search', 'pages::search')->name('search');
 Route::livewire('/cart', 'pages::cart')->name('cart');
 Route::livewire('/profile', 'pages::profile')->name('profile');
-Route::livewire('/restaurant', 'pages::restaurant')->name('restaurant');
+Route::livewire('/restaurant/{restaurant}', 'pages::restaurant')->name('restaurant');
 Route::livewire('/checkout', 'pages::checkout')->name('checkout');

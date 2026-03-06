@@ -139,16 +139,18 @@ new #[Title('Home')] class extends Component {
             <div class="flex flex-col gap-4">
                 @forelse($this->city->restaurants as $restaurant)
                     
-                    <livewire:restaurant.card
-                        :key="$restaurant->id"
-                        :name="$restaurant->name"
-                        :type="$restaurant->category?->name ?? 'General'"
-                        :stars="4.0"
-                        time="30-40min"
-                        :image="$restaurant->banner_path 
-                            ? Storage::disk('r2')->temporaryUrl($restaurant->banner_path, now()->addMinutes(10))
-                            : asset('images/default-restaurant.jpg')" 
-                    />
+                    <a wire:navigate href="{{ route('restaurant', $restaurant) }}">
+                        <livewire:restaurant.card
+                            :key="$restaurant->id"
+                            :name="$restaurant->name"
+                            :type="$restaurant->category?->name ?? 'General'"
+                            :stars="4.0"
+                            time="30-40min"
+                            :image="$restaurant->banner_path 
+                                ? Storage::disk('r2')->temporaryUrl($restaurant->banner_path, now()->addMinutes(10))
+                                : asset('images/default-restaurant.jpg')" 
+                        />
+                    </a>
 
                 @empty
                     <div class="rounded-xl bg-gray-100 p-4 text-center text-sm text-gray-500">

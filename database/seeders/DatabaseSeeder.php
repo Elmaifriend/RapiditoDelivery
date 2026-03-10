@@ -32,6 +32,9 @@ class DatabaseSeeder extends Seeder
             ServiceZoneSeeder::class,
             DeliveryZoneSeeder::class,
             DeliveryZoneFareSeeder::class,
+            DeliveryAddressSeeder::class,
+            CartSeeder::class,
+            CartItemSeeder::class,
         ]);
     }
 }

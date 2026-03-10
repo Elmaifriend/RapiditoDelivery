@@ -12,14 +12,20 @@ class OrderItem extends Model
     protected $fillable = [
         'order_id',
         'product_id',
-        'product_name',
+
+        'product_name_snapshot',
+        'product_description_snapshot',
+        'product_image_url_snapshot',
+
+        'price_snapshot',
         'quantity',
-        'price',
+        'subtotal',
     ];
 
     protected $casts = [
+        'price_snapshot' => 'decimal:2',
+        'subtotal' => 'decimal:2',
         'quantity' => 'integer',
-        'price' => 'decimal:2',
     ];
 
     public function order()
@@ -32,8 +38,9 @@ class OrderItem extends Model
         return $this->belongsTo(Product::class);
     }
 
-    public function getSubtotalAttribute(): float
+    public function recalculateSubtotal(): void
     {
-        return (float) ($this->quantity * $this->price);
+        $this->subtotal = $this->price_snapshot * $this->quantity;
+        $this->save();
     }
 }

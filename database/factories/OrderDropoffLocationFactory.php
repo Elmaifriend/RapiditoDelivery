@@ -14,6 +14,7 @@ class OrderDropoffLocationFactory extends Factory
     {
         return [
             'order_id' => Order::factory(),
+            'formatted_address' => fake()->address(),
             'lat' => $this->faker->latitude(),
             'lng' => $this->faker->longitude(),
             'source' => 'user',

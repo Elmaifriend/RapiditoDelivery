@@ -5,6 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Enums\OrderStatus;
+use App\Enums\DeliveryStatus;
+use App\Enums\OrderLifecycleStatus;
+use App\Enums\PaymentStatus;
+use App\Enums\RestaurantDecisionStatus;
+
 
 class Order extends Model
 {
@@ -14,18 +19,27 @@ class Order extends Model
         'user_id',
         'restaurant_id',
         'driver_id',
-        'status',
+
+        'lifecycle_status',
+        'restaurant_decision_status',
+        'delivery_status',
+        'payment_status',
+
         'subtotal',
         'delivery_fee',
         'total',
-        'payment_status',
+        "payment_method",
     ];
 
     protected $casts = [
-        'subtotal'      => 'decimal:2',
-        'delivery_fee'  => 'decimal:2',
-        'total'         => 'decimal:2',
-        'status' => OrderStatus::class,
+        'subtotal' => 'decimal:2',
+        'delivery_fee' => 'decimal:2',
+        'total' => 'decimal:2',
+
+        'lifecycle_status' => OrderLifecycleStatus::class,
+        'restaurant_decision_status' => RestaurantDecisionStatus::class,
+        'delivery_status' => DeliveryStatus::class,
+        'payment_status' => PaymentStatus::class,
     ];
 
     public function dropoffLocations()
@@ -55,9 +69,7 @@ class Order extends Model
 
     public function recalculateTotals(): void
     {
-        $subtotal = $this->items()->get()->sum(function ($item) {
-            return $item->subtotal;
-        });
+        $subtotal = $this->items()->sum('subtotal');
 
         $this->subtotal = $subtotal;
         $this->total = $subtotal + $this->delivery_fee;

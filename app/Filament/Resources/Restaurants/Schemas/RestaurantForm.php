@@ -27,7 +27,16 @@ class RestaurantForm
                             ->disk("r2")
                             ->openable()
                             ->visibility("private")
-                            ->directory('restaurants/banners'),
+                            ->directory('restaurants/banners')
+                            ->imageEditor()
+                            ->imageEditorAspectRatioOptions([
+                                '3:1',
+                            ])
+                            ->imageAspectRatio('3:1')
+                            ->automaticallyOpenImageEditorForAspectRatio()
+                            ->automaticallyCropImagesToAspectRatio('3:1')
+                            ->automaticallyResizeImagesToWidth('900')
+                            ->automaticallyResizeImagesToHeight('300'),
                     ]),
 
                 Section::make('Información general')
@@ -39,7 +48,13 @@ class RestaurantForm
                             ->openable()
                             ->disk("r2")
                             ->visibility("private")
-                            ->directory('restaurants/logos'),
+                            ->directory('restaurants/logos')
+                            ->imageEditor()
+                            ->imageAspectRatio('1:1')
+                            ->automaticallyOpenImageEditorForAspectRatio()
+                            ->automaticallyCropImagesToAspectRatio('1:1')
+                            ->automaticallyResizeImagesToWidth('300')
+                            ->automaticallyResizeImagesToHeight('300'),
 
                         Section::make()
                             ->schema([
@@ -112,7 +127,13 @@ class RestaurantForm
                             ->openable()
                             ->disk("r2")
                             ->visibility("private")
-                            ->directory('restaurants/references'),
+                            ->directory('restaurants/references')
+                            ->imageEditor()
+                            ->imageAspectRatio('16:9')
+                            ->automaticallyOpenImageEditorForAspectRatio()
+                            ->automaticallyCropImagesToAspectRatio('16:9')
+                            ->automaticallyResizeImagesToWidth('1280')
+                            ->automaticallyResizeImagesToHeight('720'),
                     ]),
 
                 Section::make('Configuración')

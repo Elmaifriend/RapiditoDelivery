@@ -11,6 +11,7 @@ class OrderDropoffLocation extends Model
 
     protected $fillable = [
         'order_id',
+        'formatted_address',
         'lat',
         'lng',
         'source',

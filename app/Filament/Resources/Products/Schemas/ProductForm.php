@@ -44,7 +44,15 @@ class ProductForm
                             ->openable()
                             ->directory('products')
                             ->imagePreviewHeight(200)
-                            ->maxSize(2048),
+                            ->maxSize(2048)
+                            ->imageEditorAspectRatioOptions([
+                                '1:1',
+                            ])
+                            ->imageAspectRatio('1:1')
+                            ->automaticallyOpenImageEditorForAspectRatio()
+                            ->automaticallyCropImagesToAspectRatio('1:1')
+                            ->automaticallyResizeImagesToWidth('300')
+                            ->automaticallyResizeImagesToHeight('300'),
                     ]),
 
                 Section::make('Estado y orden')
@@ -59,11 +67,6 @@ class ProductForm
                             ->label('Disponible')
                             ->helperText('Si está desactivado, no se puede pedir')
                             ->default(true),
-
-                        TextInput::make('sort_order')
-                            ->label('Orden')
-                            ->numeric()
-                            ->default(0),
                     ]),
             ]);
     }

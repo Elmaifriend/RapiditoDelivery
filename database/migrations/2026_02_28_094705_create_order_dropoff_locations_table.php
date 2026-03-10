@@ -11,11 +11,13 @@ return new class extends Migration
         Schema::create('order_dropoff_locations', function (Blueprint $table) {
             $table->id();
             $table->foreignId('order_id')->constrained()->cascadeOnDelete();
+            $table->string("formatted_address")->nullable();
             $table->decimal('lat', 10, 7);
             $table->decimal('lng', 10, 7);
             $table->string('source'); 
             $table->boolean('confirmed')->default(false);
             $table->timestamps();
+
             $table->index('order_id');
             $table->index('confirmed');
         });

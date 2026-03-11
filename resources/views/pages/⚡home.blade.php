@@ -23,6 +23,9 @@ new #[Title('Home')] class extends Component {
         $this->locationDenied = true;
         $this->noService = false;
         $this->city = null;
+        
+        // Le decimos al header que falló
+        $this->dispatch('updateHeaderLocation', text: 'Ubicación denegada')->to('header.location');
     }
 
     public function setLocation($lat, $lng)
@@ -31,6 +34,7 @@ new #[Title('Home')] class extends Component {
         $this->lng = $lng;
 
         $this->resolveServiceZone();
+        $this->saveAddress();
     }
 
     protected function resolveServiceZone()
@@ -42,16 +46,55 @@ new #[Title('Home')] class extends Component {
 
         if (!$zone) {
             $this->noService = true;
+            // Le decimos al header que estamos fuera de zona
+            $this->dispatch('updateHeaderLocation', text: 'Fuera de zona')->to('header.location');
             return;
         }
 
         $this->city = $zone->city;
         $this->noService = false;
+        
+        // ¡BINGO! Le mandamos el nombre de la ciudad directamente al Header
+        $this->dispatch('updateHeaderLocation', text: $this->city->name)->to('header.location');
+    }
+
+    protected function saveAddress()
+    {
+        $guestToken = request()->cookie('guest_token');
+
+        $response = Http::get('https://maps.googleapis.com/maps/api/geocode/json', [
+            'latlng' => "{$this->lat},{$this->lng}",
+            'key' => config('services.google_maps.key')
+        ]);
+
+        $data = $response->json();
+
+        if (!isset($data['results'][0])) {
+            return;
+        }
+
+        $result = $data['results'][0];
+
+        DeliveryAddress::updateOrCreate(
+            [
+                'guest_token' => $guestToken
+            ],
+            [
+                'formatted_address' => $result['formatted_address'],
+                'lat' => $this->lat,
+                'lng' => $this->lng,
+                'city' => $this->extractCity($result),
+            ]
+        );
+
+        $this->dispatch('addressUpdated')->to('header.location');
     }
 };
 ?>
 
 <div class="flex flex-col gap-4 pt-4">
+    
+    <livewire:header.location />
 
     {{-- Estado de ubicación --}}
     @if($locationDenied)
@@ -271,10 +314,10 @@ new #[Title('Home')] class extends Component {
 
         navigator.geolocation.getCurrentPosition(
             function (position) {
-                Livewire.dispatch('locationDetected', [
-                    position.coords.latitude,
-                    position.coords.longitude
-                ]);
+                Livewire.dispatch('locationDetected', {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude
+                });
             },
             function (error) {
                 console.log('Geolocation error:', error);

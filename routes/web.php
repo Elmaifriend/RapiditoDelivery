@@ -20,3 +20,4 @@ Route::livewire('/cart', 'pages::cart')->name('cart');
 Route::livewire('/profile', 'pages::profile')->name('profile');
 Route::livewire('/restaurant/{restaurant}', 'pages::restaurant')->name('restaurant');
 Route::livewire('/checkout', 'pages::checkout')->name('checkout');
+Route::livewire('/location', 'pages::location')->name('location');

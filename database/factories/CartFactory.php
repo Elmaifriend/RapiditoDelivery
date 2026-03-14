@@ -29,9 +29,6 @@ class CartFactory extends Factory
 
             'status' => 'active',
             'expires_at' => now()->addHours(2),
-
-            'converted_to_order' => false,
-            'converted_to_order_at' => null,
         ];
     }
 

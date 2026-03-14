@@ -46,7 +46,7 @@ class Cart extends Model
 
     public function recalculateTotals(): void
     {
-        $subtotal = $this->items()->sum('total');
+        $subtotal = $this->items()->sum('subtotal');
 
         $this->update([
             'subtotal' => $subtotal,

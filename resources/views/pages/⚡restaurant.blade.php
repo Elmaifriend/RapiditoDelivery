@@ -6,16 +6,15 @@ use App\Models\Restaurant;
 use App\Models\Product;
 use App\Models\Cart;
 use App\Models\CartItem;
-use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 
 new #[Title('Restaurant')] class extends Component
 {
     public Restaurant $restaurant;
-
     public ?Product $selectedProduct = null;
     public int $quantity = 1;
-    public bool $showModal = false;
+    public bool $showProductModal = false;
+    public bool $showStartNewCartModal = false;
 
     public function mount(Restaurant $restaurant)
     {
@@ -27,14 +26,32 @@ new #[Title('Restaurant')] class extends Component
 
     public function openProductModal(Product $product)
     {
+        $userId = auth()->id();
+        $guestToken = request()->cookie('guest_token');
+
         $this->selectedProduct = $product;
         $this->quantity = 1;
-        $this->showModal = true;
+
+        $otherCart = Cart::where('status', 'active')
+            ->where('restaurant_id', '!=', $this->restaurant->id)
+            ->where(function($query) use ($userId, $guestToken) {
+                if ($userId) $query->where('user_id', $userId);
+                else $query->where('guest_token', $guestToken);
+            })
+            ->exists();
+
+        if ($otherCart) {
+            $this->showStartNewCartModal = true;
+            $this->showProductModal = false;
+            return;
+        }
+
+        $this->showProductModal = true;
     }
 
     public function closeModal()
     {
-        $this->showModal = false;
+        $this->showProductModal = false;
         $this->selectedProduct = null;
     }
 
@@ -45,9 +62,8 @@ new #[Title('Restaurant')] class extends Component
     {
         if (!$this->selectedProduct) return;
 
-        $guestToken = request()->cookie('guest_token');
-
         $userId = auth()->id();
+        $guestToken = request()->cookie('guest_token');
 
         $cart = Cart::firstOrCreate(
             [
@@ -78,12 +94,27 @@ new #[Title('Restaurant')] class extends Component
         }
 
         $cart->recalculateTotals();
-
         $this->closeModal();
         $this->dispatch('cart-updated');
     }
-};
 
+    public function clearCart()
+    {
+        $userId = auth()->id();
+        $guestToken = request()->cookie('guest_token');
+
+        Cart::where('status', 'active')
+            ->where('restaurant_id', '!=', $this->restaurant->id)
+            ->where(function($query) use ($userId, $guestToken) {
+                if ($userId) $query->where('user_id', $userId);
+                else $query->where('guest_token', $guestToken);
+            })
+            ->delete();
+
+        $this->showStartNewCartModal = false;
+        $this->showProductModal = true;
+    }
+};
 ?>
 
 <div class="min-h-screen bg-gray-50 pb-28">
@@ -115,11 +146,9 @@ new #[Title('Restaurant')] class extends Component
         <h1 class="text-2xl font-bold text-gray-800">
             {{ $restaurant->name }}
         </h1>
-
         <p class="mt-1 text-sm text-gray-500">
             {{ $restaurant->category?->name }} • 25-35 min
         </p>
-
     </div>
 
 
@@ -215,7 +244,7 @@ new #[Title('Restaurant')] class extends Component
     </div>
 
 
-    <div x-data="{ open: @entangle('showModal') }" x-show="open"
+    <div x-data="{ open: @entangle('showProductModal') }" x-show="open"
         class="fixed inset-0 z-50 flex items-end justify-center sm:items-center" x-cloak>
 
         {{-- Backdrop --}}
@@ -260,6 +289,43 @@ new #[Title('Restaurant')] class extends Component
                 </button>
             </div>
             @endif
+        </div>
+    </div>
+
+    <div x-data="{ open: @entangle('showStartNewCartModal') }" x-show="open"
+        class="fixed inset-0 z-[60] flex items-center justify-center p-4" x-cloak>
+
+        <div x-show="open" x-transition.opacity class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+
+        <div x-show="open" x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
+            class="relative w-full max-w-sm rounded-3xl bg-white p-6 text-center shadow-2xl">
+
+            <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100 text-red-600">
+                <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.34c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                </svg>
+            </div>
+
+            <h3 class="text-lg font-bold text-gray-900">¿Empezar un nuevo carrito?</h3>
+
+            <p class="mt-2 text-sm text-gray-500">
+                Ya tienes productos de otro restaurante en tu carrito. Si continúas, se borrará tu pedido anterior para
+                agregar este.
+            </p>
+
+            <div class="mt-6 flex flex-col gap-3">
+                <button wire:click="clearCart"
+                    class="w-full rounded-xl bg-red-500 py-3 font-bold text-white shadow-lg active:scale-95 transition-transform">
+                    Nuevo pedido
+                </button>
+
+                <button x-on:click="open = false"
+                    class="w-full py-2 text-sm font-bold text-gray-400 active:text-gray-600">
+                    Cancelar
+                </button>
+            </div>
         </div>
     </div>
 </div>

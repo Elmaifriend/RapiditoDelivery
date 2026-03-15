@@ -11,14 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('options', function (Blueprint $table) {
+        Schema::create('business_user', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('option_group_id')->constrained()->cascadeOnDelete();
-            $table->string('name');
-            $table->decimal('price', 10, 2)->default(0);
-            $table->boolean('is_active')->default(true);
-            $table->unsignedInteger('order')->default(0);
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('business_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
+            $table->unique(['user_id', 'business_id']);
         });
 
     }
@@ -28,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('options');
+        Schema::dropIfExists('restaurant_user');
     }
 };

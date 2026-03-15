@@ -64,10 +64,6 @@ new #[Title('Buscar Dirección')] class extends Component {
 
 <div class="h-screen flex flex-col bg-gray-50">
 
-    {{-- Dependencias de Leaflet (Idealmente deberían ir en tu layout principal, pero aquí funcionan) --}}
-    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-
     {{-- Buscador superior --}}
     <div class="p-4 bg-white shadow z-10">
         <div class="flex items-center gap-2 mb-2">

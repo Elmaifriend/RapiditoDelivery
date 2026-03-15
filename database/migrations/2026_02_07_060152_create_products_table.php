@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('restaurant_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('business_id')->constrained()->cascadeOnDelete();
             $table->foreignId('product_category_id')->nullable();
             $table->string('name');
             $table->text('description')->nullable();
@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('image_path')->nullable();
             $table->unsignedInteger('sort_order')->default(0);
             $table->timestamps();
-            $table->index(['restaurant_id', 'is_active']);
+            $table->index(['business_id', 'is_active']);
         });
     }
 

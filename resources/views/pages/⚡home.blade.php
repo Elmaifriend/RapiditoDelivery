@@ -93,8 +93,6 @@ new #[Title('Home')] class extends Component {
 ?>
 
 <div class="flex flex-col gap-4 pt-4">
-    
-    <livewire:header.location />
 
     {{-- Estado de ubicación --}}
     @if($locationDenied)
@@ -180,18 +178,18 @@ new #[Title('Home')] class extends Component {
             <h2 class="font-bold">Restaurantes cerca</h2>
 
             <div class="flex flex-col gap-4">
-                @forelse($this->city->restaurants as $restaurant)
+                @forelse($this->city->businesses as $business)
                     
-                    <a wire:navigate href="{{ route('restaurant', ['restaurant' => $restaurant->id]) }}">
+                    <a wire:navigate href="{{ route('business', ['business' => $business->id]) }}">
                         <livewire:restaurant.card
-                            :restaurantId="$restaurant->id"
-                            :key="$restaurant->id"
-                            :name="$restaurant->name"
-                            :type="$restaurant->category?->name ?? 'General'"
+                            :business_id="$business->id"
+                            :key="$business->id"
+                            :name="$business->name"
+                            :type="$business->category?->name ?? 'General'"
                             :stars="4.0"
                             time="30-40min"
-                            :image="$restaurant->banner_path 
-                                ? Storage::disk('r2')->temporaryUrl($restaurant->banner_path, now()->addMinutes(10))
+                            :image="$business->banner_path 
+                                ? Storage::disk('r2')->temporaryUrl($business->banner_path, now()->addMinutes(10))
                                 : asset('images/default-restaurant.jpg')" 
                         />
                     </a>

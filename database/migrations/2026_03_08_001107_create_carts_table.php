@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('guest_token')->nullable()->index();
 
             // Optional restaurant association
-            $table->foreignId('restaurant_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('business_id')->nullable()->constrained()->nullOnDelete();
 
             // Totals
             $table->decimal('subtotal', 10, 2)->default(0);
@@ -31,7 +31,7 @@ return new class extends Migration
 
             // Indexes
             $table->index(['user_id']);
-            $table->index(['restaurant_id']);
+            $table->index(['business_id']);
         });
     }
 

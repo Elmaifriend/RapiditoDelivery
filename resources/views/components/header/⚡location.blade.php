@@ -37,7 +37,7 @@ new class extends Component {
 <div 
     wire:navigate
     href="/location"
-    class="flex w-full items-center justify-between rounded-b-2xl bg-white p-4 cursor-pointer shadow-sm"
+    class="flex w-full items-center justify-between rounded-b-2xl bg-white p-4 cursor-pointer"
 >
     <div>
         <div class="flex items-center gap-1 text-3xl">

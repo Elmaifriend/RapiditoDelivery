@@ -22,7 +22,7 @@ return new class extends Migration
                 ->constrained()
                 ->cascadeOnDelete();
 
-            $table->foreignId('restaurant_id')
+            $table->foreignId('business_id')
                 ->constrained()
                 ->cascadeOnDelete();
 
@@ -36,7 +36,7 @@ return new class extends Migration
             $table->string('lifecycle_status')
                 ->default(OrderLifecycleStatus::DRAFT->value);
 
-            $table->string('restaurant_decision_status')
+            $table->string('business_decision_status')
                 ->default(RestaurantDecisionStatus::PENDING->value);
 
             $table->string('delivery_status')
@@ -57,12 +57,12 @@ return new class extends Migration
             // INDEXES IMPORTANTES
 
             $table->index('lifecycle_status');
-            $table->index('restaurant_decision_status');
+            $table->index('business_decision_status');
             $table->index('delivery_status');
             $table->index('payment_status');
 
             $table->index('driver_id');
-            $table->index('restaurant_id');
+            $table->index('business_id');
         });
     }
 

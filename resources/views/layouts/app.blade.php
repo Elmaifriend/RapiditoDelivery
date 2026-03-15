@@ -38,6 +38,10 @@
     </div>
 
     @livewireScripts
+    
+    {{-- Dependencias de Leaflet (Idealmente deberían ir en tu layout principal, pero aquí funcionan) --}}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 </body>
 
 </html>

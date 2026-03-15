@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Business;
 use App\Models\ProductCategory;
 use App\Models\Restaurant;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -13,7 +14,7 @@ class ProductCategoryFactory extends Factory
     public function definition(): array
     {
         return [
-            'restaurant_id' => Restaurant::inRandomOrder()->first()->id,
+            'business_id' => Business::inRandomOrder()->first()->id,
             'name' => fake()->randomElement([
                 'Entradas',
                 'Combos',

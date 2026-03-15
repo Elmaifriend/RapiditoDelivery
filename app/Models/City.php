@@ -26,7 +26,7 @@ class City extends Model
         return $this->hasMany(ServiceZone::class);
     }
 
-    public function restaurants(){
-        return $this->hasMany(Restaurant::class);
+    public function businesses(){
+        return $this->hasMany(Business::class);
     }
 }

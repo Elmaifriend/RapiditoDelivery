@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Business;
 use Illuminate\Database\Seeder;
 use App\Models\Product;
 use App\Models\Restaurant;
@@ -24,24 +25,24 @@ class ProductSeeder extends Seeder
             ['name' => 'Producto Económico', 'price' => 59.00],
         ];
 
-        $restaurants = Restaurant::with('productCategories')->get();
+        $businesses = Business::with('productCategories')->get();
 
-        foreach ($restaurants as $restaurant) {
+        foreach ($businesses as $business) {
 
             // Si el restaurante no tiene categorías, saltamos
-            if ($restaurant->productCategories->isEmpty()) {
+            if ($business->productCategories->isEmpty()) {
                 continue;
             }
 
             foreach ($baseProducts as $index => $product) {
 
-                $category = $restaurant->productCategories->random();
+                $category = $business->productCategories->random();
 
                 Product::create([
-                    'restaurant_id' => $restaurant->id,
+                    'business_id' => $business->id,
                     'product_category_id' => $category->id,
                     'name' => $product['name'],
-                    'description' => 'Producto disponible en ' . $restaurant->name,
+                    'description' => 'Producto disponible en ' . $business->name,
                     'price' => $product['price'],
                     'is_active' => true,
                     'is_available' => true,

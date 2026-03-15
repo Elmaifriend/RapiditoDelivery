@@ -17,7 +17,7 @@ class Order extends Model
 
     protected $fillable = [
         'user_id',
-        'restaurant_id',
+        'business_id',
         'driver_id',
 
         'lifecycle_status',
@@ -54,7 +54,7 @@ class Order extends Model
 
     public function restaurant()
     {
-        return $this->belongsTo(Restaurant::class);
+        return $this->belongsTo(Business::class);
     }
 
     public function driver()

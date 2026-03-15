@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('product_categories', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('restaurant_id')
+            $table->foreignId('business_id')
                 ->constrained()
                 ->cascadeOnDelete();
 
@@ -20,7 +20,7 @@ return new class extends Migration
 
             $table->timestamps();
 
-            $table->unique(['restaurant_id', 'name']); 
+            $table->unique(['business_id', 'name']); 
             // Evita categorías duplicadas dentro del mismo restaurante
         });
     }

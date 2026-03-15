@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Business;
 use App\Models\Cart;
 use App\Models\User;
 use App\Models\Restaurant;
@@ -21,7 +22,7 @@ class CartFactory extends Factory
             'user_id' => User::inRandomOrder()->value('id'),
             'guest_token' => null,
 
-            'restaurant_id' => Restaurant::inRandomOrder()->value('id'),
+            'business_id' => Business::inRandomOrder()->value('id'),
 
             'subtotal' => $subtotal,
             'delivery_fee' => $delivery,

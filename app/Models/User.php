@@ -69,13 +69,13 @@ class User extends Authenticatable implements FilamentUser
             ->implode('');
     }
 
-    public function restaurants()
+    public function businesses()
     {
-        return $this->belongsToMany(Restaurant::class, "restaurant_user", "user_id", "restaurant_id");
+        return $this->belongsToMany(Business::class, "business_user", "user_id", "business_id");
     }
 
-    public function currentRestaurant()
+    public function currentBusiness()
     {
-        return $this->belongsTo(Restaurant::class, 'current_restaurant_id');
+        return $this->belongsTo(Business::class, 'current_business_id');
     }
 }

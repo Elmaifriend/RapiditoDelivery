@@ -11,6 +11,7 @@ use App\Enums\RestaurantDecisionStatus;
 use App\Enums\DeliveryStatus;
 use App\Enums\PaymentStatus;
 use App\Enums\PaymentMethod;
+use App\Models\Business;
 use Faker\Provider\Payment;
 
 class OrderFactory extends Factory
@@ -26,14 +27,14 @@ class OrderFactory extends Factory
 
             'user_id' => User::factory(),
 
-            'restaurant_id' => Restaurant::inRandomOrder()->first()?->id
-                ?? Restaurant::factory(),
+            'business_id' => Business::inRandomOrder()->first()?->id
+                ?? Business::factory(),
 
             'driver_id' => null,
 
             'lifecycle_status' => OrderLifecycleStatus::CONFIRMED,
 
-            'restaurant_decision_status' => RestaurantDecisionStatus::PENDING,
+            'business_decision_status' => RestaurantDecisionStatus::PENDING,
 
             'delivery_status' => null,
 
@@ -53,7 +54,7 @@ class OrderFactory extends Factory
     {
         return $this->state(fn () => [
             'lifecycle_status' => OrderLifecycleStatus::READY,
-            'restaurant_decision_status' => RestaurantDecisionStatus::ACCEPTED,
+            'business_decision_status' => RestaurantDecisionStatus::ACCEPTED,
             'delivery_status' => DeliveryStatus::WAITING_DRIVER,
         ]);
     }
@@ -62,7 +63,7 @@ class OrderFactory extends Factory
     {
         return $this->state(fn () => [
             'lifecycle_status' => OrderLifecycleStatus::DELIVERED,
-            'restaurant_decision_status' => RestaurantDecisionStatus::ACCEPTED,
+            'business_decision_status' => RestaurantDecisionStatus::ACCEPTED,
             'delivery_status' => DeliveryStatus::DELIVERED,
             'payment_status' => PaymentStatus::PAID,
         ]);

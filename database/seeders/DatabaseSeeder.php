@@ -22,7 +22,7 @@ class DatabaseSeeder extends Seeder
             CitySeeder::class,
             CategorySeeder::class,
             TagSeeder::class,
-            RestaurantSeeder::class, 
+            BusinessSeeder::class, 
             ProductCategorySeeder::class,
             ProductSeeder::class,
             OptionGroupSeeder::class,

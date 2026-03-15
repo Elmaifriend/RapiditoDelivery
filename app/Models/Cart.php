@@ -12,7 +12,7 @@ class Cart extends Model
     protected $fillable = [
         'user_id',
         'guest_token',
-        'restaurant_id',
+        'business_id',
         'subtotal',
         'delivery_fee',
         'total',
@@ -36,7 +36,7 @@ class Cart extends Model
 
     public function restaurant()
     {
-        return $this->belongsTo(Restaurant::class);
+        return $this->belongsTo(Business::class);
     }
 
     public function items()

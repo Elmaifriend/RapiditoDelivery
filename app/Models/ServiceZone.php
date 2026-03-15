@@ -64,9 +64,6 @@ class ServiceZone extends Model
         return $this->belongsTo(City::class);
     }
 
-    /**
-     * Convert stored GeoJSON into phpgeo Polygon
-     */
     public function toPhpGeoPolygon(): GeoPolygon
     {
         $polygon = new GeoPolygon();
@@ -80,16 +77,12 @@ class ServiceZone extends Model
         return $polygon;
     }
 
-    /**
-     * Check if point is inside zone
-     */
     public function contains(float $lat, float $lng): bool
     {
         if (!$this->active) {
             return false;
         }
 
-        // BBOX check (mucho más rápido)
         if (
             $lat < $this->min_lat ||
             $lat > $this->max_lat ||
@@ -104,17 +97,11 @@ class ServiceZone extends Model
         return $this->toPhpGeoPolygon()->contains($coordinate);
     }
 
-    /**
-     * Scope: only active zones
-     */
     public function scopeActive($query)
     {
         return $query->where('active', true);
     }
 
-    /**
-     * Scope: debug zones
-     */
     public function scopeDebug($query)
     {
         return $query->where('debug', true);

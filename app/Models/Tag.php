@@ -11,9 +11,9 @@ class Tag extends Model
         'name',
     ];
 
-    public function restaurants()
+    public function businesses()
     {
-        return $this->belongsToMany(Restaurant::class, "")
+        return $this->belongsToMany(Business::class, "business_id")
             ->withTimestamps();
     }
 }

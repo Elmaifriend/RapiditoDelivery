@@ -14,7 +14,7 @@ class Category extends Model
 
     public function restaurants()
     {
-        return $this->hasMany(Restaurant::class, "category_id");
+        return $this->hasMany(Business::class, "category_id");
     }
 
     public function scopeActive($query)

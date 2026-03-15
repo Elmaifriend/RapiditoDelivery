@@ -10,7 +10,7 @@ class Product extends Model
     use HasFactory;
 
     protected $fillable = [
-        'restaurant_id',
+        'business_id',
         'product_category_id',
         'name',
         'description',
@@ -30,19 +30,15 @@ class Product extends Model
      | Relaciones
      ====================== */
 
-    public function restaurant()
+    public function businesses()
     {
-        return $this->belongsTo(Restaurant::class);
+        return $this->belongsTo(Business::class);
     }
 
     public function category()
     {
         return $this->belongsTo(ProductCategory::class, 'product_category_id');
     }
-
-    /* ======================
-     | Scopes
-     ====================== */
 
     public function scopeActive($query)
     {

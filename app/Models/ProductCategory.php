@@ -10,14 +10,14 @@ class ProductCategory extends Model
     use HasFactory;
 
     protected $fillable = [
-        'restaurant_id',
+        'business_id',
         'name',
         'sort_order',
     ];
 
-    public function restaurant()
+    public function business()
     {
-        return $this->belongsTo(Restaurant::class);
+        return $this->belongsTo(Business::class);
     }
 
     public function products()

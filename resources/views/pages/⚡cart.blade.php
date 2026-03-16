@@ -36,7 +36,6 @@ new #[Title('Cart')] class extends Component {
     }
 };
 ?>
-
 <div class="flex flex-col gap-4 p-4">
     @forelse($this->carts as $index => $cart)
         <div class="overflow-hidden rounded-3xl border border-gray-100 bg-white">

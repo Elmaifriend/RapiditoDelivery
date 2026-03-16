@@ -3,6 +3,9 @@
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use App\Models\ServiceZone;
+use App\Models\DeliveryAddress;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 new #[Title('Home')] class extends Component {
 
@@ -24,73 +27,129 @@ new #[Title('Home')] class extends Component {
         $this->noService = false;
         $this->city = null;
         
-        // Le decimos al header que falló
-        $this->dispatch('updateHeaderLocation', text: 'Ubicación denegada')->to('header.location');
+        // Disparamos el único evento global para que el header reaccione
+        $this->dispatch('addressUpdated');
     }
 
+    // Agregamos este método al principio de tu clase Home
+    public function mount()
+    {
+        $guestToken = request()->cookie('guest_token');
+        $address = DeliveryAddress::where('guest_token', $guestToken)->latest()->first();
+
+        // Si ya tenemos una dirección guardada en la base de datos...
+        if ($address && $address->lat && $address->lng) {
+            $this->lat = $address->lat;
+            $this->lng = $address->lng;
+            
+            // Calculamos los restaurantes directamente sin consultar a Google
+            $this->resolveServiceZone();
+        }
+    }
+
+    // Tu método setLocation se queda casi igual, solo delegamos la resolución
     public function setLocation($lat, $lng)
     {
         $this->lat = $lat;
         $this->lng = $lng;
 
-        $this->resolveServiceZone();
+        // Consultamos a Google y guardamos en BD
         $this->saveAddress();
+
+        // Evaluamos los restaurantes
+        $this->resolveServiceZone();
+
+        // Avisamos al Header
+        $this->dispatch('addressUpdated');
     }
 
+    // Extraemos la lógica de la zona de servicio para poder reusarla
     protected function resolveServiceZone()
     {
         $zone = ServiceZone::active()
-            ->with('city')
+            ->with('city.businesses') // Precargamos los negocios para optimizar la consulta
             ->get()
             ->first(fn ($zone) => $zone->contains($this->lat, $this->lng));
 
         if (!$zone) {
             $this->noService = true;
-            // Le decimos al header que estamos fuera de zona
-            $this->dispatch('updateHeaderLocation', text: 'Fuera de zona')->to('header.location');
-            return;
+            $this->city = null;
+        } else {
+            $this->noService = false;
+            $this->city = $zone->city;
         }
-
-        $this->city = $zone->city;
-        $this->noService = false;
-        
-        // ¡BINGO! Le mandamos el nombre de la ciudad directamente al Header
-        $this->dispatch('updateHeaderLocation', text: $this->city->name)->to('header.location');
     }
 
     protected function saveAddress()
     {
         $guestToken = request()->cookie('guest_token');
 
+        if (!$this->lat || !$this->lng) return;
+
         $response = Http::get('https://maps.googleapis.com/maps/api/geocode/json', [
             'latlng' => "{$this->lat},{$this->lng}",
-            'key' => config('services.google_maps.key')
+            'key' => config('services.google_maps.key'),
+            'language' => 'es'
         ]);
 
         $data = $response->json();
 
+        // Si Google no responde nada válido
         if (!isset($data['results'][0])) {
+            \Illuminate\Support\Facades\Log::error('Error API Google:', $data ?? []);
             return;
         }
 
         $result = $data['results'][0];
+        $components = $result['address_components'];
+
+        // Extrayendo TODO el jugo a la API de Google
+        $calle = $this->extractComponent($components, ['route']);
+        $numero = $this->extractComponent($components, ['street_number']);
+        $colonia = $this->extractComponent($components, ['sublocality', 'sublocality_level_1', 'neighborhood']);
+        $ciudad = $this->extractComponent($components, ['locality', 'administrative_area_level_2']);
+        $estado = $this->extractComponent($components, ['administrative_area_level_1']);
+        $codigoPostal = $this->extractComponent($components, ['postal_code']);
+        $pais = $this->extractComponent($components, ['country']);
+        $placeId = $result['place_id'] ?? null; // Viene en la raíz del resultado, no en los componentes
 
         DeliveryAddress::updateOrCreate(
-            [
-                'guest_token' => $guestToken
-            ],
+            // Condición de búsqueda (de quién es esta dirección)
+            ['guest_token' => $guestToken],
+            
+            // Datos a actualizar o crear
             [
                 'formatted_address' => $result['formatted_address'],
+                'street' => $calle,
+                'street_number' => $numero,
+                'neighborhood' => $colonia,
+                'city' => $ciudad,
+                'state' => $estado,
+                'postal_code' => $codigoPostal,
+                'country' => $pais,
                 'lat' => $this->lat,
                 'lng' => $this->lng,
-                'city' => $this->extractCity($result),
+                'place_id' => $placeId,
             ]
         );
+        
+        // ¡Listo! Todo guardado. Ya no disparamos el evento aquí, 
+        // recuerda que se dispara al final del método setLocation()
+    }
 
-        $this->dispatch('addressUpdated')->to('header.location');
+    protected function extractComponent(array $components, array $types): ?string
+    {
+        foreach ($components as $component) {
+            if (!empty(array_intersect($types, $component['types']))) {
+                return $component['long_name'];
+            }
+        }
+        return null;
     }
 };
 ?>
+
+{{-- EL HTML DE TU HOME SE QUEDA EXACTAMENTE IGUAL --}}
 
 <div class="flex flex-col gap-4 pt-4">
 
@@ -307,7 +366,23 @@ new #[Title('Home')] class extends Component {
     
     <script>
     document.addEventListener('livewire:navigated', () => {
+        // Obtenemos el token del usuario actual
+        const guestToken = document.cookie
+            .split('; ')
+            .find(row => row.startsWith('guest_token='))
+            ?.split('=')[1];
 
+        // Verificamos si ya existe una dirección en la BD para este token.
+        // Usamos una variable de Blade inyectada en el script.
+        const hasAddress = @json(\App\Models\DeliveryAddress::where('guest_token', request()->cookie('guest_token'))->exists());
+
+        // Si ya tiene dirección guardada (ya sea por GPS previo o manual), NO hacemos nada.
+        // Dejamos que el Header simplemente la lea de la base de datos.
+        if (hasAddress) {
+            return; 
+        }
+
+        // Si no tiene dirección (es su primera vez o borró cookies), pedimos el GPS
         if (!navigator.geolocation) return;
 
         navigator.geolocation.getCurrentPosition(

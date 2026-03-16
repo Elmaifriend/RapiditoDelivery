@@ -2,7 +2,12 @@
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use App\Models\ServiceZone;
+use App\Models\DeliveryAddress;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 ?>
+
+
 
 <div class="flex flex-col gap-4 pt-4">
 
@@ -1081,7 +1086,23 @@ unset($__split);
     
     <script>
     document.addEventListener('livewire:navigated', () => {
+        // Obtenemos el token del usuario actual
+        const guestToken = document.cookie
+            .split('; ')
+            .find(row => row.startsWith('guest_token='))
+            ?.split('=')[1];
 
+        // Verificamos si ya existe una dirección en la BD para este token.
+        // Usamos una variable de Blade inyectada en el script.
+        const hasAddress = <?php echo json_encode(\App\Models\DeliveryAddress::where('guest_token', request()->cookie('guest_token'))->exists(), 512) ?>;
+
+        // Si ya tiene dirección guardada (ya sea por GPS previo o manual), NO hacemos nada.
+        // Dejamos que el Header simplemente la lea de la base de datos.
+        if (hasAddress) {
+            return; 
+        }
+
+        // Si no tiene dirección (es su primera vez o borró cookies), pedimos el GPS
         if (!navigator.geolocation) return;
 
         navigator.geolocation.getCurrentPosition(

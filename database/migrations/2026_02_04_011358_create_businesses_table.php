@@ -23,7 +23,7 @@ return new class extends Migration
 
             $table->string('country')->default('MX');
             $table->string('state')->nullable();
-            $table->string('city_id')->index();
+            $table->unsignedBigInteger('city_id')->index();
             $table->string('address')->nullable();
             $table->string('postal_code')->nullable();
 

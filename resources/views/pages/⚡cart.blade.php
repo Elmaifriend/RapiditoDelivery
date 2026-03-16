@@ -13,7 +13,7 @@ new #[Title('Cart')] class extends Component {
         $userId = auth()->id();
         $guestToken = request()->cookie('guest_token');
 
-        return Cart::with(['restaurant', 'items'])
+        return Cart::with(['business', 'items'])
             ->where('status', 'active')
             ->where(function($query) use ($userId, $guestToken) {
                 if ($userId) {
@@ -46,14 +46,14 @@ new #[Title('Cart')] class extends Component {
                     Pedido {{ $index + 1 }} de {{ $this->carts->count() }}
                 </span>
                 <div class="flex items-center gap-1.5 text-xs font-medium text-gray-300">
-                    <span>{{ $cart->restaurant->delivery_time }} min</span>
+                    <span>{{ $cart->business->delivery_time }} min</span>
                     <i class="fas fa-motorcycle"></i>
                 </div>
             </div>
 
             <div class="p-5">
                 <div class="mb-4 border-b border-gray-50 pb-4">
-                    <h3 class="text-lg font-bold leading-tight text-gray-800">{{ $cart->restaurant->name }}</h3>
+                    <h3 class="text-lg font-bold leading-tight text-gray-800">{{ $cart->business->name }}</h3>
                 </div>
 
                 {{-- Items del Carrito --}}
@@ -111,9 +111,9 @@ new #[Title('Cart')] class extends Component {
             </div>
         </div>
 
-        <a href="{{ route('checkout') }}" wire:navigate
+        <a href="{{ route('location', ['mode' => 'checkout']) }}" wire:navigate
             class="w-full rounded-2xl bg-red-500 px-6 py-4 text-center font-bold text-white transition-all active:scale-90">
-            Pagar Pedidos
+            Continuar
         </a>
     @endif
 </div>

@@ -21,3 +21,4 @@ Route::livewire('/profile', 'pages::profile')->name('profile');
 Route::livewire('/business/{business}', 'pages::business')->name('business');
 Route::livewire('/checkout', 'pages::checkout')->name('checkout');
 Route::livewire('/location', 'pages::location')->name('location');
+Route::livewire('/checkout/address', 'pages::location')->name('checkout.address');

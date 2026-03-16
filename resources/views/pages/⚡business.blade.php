@@ -122,7 +122,7 @@ new #[Title('Business')] class extends Component
     {{-- HEADER --}}
     <div class="relative h-52 w-full overflow-hidden bg-gray-200">
 
-        <img src="{{ $business->banner_path ? Storage::url($business->banner_path, now()->addMinutes(10)) : 'https://images.unsplash.com/photo-1571091718767-18b5b1457add?q=80&w=1000&auto=format&fit=crop' }}"
+        <img src="{{ $business->banner_path ? Storage::temporaryUrl($business->banner_path, now()->addMinutes(10)) : 'https://images.unsplash.com/photo-1571091718767-18b5b1457add?q=80&w=1000&auto=format&fit=crop' }}"
             class="h-full w-full object-cover">
 
         <div class="absolute left-0 right-0 top-0 flex items-center justify-between p-4">
@@ -328,4 +328,5 @@ new #[Title('Business')] class extends Component
             </div>
         </div>
     </div>
+    <livewire:cart.bar />
 </div>

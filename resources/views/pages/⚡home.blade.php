@@ -189,7 +189,7 @@ new #[Title('Home')] class extends Component {
                             :stars="4.0"
                             time="30-40min"
                             :image="$business->banner_path 
-                                ? Storage::disk('r2')->temporaryUrl($business->banner_path, now()->addMinutes(10))
+                                ? Storage::temporaryUrl($business->banner_path, now()->addMinutes(10))
                                 : asset('images/default-restaurant.jpg')" 
                         />
                     </a>

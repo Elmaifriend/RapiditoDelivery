@@ -1,79 +1,15 @@
 <?php
-
 use Livewire\Component;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Illuminate\Support\Facades\Http;
 use App\Models\DeliveryAddress;
-
-new #[Title('Buscar Dirección')] class extends Component {
-
-    public $search = '';
-    public $lat;
-    public $lng;
-    public $formattedAddress;
-
-    #[Url] 
-    public string $mode = 'settings'; // settings | checkout
-
-    // Escuchamos el evento del mapa
-    #[On('mapMoved')]
-    public function updateLocation($lat, $lng)
-    {
-        $this->lat = $lat;
-        $this->lng = $lng;
-
-        $this->reverseGeocode();
-    }
-
-    public function reverseGeocode()
-    {
-        if (!$this->lat || !$this->lng) return;
-
-        $response = Http::get('https://maps.googleapis.com/maps/api/geocode/json', [
-            'latlng' => "{$this->lat},{$this->lng}",
-            'key' => config('services.google_maps.key')
-        ]);
-
-        $data = $response->json();
-
-        $this->formattedAddress = $data['results'][0]['formatted_address'] ?? null;
-    }
-
-    public function save()
-    {
-        if (!$this->lat || !$this->lng) return;
-
-        $guestToken = request()->cookie('guest_token');
-
-        DeliveryAddress::updateOrCreate(
-            ['guest_token' => $guestToken],
-            [
-                'formatted_address' => $this->formattedAddress,
-                'lat' => $this->lat,
-                'lng' => $this->lng,
-            ]
-        );
-
-        // flujo diferente dependiendo del modo
-        if ($this->mode === 'checkout') {
-
-            $this->redirect('/cart', navigate: true);
-
-        } else {
-
-            $this->dispatch('addressUpdated');
-            $this->redirect('/', navigate: true);
-
-        }
-    }
-};
 ?>
 
 <div class="h-screen flex flex-col bg-gray-50">
 
-    {{-- HEADER --}}
+    
     <div class="p-4 bg-white shadow z-10">
         <div class="flex items-center gap-2 mb-2">
 
@@ -97,11 +33,11 @@ new #[Title('Buscar Dirección')] class extends Component {
     </div>
 
 
-    {{-- MAPA --}}
+    
     <div id="map" wire:ignore class="flex-1 z-0"></div>
 
 
-    {{-- PANEL INFERIOR --}}
+    
     <div class="p-4 bg-white rounded-t-3xl shadow-[0_-4px_20px_rgba(0,0,0,0.05)] z-10 flex flex-col gap-4">
 
         <div class="flex items-start gap-3 p-2">
@@ -115,11 +51,12 @@ new #[Title('Buscar Dirección')] class extends Component {
 
                 <p class="text-sm font-semibold text-gray-800 line-clamp-2">
 
-                    @if($formattedAddress)
-                        {{ $formattedAddress }}
-                    @else
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($formattedAddress): ?>
+                        <?php echo e($formattedAddress); ?>
+
+                    <?php else: ?>
                         Mueve el pin en el mapa...
-                    @endif
+                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
                 </p>
             </div>
@@ -127,8 +64,8 @@ new #[Title('Buscar Dirección')] class extends Component {
         </div>
 
 
-        {{-- BOTÓN DINÁMICO --}}
-        @if($mode === 'checkout')
+        
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($mode === 'checkout'): ?>
         <a
             href="/checkout"
             class="block w-full text-center bg-red-500 text-white font-bold p-4 rounded-2xl hover:bg-red-600 active:scale-[0.98] transition-all"
@@ -136,7 +73,7 @@ new #[Title('Buscar Dirección')] class extends Component {
             Siguiente
         </a>
 
-        @else
+        <?php else: ?>
 
         <a
             href="/"
@@ -145,12 +82,12 @@ new #[Title('Buscar Dirección')] class extends Component {
             Guardar dirección
         </a>
 
-        @endif
+        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
     </div>
 
 
-    {{-- SCRIPT MAPA --}}
+    
     <script>
 
         document.addEventListener('livewire:navigated', () => {
@@ -199,4 +136,4 @@ new #[Title('Buscar Dirección')] class extends Component {
 
     </script>
 
-</div>
+</div><?php /**PATH C:\Users\Elmaifriend\Documents\Programacion\RapiditoDelivery\storage\framework/views/livewire/views/c06d6d6a.blade.php ENDPATH**/ ?>

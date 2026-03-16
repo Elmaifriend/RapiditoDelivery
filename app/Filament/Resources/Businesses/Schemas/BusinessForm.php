@@ -23,7 +23,7 @@ class BusinessForm
                         FileUpload::make('banner_path')
                             ->label('Banner')
                             ->image()
-                            ->disk("r2")
+                            ->disk( fn () => config('filesystems.default') )
                             ->openable()
                             ->visibility("private")
                             ->directory('restaurants/banners')
@@ -45,7 +45,7 @@ class BusinessForm
                             ->label('Logo')
                             ->image()
                             ->openable()
-                            ->disk("r2")
+                            ->disk( fn () => config('filesystems.default') )
                             ->visibility("private")
                             ->directory('restaurants/logos')
                             ->imageEditor()
@@ -69,6 +69,21 @@ class BusinessForm
 
                                 TextInput::make('slug')
                                     ->label('Slug')
+                                    ->required()
+                                    ->unique(ignoreRecord: true),
+
+                                TextInput::make('phone')
+                                    ->label('Telefono')
+                                    ->required()
+                                    ->unique(ignoreRecord: true),
+
+                                TextInput::make('email')
+                                    ->label('Correo')
+                                    ->required()
+                                    ->unique(ignoreRecord: true),
+
+                                TextInput::make('web_site')
+                                    ->label('Sitio Web')
                                     ->required()
                                     ->unique(ignoreRecord: true),
 
@@ -124,7 +139,7 @@ class BusinessForm
                             ->label('Imagen de referencia')
                             ->image()
                             ->openable()
-                            ->disk("r2")
+                            ->disk( fn () => config('filesystems.default') )
                             ->visibility("private")
                             ->directory('restaurants/references')
                             ->imageEditor()

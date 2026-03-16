@@ -43,7 +43,7 @@ class Business extends Model
     
     public function category()
     {
-        return $this->belongsTo(Category::class, "business_id");
+        return $this->belongsTo(Category::class, "category_id");
     }
 
     public function tags()

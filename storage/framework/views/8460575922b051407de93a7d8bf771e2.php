@@ -13,7 +13,7 @@ use Illuminate\Support\Str;
     
     <div class="relative h-52 w-full overflow-hidden bg-gray-200">
 
-        <img src="<?php echo e($business->banner_path ? Storage::url($business->banner_path, now()->addMinutes(10)) : 'https://images.unsplash.com/photo-1571091718767-18b5b1457add?q=80&w=1000&auto=format&fit=crop'); ?>"
+        <img src="<?php echo e($business->banner_path ? Storage::temporaryUrl($business->banner_path, now()->addMinutes(10)) : 'https://images.unsplash.com/photo-1571091718767-18b5b1457add?q=80&w=1000&auto=format&fit=crop'); ?>"
             class="h-full w-full object-cover">
 
         <div class="absolute left-0 right-0 top-0 flex items-center justify-between p-4">
@@ -225,4 +225,30 @@ use Illuminate\Support\Str;
             </div>
         </div>
     </div>
+    <?php
+$__split = function ($name, $params = []) {
+    return [$name, $params];
+};
+[$__name, $__params] = $__split('cart.bar', []);
+
+$__keyOuter = $__key ?? null;
+
+$__key = null;
+$__componentSlots = [];
+
+$__key ??= \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::generateKey('lw-2865290527-0', $__key);
+
+$__html = app('livewire')->mount($__name, $__params, $__key, $__componentSlots);
+
+echo $__html;
+
+unset($__html);
+unset($__key);
+$__key = $__keyOuter;
+unset($__keyOuter);
+unset($__name);
+unset($__params);
+unset($__componentSlots);
+unset($__split);
+?>
 </div><?php /**PATH C:\Users\Elmaifriend\Documents\Programacion\RapiditoDelivery\storage\framework/views/livewire/views/46164ca5.blade.php ENDPATH**/ ?>

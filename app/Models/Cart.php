@@ -34,7 +34,7 @@ class Cart extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function restaurant()
+    public function business()
     {
         return $this->belongsTo(Business::class);
     }

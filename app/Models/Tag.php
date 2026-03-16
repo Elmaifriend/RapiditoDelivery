@@ -13,7 +13,7 @@ class Tag extends Model
 
     public function businesses()
     {
-        return $this->belongsToMany(Business::class, "business_id")
+        return $this->belongsToMany(Business::class, 'business_tag')
             ->withTimestamps();
     }
 }

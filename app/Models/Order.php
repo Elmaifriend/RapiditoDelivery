@@ -25,6 +25,8 @@ class Order extends Model
         'delivery_status',
         'payment_status',
 
+        "special_instructions",
+
         'subtotal',
         'delivery_fee',
         'total',

@@ -31,6 +31,8 @@ return new class extends Migration
                 ->constrained('users')
                 ->nullOnDelete();
 
+            $table->text('special_instructions')->nullable();
+
             // ORDER WORKFLOWS
 
             $table->string('lifecycle_status')

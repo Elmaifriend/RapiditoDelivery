@@ -27,6 +27,12 @@ return new class extends Migration
             $table->string('state')->nullable();
             $table->string('postal_code')->nullable();
             $table->string('country');
+            
+            $table->boolean('is_default')->nullable()->default(false);
+            $table->string('source')->nullable();
+            $table->string('address_line')->nullable();
+            $table->text('reference')->nullable();
+            $table->string('photo_path')->nullable();
 
             // Coordinates
             $table->decimal('lat', 10, 7);
@@ -35,7 +41,6 @@ return new class extends Migration
             // Google Place
             $table->string('place_id')->nullable()->index();
 
-            $table->boolean('is_default')->default(false);
             $table->timestamp('last_used_at')->nullable();
             $table->timestamps();
 

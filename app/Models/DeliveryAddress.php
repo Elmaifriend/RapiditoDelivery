@@ -17,6 +17,11 @@ class DeliveryAddress extends Model
         'street',
         'street_number',
         'neighborhood',
+        'is_default',
+        'source',
+        'address_line',
+        'reference',
+        'photo_path',
         'city',
         'state',
         'postal_code',
@@ -29,6 +34,7 @@ class DeliveryAddress extends Model
     protected $casts = [
         'lat' => 'float',
         'lng' => 'float',
+        'is_default' => 'boolean',
     ];
 
 

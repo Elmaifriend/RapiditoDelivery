@@ -21,6 +21,12 @@ class DeliveryAddressFactory extends Factory
             'postal_code' => $this->faker->postcode(),
             'country' => $this->faker->country(),
 
+            'is_default' => null,
+            'source' => null,
+            'address_line' => null,
+            'reference' => null,
+            'photo_path' => null,
+
             'lat' => $this->faker->latitude(),
             'lng' => $this->faker->longitude(),
 

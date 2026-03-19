@@ -32,6 +32,8 @@ class OrderFactory extends Factory
 
             'driver_id' => null,
 
+            'special_instructions' => fake()->paragraph(),
+
             'lifecycle_status' => OrderLifecycleStatus::CONFIRMED,
 
             'business_decision_status' => RestaurantDecisionStatus::PENDING,

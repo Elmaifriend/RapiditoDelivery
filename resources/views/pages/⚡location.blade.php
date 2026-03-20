@@ -10,19 +10,16 @@ new #[Title('Buscar Dirección')] class extends Component {
 
     public $lat;
     public $lng;
-    
-    public $googleResult = null; 
+    public $googleResult = null;
     public $formattedAddress;
 
-    #[Url] 
+    #[Url]
     public string $mode = 'settings';
 
-    // Alpine.js llamará a esta función directamente cuando el mapa se mueva
     public function updateLocation($lat, $lng)
     {
         $this->lat = $lat;
         $this->lng = $lng;
-
         $this->reverseGeocode();
     }
 
@@ -39,7 +36,7 @@ new #[Title('Buscar Dirección')] class extends Component {
         $data = $response->json();
 
         if (isset($data['results'][0])) {
-            $this->googleResult = $data['results'][0]; 
+            $this->googleResult = $data['results'][0];
             $this->formattedAddress = $this->googleResult['formatted_address'];
         } else {
             $this->googleResult = null;
@@ -61,7 +58,6 @@ new #[Title('Buscar Dirección')] class extends Component {
         $estado = $this->extractComponent($components, ['administrative_area_level_1']);
         $codigoPostal = $this->extractComponent($components, ['postal_code']);
         $pais = $this->extractComponent($components, ['country']);
-        $placeId = $this->googleResult['place_id'] ?? null;
 
         DeliveryAddress::updateOrCreate(
             ['guest_token' => $guestToken],
@@ -76,14 +72,13 @@ new #[Title('Buscar Dirección')] class extends Component {
                 'country' => $pais ?? 'México',
                 'lat' => $this->lat,
                 'lng' => $this->lng,
-                'place_id' => $placeId,
+                'place_id' => $this->googleResult['place_id'] ?? null,
             ]
         );
 
         if ($this->mode === 'checkout') {
             $this->redirect('/cart', navigate: true);
         } else {
-            // Despachamos el evento para que el Home se entere del cambio
             $this->dispatch('addressUpdated');
             $this->redirect('/', navigate: true);
         }
@@ -105,6 +100,7 @@ new #[Title('Buscar Dirección')] class extends Component {
 <div x-data="{
         map: null,
         autocomplete: null,
+        loadingLocation: false,
 
         // init() arranca mágicamente en cuanto pisas esta página
         init() {
@@ -116,24 +112,27 @@ new #[Title('Buscar Dirección')] class extends Component {
             const container = document.getElementById('map');
             if(!container) return;
 
-            // Limpieza obligatoria para que Leaflet no explote al ir y venir
-            if(container._leaflet_id) {
+            // Limpiar instancia previa para Livewire Navigate
+            if (container._leaflet_id) {
                 container._leaflet_id = null;
             }
 
-            this.map = L.map('map', { zoomControl: false }).setView([32.5149, -117.0382], 16);
-            
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 19,
-                attribution: '© OpenStreetMap'
+            // Mapa con controles ocultos para minimalismo
+            this.map = L.map('map', {
+                zoomControl: false,
+                attributionControl: false
+            }).setView([32.5149, -117.0382], 16);
+
+            // MAPA SIMPLIFICADO: CartoDB Positron (Gris claro, pocos detalles)
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                maxZoom: 20
             }).addTo(this.map);
 
-            // Forzamos dibujo correcto
-            setTimeout(() => this.map.invalidateSize(), 100);
+            setTimeout(() => this.map.invalidateSize(), 200);
 
             this.map.on('moveend', () => {
                 let center = this.map.getCenter();
-                
+
                 // Usamos $wire que Livewire inyecta automáticamente en Alpine
                 this.$wire.updateLocation(center.lat, center.lng);
 
@@ -147,6 +146,28 @@ new #[Title('Buscar Dirección')] class extends Component {
             });
         },
 
+        locateMe() {
+            if (!navigator.geolocation) {
+                alert('Tu navegador no soporta geolocalización');
+                return;
+            }
+
+            this.loadingLocation = true;
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    this.map.flyTo([lat, lng], 18, { animate: true, duration: 1.5 });
+                    this.loadingLocation = false;
+                },
+                (error) => {
+                    this.loadingLocation = false;
+                    alert('Permiso de ubicación denegado o error de señal.');
+                },
+                { enableHighAccuracy: true }
+            );
+        },
+
         initGooglePlaces() {
             const input = document.getElementById('google-places-input');
             if(!input) return;
@@ -154,7 +175,6 @@ new #[Title('Buscar Dirección')] class extends Component {
             // Vigilamos hasta que el script de Google (que está en tu layout) termine de descargar
             const checkGoogle = () => {
                 if (typeof google !== 'undefined' && google.maps && google.maps.places) {
-                    
                     input.addEventListener('keydown', (e) => { if(e.key === 'Enter') e.preventDefault() });
 
                     this.autocomplete = new google.maps.places.Autocomplete(input, {
@@ -175,45 +195,60 @@ new #[Title('Buscar Dirección')] class extends Component {
 
             checkGoogle();
         }
-    }" 
-    class="fixed inset-0 z-[100] h-[100dvh] flex flex-col bg-gray-50 overflow-hidden"
+    }"
+    class="fixed inset-0 z-[100] h-[100dvh] flex flex-col bg-white overflow-hidden"
 >
+    {{-- BARRA DE BÚSQUEDA SUPERIOR --}}
+    <div class="absolute top-6 left-0 right-0 z-50 p-4 pointer-events-none">
+        <div class="max-w-md mx-auto flex flex-col gap-3">
+            <div class="flex items-center gap-2 pointer-events-auto">
+                <a wire:navigate href="/" class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white border border-gray-100 text-gray-800 active:scale-95 transition-all">
+                    <i class="bxf bx-chevron-left text-3xl"></i>
+                </a>
 
-    {{-- HEADER --}}
-    <div class="p-4 bg-white shadow z-20 flex-shrink-0 flex flex-col gap-2 relative">
-        <div class="flex items-center gap-2">
-            <a wire:navigate href="/" class="p-2 text-gray-500 rounded-full hover:bg-gray-100">
-                <i class="bxf bx-arrow-back text-xl"></i>
-            </a>
-            <h1 class="font-bold text-lg">Elige tu ubicación</h1>
-        </div>
-
-        <div class="relative" wire:ignore>
-            <input 
-                id="google-places-input"
-                type="text"
-                placeholder="Busca tu calle o colonia..."
-                class="w-full border-2 border-gray-100 rounded-xl p-3 pl-10 bg-gray-50 focus:border-red-400 focus:outline-none focus:bg-white transition-colors"
-            />
-            <i class="bxf bx-search absolute left-3 top-3.5 text-xl text-gray-400"></i>
+                <div class="relative flex-1" wire:ignore>
+                    <input
+                        id="google-places-input"
+                        type="text"
+                        placeholder="¿A dónde enviamos?"
+                        class="w-full h-12 border-none rounded-2xl p-3 pl-11 bg-white shadow-xl focus:ring-2 focus:ring-red-600 text-sm text-gray-700"
+                    />
+                    <i class="bxf bx-search absolute left-4 top-3.5 text-xl text-red-600"></i>
+                </div>
+            </div>
         </div>
     </div>
 
-    {{-- MAPA --}}
     <div class="flex-1 relative z-0" wire:ignore>
         <div id="map" class="absolute inset-0"></div>
 
-        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-full z-[1000] pointer-events-none mb-3 flex flex-col items-center">
-            <div class="relative bg-white rounded-full p-2 shadow-lg border border-gray-100 flex items-center justify-center animate-bounce-slow">
-                <i class="bxf bx-carrot text-4xl text-orange-500"></i>
-                <div class="absolute -bottom-2 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[8px] border-t-white"></div>
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[90%] z-[1000] pointer-events-none flex flex-col items-center">
+            <div class="relative group">
+                <div class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-4 h-1.5 bg-black/20 rounded-[100%] blur-[1px]"></div>
+
+                <div class="relative animate-bounce-slow">
+                    <svg width="50" height="60" viewBox="0 0 50 60" fill="none" xmlns="http://www.w3.org/2000/svg" class="drop-shadow-2xl">
+                        <path d="M25 0C11.1929 0 0 11.1929 0 25C0 39.5 25 60 25 60C25 60 50 39.5 50 25C50 11.1929 38.8071 0 25 0Z" fill="#e7000b"/>
+                        <circle cx="25" cy="24" r="18" fill="white"/>
+                    </svg>
+                    <div class="absolute top-[12px] left-[13px]">
+                        <i class="bxf bx-carrot text-2xl text-red-600"></i>
+                    </div>
+                </div>
             </div>
-            <div class="w-3 h-1.5 bg-black/20 rounded-[100%] mt-2 blur-[1px]"></div>
         </div>
 
-        <div wire:loading wire:target="updateLocation" class="absolute top-4 left-1/2 -translate-x-1/2 bg-black/80 text-white font-medium text-xs px-4 py-2 rounded-full z-[1000] shadow-lg">
-            Calculando dirección...
-        </div>
+        <button
+            x-on:click="locateMe()"
+            class="absolute bottom-8 right-4 z-[1000] flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-2xl text-red-600 active:scale-90 transition-all border border-gray-100"
+        >
+            <template x-if="!loadingLocation">
+                <i class="bxf bx-location-pin text-2xl"></i>
+            </template>
+            <template x-if="loadingLocation">
+                <div class="h-6 w-6 animate-spin rounded-full border-2 border-orange-100 border-t-orange-600"></div>
+            </template>
+        </button>
     </div>
 
     {{-- PANEL INFERIOR --}}

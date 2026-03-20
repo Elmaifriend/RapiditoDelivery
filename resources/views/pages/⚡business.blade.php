@@ -157,17 +157,8 @@ new #[Title('Business')] class extends Component {
 
 <div class="min-h-screen bg-gray-50 pb-28">
     <div class="relative h-52 w-full overflow-hidden bg-gray-200">
-        <img src="{{ $business->banner_path ? Storage::url($business->banner_path, now()->addMinutes(10)) : 'https://images.unsplash.com/photo-1571091718767-18b5b1457add?q=80&w=1000&auto=format&fit=crop' }}"
+        <img src="{{ $business->banner_path ? Storage::temporaryUrl($business->banner_path, now()->addMinutes(10)) : 'https://images.unsplash.com/photo-1571091718767-18b5b1457add?q=80&w=1000&auto=format&fit=crop' }}"
             class="h-full w-full object-cover">
-        <div class="absolute left-0 right-0 top-0 flex items-center justify-between p-4">
-            <button onclick="history.back()"
-                class="flex h-9 w-9 items-center justify-center rounded-full bg-white/90 shadow">
-                ←
-            </button>
-            <button class="flex h-9 w-9 items-center justify-center rounded-full bg-white/90 shadow">
-                ♡
-            </button>
-        </div>
     </div>
 
     <div class="bg-white px-5 pb-5 pt-4">
@@ -180,7 +171,7 @@ new #[Title('Business')] class extends Component {
     </div>
 
     <div class="sticky top-0 z-10 bg-gray-50">
-        <div class="no-scrollbar flex gap-3 overflow-x-auto px-4 py-4">
+        <div class="no-scrollbar flex items-center gap-3 overflow-x-auto p-4">
             @foreach ($business->productCategories as $category)
                 <a href="#category-{{ $category->id }}"
                     class="whitespace-nowrap rounded-full border border-gray-200 bg-white px-5 py-2 text-xs font-bold text-gray-600 transition-transform active:scale-90">

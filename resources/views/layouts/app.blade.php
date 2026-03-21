@@ -15,7 +15,7 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
-    
+
     {{-- Dependencias de Leaflet --}}
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
@@ -24,8 +24,8 @@
     <script src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google_maps.key') }}&libraries=places" async defer></script>
 </head>
 
-<body class="flex min-h-dvh justify-center bg-gray-100 font-sans text-gray-800">
-    <div class="flex h-dvh w-full max-w-[900px] flex-col overflow-hidden bg-white shadow-xl relative">
+<body class="flex min-h-dvh justify-center bg-gray-50 font-sans text-gray-800">
+    <div class="mt-25 flex h-[85dvh] w-full max-w-[900px] flex-col overflow-hidden bg-gray-50 shadow-xl relative">
         <livewire:header.bar />
 
         <main class="no-scrollbar relative flex-1 overflow-y-auto pb-32">

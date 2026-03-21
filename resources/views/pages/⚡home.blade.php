@@ -6,8 +6,11 @@ use App\Models\ServiceZone;
 use App\Models\DeliveryAddress;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Livewire\Attributes\Computed;
+use App\Models\Category;
 
 new #[Title('Home')] class extends Component {
+    public ?int $selectedCategoryId = null;
 
     public ?float $lat = null;
     public ?float $lng = null;
@@ -19,6 +22,7 @@ new #[Title('Home')] class extends Component {
     protected $listeners = [
         'locationDetected' => 'setLocation',
         'locationDenied' => 'handleDenied',
+        'category-selected' => 'filterByCategory',
     ];
 
     public function handleDenied()
@@ -26,7 +30,7 @@ new #[Title('Home')] class extends Component {
         $this->locationDenied = true;
         $this->noService = false;
         $this->city = null;
-        
+
         // Disparamos el único evento global para que el header reaccione
         $this->dispatch('addressUpdated');
     }
@@ -41,7 +45,7 @@ new #[Title('Home')] class extends Component {
         if ($address && $address->lat && $address->lng) {
             $this->lat = $address->lat;
             $this->lng = $address->lng;
-            
+
             // Calculamos los restaurantes directamente sin consultar a Google
             $this->resolveServiceZone();
         }
@@ -116,7 +120,7 @@ new #[Title('Home')] class extends Component {
         DeliveryAddress::updateOrCreate(
             // Condición de búsqueda (de quién es esta dirección)
             ['guest_token' => $guestToken],
-            
+
             // Datos a actualizar o crear
             [
                 'formatted_address' => $result['formatted_address'],
@@ -132,8 +136,8 @@ new #[Title('Home')] class extends Component {
                 'place_id' => $placeId,
             ]
         );
-        
-        // ¡Listo! Todo guardado. Ya no disparamos el evento aquí, 
+
+        // ¡Listo! Todo guardado. Ya no disparamos el evento aquí,
         // recuerda que se dispara al final del método setLocation()
     }
 
@@ -146,6 +150,24 @@ new #[Title('Home')] class extends Component {
         }
         return null;
     }
+
+    public function filterByCategory(?int $categoryId)
+    {
+        $this->selectedCategoryId = ($this->selectedCategoryId === $categoryId) ? null : $categoryId;
+    }
+
+    #[Computed]
+    public function filteredBusinesses()
+    {
+        if (!$this->city) return collect();
+
+        return $this->city->businesses()
+            ->when($this->selectedCategoryId, function($query) {
+                $query->where('category_id', $this->selectedCategoryId);
+            })
+            ->active()
+            ->get();
+    }
 };
 ?>
 
@@ -155,217 +177,165 @@ new #[Title('Home')] class extends Component {
 
     {{-- Estado de ubicación --}}
     @if($locationDenied)
-        <div class="mx-4 rounded-xl bg-yellow-100 p-4 text-yellow-700">
-            Necesitamos acceso a tu ubicación para mostrar restaurantes disponibles.
-        </div>
-        <img 
-            src="https://img.freepik.com/free-vector/delivery-service-with-masks-concept_23-2148509518.jpg?ga=GA1.1.1103732986.1772644375&w=740&q=80"
-            alt="Sin servicio disponible"
-            class="w-full rounded-2xl shadow-md"
-        />
-    @elseif($city)
-        <div class="mx-4 rounded-xl bg-green-100 p-4 text-sm text-green-700">
-            Estás en {{ $city->name }}
-        </div>
+    <div class="flex flex-col items-center justify-center px-6 py-24 gap-8 text-center">
 
-        {{-- Buscador --}}
-        <a href="{{ route('search') }}" 
-           class="mx-4 flex items-center gap-4 rounded-2xl border border-gray-100 bg-white p-4">
-            <i class="bxf bx-search text-lg text-red-400"></i>
+        <span class="text-6xl text-red-500">
+            <i class="bxf bx-lock-alt"></i>
+        </span>
+
+        <h2 class="text-2xl font-bold text-gray-800 tracking-tight">
+            Necesitamos acceso a tu ubicación
+        </h2>
+
+        <p class="max-w-xs text-sm leading-relaxed text-gray-500">
+            No pudimos acceder a tu ubicación. Necesitamos saber dónde estás para mostrarte los mejores sabores a tu
+            alrededor.
+        </p>
+
+        <div class="flex flex-col gap-4">
             <p class="text-sm font-medium text-gray-400">
-                ¿Qué se te antoja hoy?
+                ¿Prefieres hacerlo tú mismo?
             </p>
-        </a>
 
-        {{-- Promos --}}
-        <div class="no-scrollbar flex w-full gap-4 overflow-x-auto px-4">
+            <a wire:navigate href="/location"
+                class="block w-full text-center bg-red-500 text-white font-bold p-4 rounded-2xl hover:bg-red-600 active:scale-[0.98] transition-all disabled:opacity-50 disabled:active:scale-100 shadow-md shadow-red-200">
+                Seleccionar ubicación manualmente
+            </a>
 
-            <div class="relative flex h-40 min-w-[85%] flex-col justify-center overflow-hidden rounded-4xl bg-gradient-to-r from-red-400 to-red-600 p-5 text-white shadow-lg shadow-red-200">
-                <div class="z-10 flex flex-col gap-4">
-                    <div>
-                        <h2 class="font-logo text-2xl font-extrabold tracking-tight">
-                            50% OFF
-                        </h2>
-                        <p class="text-sm font-medium opacity-90">
-                            En tu primer pedido
-                        </p>
-                    </div>
-                    <a class="self-start rounded-xl bg-white px-4 py-2 text-xs font-bold text-red-600">
-                        Ver más
-                    </a>
-                </div>
-                <i class="bxf bx-carrot absolute -bottom-6 -right-2 rotate-12 text-9xl opacity-20"></i>
-            </div>
+            <p class="text-sm text-gray-400 italic">
+                Prometemos no seguirte hasta tu cocina (solo hasta la puerta)
+            </p>
+        </div>
+    </div>
+    @elseif($city)
 
-            <div class="relative flex h-40 min-w-[85%] flex-col justify-center overflow-hidden rounded-4xl bg-gradient-to-r from-orange-300 to-red-400 p-5 text-white shadow-lg shadow-red-200">
-                <div class="z-10">
+    {{-- Buscador
+    <a href="{{ route('search') }}"
+        class="mx-4 flex items-center gap-4 rounded-2xl border border-gray-100 bg-white p-4">
+        <i class="bxf bx-search text-lg text-red-400"></i>
+        <p class="text-sm font-medium text-gray-400">
+            ¿Qué se te antoja hoy?
+        </p>
+    </a> --}}
+
+    {{-- Promos
+    <div class="no-scrollbar flex w-full gap-4 overflow-x-auto px-4">
+
+        <div
+            class="relative flex h-40 min-w-[85%] flex-col justify-center overflow-hidden rounded-4xl bg-gradient-to-r from-red-400 to-red-600 p-5 text-white shadow-lg shadow-red-200">
+            <div class="z-10 flex flex-col gap-4">
+                <div>
                     <h2 class="font-logo text-2xl font-extrabold tracking-tight">
-                        Envíos Gratis
+                        50% OFF
                     </h2>
                     <p class="text-sm font-medium opacity-90">
-                        Todo el fin de semana
+                        En tu primer pedido
                     </p>
                 </div>
-                <i class="bxf bx-bolt absolute -bottom-6 -right-6 text-9xl opacity-20"></i>
+                <a class="self-start rounded-xl bg-white px-4 py-2 text-xs font-bold text-red-600">
+                    Ver más
+                </a>
             </div>
+            <i class="bxf bx-carrot absolute -bottom-6 -right-2 rotate-12 text-9xl opacity-20"></i>
         </div>
 
-        {{-- Categorías --}}
-        <div class="flex w-full flex-col gap-2">
-            <h2 class="px-4 font-bold">Categorías</h2>
-
-            <div class="no-scrollbar flex gap-12 overflow-x-auto px-4">
-                <livewire:category.icon category="Pizza" icon="🍕" />
-                <livewire:category.icon category="Hamburguesas" icon="🍔" />
-                <livewire:category.icon category="Tacos" icon="🌮" />
-                <livewire:category.icon category="Sushi" icon="🍣" />
-                <livewire:category.icon category="Pollo" icon="🍗" />
-                <livewire:category.icon category="Comida Mexicana" icon="🇲🇽" />
-                <livewire:category.icon category="Saludable" icon="🥗" />
-                <livewire:category.icon category="Desayunos" icon="🍳" />
-                <livewire:category.icon category="Postres" icon="🍰" />
-                <livewire:category.icon category="Café" icon="☕" />
-                <livewire:category.icon category="Helados" icon="🍦" />
-                <livewire:category.icon category="Comida Asiática" icon="🥢" />
-                <livewire:category.icon category="Mariscos" icon="🦐" />
-                <livewire:category.icon category="Bebidas" icon="🥤" />
+        <div
+            class="relative flex h-40 min-w-[85%] flex-col justify-center overflow-hidden rounded-4xl bg-gradient-to-r from-orange-300 to-red-400 p-5 text-white shadow-lg shadow-red-200">
+            <div class="z-10">
+                <h2 class="font-logo text-2xl font-extrabold tracking-tight">
+                    Envíos Gratis
+                </h2>
+                <p class="text-sm font-medium opacity-90">
+                    Todo el fin de semana
+                </p>
             </div>
+            <i class="bxf bx-bolt absolute -bottom-6 -right-6 text-9xl opacity-20"></i>
+        </div>
+    </div> --}}
+
+    {{-- Categorías --}}
+    <div class="flex w-full flex-col gap-2">
+        <div class="flex items-center justify-between px-4">
+            <h2 class="font-bold text-gray-800">Categorías</h2>
+            @if($selectedCategoryId)
+            <button wire:click="filterByCategory(null)" class="text-xs font-bold text-red-500">Limpiar</button>
+            @endif
         </div>
 
-        {{-- Restaurantes --}}
-        <div class="flex w-full flex-col gap-2 px-4">
-            <h2 class="font-bold">Restaurantes cerca</h2>
-
-            <div class="flex flex-col gap-4">
-                @forelse($this->city->businesses as $business)
-                    
-                    <a wire:navigate href="{{ route('business', ['business' => $business->id]) }}">
-                        <livewire:restaurant.card
-                            :business_id="$business->id"
-                            :key="$business->id"
-                            :name="$business->name"
-                            :type="$business->category?->name ?? 'General'"
-                            :stars="4.0"
-                            time="30-40min"
-                            :image="$business->banner_path 
-                                ? Storage::temporaryUrl($business->banner_path, now()->addMinutes(10))
-                                : asset('images/default-restaurant.jpg')" 
-                        />
-                    </a>
-
-                @empty
-                    <div class="rounded-xl bg-gray-100 p-4 text-center text-sm text-gray-500">
-                        No hay restaurantes disponibles en este momento.
-                    </div>
-                @endforelse
-            </div>
+        <div class="no-scrollbar flex gap-4 overflow-x-auto px-4 pb-2">
+            @foreach(App\Models\Category::active()->get() as $cat)
+            <livewire:category.icon
+                :key="'cat-'.$cat->id"
+                :id="$cat->id"
+                :category="$cat->name"
+                icon="🍴"
+                :active="$selectedCategoryId === $cat->id"
+            />
+            @endforeach
         </div>
+    </div>
+
+    {{-- Restaurantes --}}
+    <div class="flex w-full flex-col gap-2 px-4">
+        <h2 class="font-bold text-gray-800">
+            {{ $selectedCategoryId ? 'Resultados' : 'Restaurantes cerca' }}
+        </h2>
+
+    <div class="flex flex-col gap-4">
+        @forelse($this->filteredBusinesses as $restaurant)
+            <livewire:restaurant.card
+                :key="'res-'.$restaurant->id"
+                :business="$restaurant"
+                :name="$restaurant->name"
+                :type="$restaurant->category?->name ?? 'General'"
+                :stars="4.0"
+                time="30-40min"
+                :image="$restaurant->banner_path
+                        ? Storage::temporaryUrl($restaurant->banner_path, now()->addMinutes(10))
+                        : 'https://picsum.photos/300/200'"
+            />
+        @empty
+            <div class="flex flex-col items-center py-10 text-center">
+                <i class="bxf bx-search-alt text-4xl text-gray-200"></i>
+                <p class="mt-2 text-sm text-gray-400 text-balance">
+                    No encontramos restaurantes de esta categoría en tu zona.
+                </p>
+            </div>
+        @endforelse
+    </div>
+    </div>
 
     @elseif($noService)
-        <div class="mx-4 rounded-xl bg-red-100 p-4 text-sm text-red-600">
-            No tenemos servicio en tu ubicación, estamos trabajando para llegar a tu ciudad.
-        </div>
+    <div class="flex flex-col items-center justify-center px-6 py-24 gap-8 text-center">
 
-        <div class="px-4">
-            <img 
-                src="https://img.freepik.com/free-vector/delivery-service-with-masks-concept_23-2148509518.jpg?ga=GA1.1.1103732986.1772644375&w=740&q=80"
-                alt="Sin servicio disponible"
-                class="w-full rounded-2xl shadow-md"
-            />
-        </div>
-    @else
-        {{-- Buscador --}}
-        <a href="{{ route('search') }}" 
-           class="mx-4 flex items-center gap-4 rounded-2xl border border-gray-100 bg-white p-4">
-            <i class="bxf bx-search text-lg text-red-400"></i>
+        <span class="text-6xl text-red-500">:(</span>
+
+        <h2 class="text-2xl font-bold text-gray-800 tracking-tight">
+            ¡Vaya! Aún no llegamos ahí
+        </h2>
+        <p class="max-w-xs text-sm leading-relaxed text-gray-500">
+            Lo sentimos mucho, pero aún no tenemos cobertura en tu ubicación actual.
+        </p>
+
+        <div class="flex flex-col gap-4">
             <p class="text-sm font-medium text-gray-400">
-                ¿Qué se te antoja hoy?
+                ¿Crees que es un error?
             </p>
-        </a>
 
-        {{-- Promos --}}
-        <div class="no-scrollbar flex w-full gap-4 overflow-x-auto px-4">
+            <a wire:navigate href="/location"
+                class="block w-full text-center bg-red-500 text-white font-bold p-4 rounded-2xl hover:bg-red-600 active:scale-[0.98] transition-all disabled:opacity-50 disabled:active:scale-100 shadow-md shadow-red-200">
+                Seleccionar ubicación manualmente
+            </a>
 
-            <div class="relative flex h-40 min-w-[85%] flex-col justify-center overflow-hidden rounded-4xl bg-gradient-to-r from-red-400 to-red-600 p-5 text-white shadow-lg shadow-red-200">
-                <div class="z-10 flex flex-col gap-4">
-                    <div>
-                        <h2 class="font-logo text-2xl font-extrabold tracking-tight">
-                            50% OFF
-                        </h2>
-                        <p class="text-sm font-medium opacity-90">
-                            En tu primer pedido
-                        </p>
-                    </div>
-                    <a class="self-start rounded-xl bg-white px-4 py-2 text-xs font-bold text-red-600">
-                        Ver más
-                    </a>
-                </div>
-                <i class="bxf bx-carrot absolute -bottom-6 -right-2 rotate-12 text-9xl opacity-20"></i>
-            </div>
-
-            <div class="relative flex h-40 min-w-[85%] flex-col justify-center overflow-hidden rounded-4xl bg-gradient-to-r from-orange-300 to-red-400 p-5 text-white shadow-lg shadow-red-200">
-                <div class="z-10">
-                    <h2 class="font-logo text-2xl font-extrabold tracking-tight">
-                        Envíos Gratis
-                    </h2>
-                    <p class="text-sm font-medium opacity-90">
-                        Todo el fin de semana
-                    </p>
-                </div>
-                <i class="bxf bx-bolt absolute -bottom-6 -right-6 text-9xl opacity-20"></i>
-            </div>
+            <p class="text-sm text-gray-400 italic">
+                A veces el GPS tiene hambre y se confunde un poco
+            </p>
         </div>
-
-        {{-- Categorías --}}
-        <div class="flex w-full flex-col gap-2">
-            <h2 class="px-4 font-bold">Categorías</h2>
-
-            <div class="no-scrollbar flex gap-12 overflow-x-auto px-4">
-                <livewire:category.icon category="Pizza" icon="🍕" />
-                <livewire:category.icon category="Hamburguesas" icon="🍔" />
-                <livewire:category.icon category="Tacos" icon="🌮" />
-                <livewire:category.icon category="Sushi" icon="🍣" />
-                <livewire:category.icon category="Pollo" icon="🍗" />
-                <livewire:category.icon category="Comida Mexicana" icon="🇲🇽" />
-                <livewire:category.icon category="Saludable" icon="🥗" />
-                <livewire:category.icon category="Desayunos" icon="🍳" />
-                <livewire:category.icon category="Postres" icon="🍰" />
-                <livewire:category.icon category="Café" icon="☕" />
-                <livewire:category.icon category="Helados" icon="🍦" />
-                <livewire:category.icon category="Comida Asiática" icon="🥢" />
-                <livewire:category.icon category="Mariscos" icon="🦐" />
-                <livewire:category.icon category="Bebidas" icon="🥤" />
-            </div>
-        </div>
-
-        {{-- Restaurantes --}}
-        <div class="flex w-full flex-col gap-2 px-4">
-            <h2 class="font-bold">Restaurantes cerca</h2>
-
-            <div class="flex flex-col gap-4">
-                <livewire:restaurant.card name="El Tizoncito" type="Tacos" :stars="3.5" time="35-40min"
-                    image="https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=500&q=80" />
-
-                <livewire:restaurant.card name="Burger Lab" type="Hamburguesas" :stars="4.2" time="25-30min"
-                    image="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=500&q=80" />
-
-                <livewire:restaurant.card name="Sushi Itto" type="Sushi" :stars="4.0" time="40-50min"
-                    image="https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=500&q=80" />
-
-                <livewire:restaurant.card name="La Casa del Pollo" type="Pollo" :stars="3.8" time="30-35min"
-                    image="https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&w=500&q=80" />
-
-                <livewire:restaurant.card name="Green Bowl" type="Saludable" :stars="4.5" time="20-25min"
-                    image="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=500&q=80" />
-
-                <livewire:restaurant.card name="Dulce Antojo" type="Postres" :stars="4.7" time="15-20min"
-                    image="https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?auto=format&fit=crop&w=500&q=80" />
-            </div>
-        </div>
+    </div>
     @endif
-    
+
     <script>
-    document.addEventListener('livewire:navigated', () => {
+        document.addEventListener('livewire:navigated', () => {
         // Obtenemos el token del usuario actual
         const guestToken = document.cookie
             .split('; ')
@@ -379,7 +349,7 @@ new #[Title('Home')] class extends Component {
         // Si ya tiene dirección guardada (ya sea por GPS previo o manual), NO hacemos nada.
         // Dejamos que el Header simplemente la lea de la base de datos.
         if (hasAddress) {
-            return; 
+            return;
         }
 
         // Si no tiene dirección (es su primera vez o borró cookies), pedimos el GPS

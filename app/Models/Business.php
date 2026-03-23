@@ -12,7 +12,7 @@ use App\Models\Product;
 class Business extends Model
 {
     use HasFactory;
-    
+
     protected $fillable = [
         'name',
         'slug',
@@ -37,10 +37,19 @@ class Business extends Model
         'accepts_pickup',
     ];
 
-    public function products(){
+    protected $casts = [
+        'is_open' => 'boolean',
+        'accepts_delivery' => 'boolean',
+        'accepts_pickup' => 'boolean',
+        'lat' => 'float',
+        'lng' => 'float',
+    ];
+
+    public function products()
+    {
         return $this->hasMany(Product::class, "business_id");
     }
-    
+
     public function category()
     {
         return $this->belongsTo(Category::class, "category_id");
@@ -76,6 +85,9 @@ class Business extends Model
     {
         return $query->where('is_open', true);
     }
+
+    public function city()
+    {
+        return $this->belongsTo(City::class, 'city_id');
+    }
 }
-
-

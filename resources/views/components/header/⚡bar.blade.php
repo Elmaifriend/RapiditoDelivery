@@ -45,7 +45,7 @@ new class extends Component {
 ?>
 
 <div
-    class="fixed top-0 z-100 flex w-full items-center justify-between rounded-b-2xl bg-white px-8 pt-8 pb-6 cursor-pointer">
+    class="fixed top-0 z-100 flex gap-4 w-full items-center justify-between rounded-b-2xl bg-white px-6 pt-8 pb-6 cursor-pointer">
     {{-- ETIQUETA DE DEBUG: Se muestra chiquito arriba a la derecha --}}
     @if($debugLat && $debugLng)
     <div
@@ -59,21 +59,19 @@ new class extends Component {
         <h1 class="font-display font-extrabold text-gray-800">Rapidito</h1>
     </a>
 
-    <a class="flex items-start gap-1.5 text-gray-500" wire:navigate href="/location">
-        <div class="flex flex-col gap-1 pt-0.5">
-            <span class="text-xl flex items-center gap-1 justify-end font-bold text-gray-800">
-                {{ $cityText }}
-                <i class="bxf bx-location text-red-400"></i>
-            </span>
+    <a class="flex items-end flex-col gap-1 text-gray-500 max-w-1/2" wire:navigate href="/location">
+        <span class="text-xl flex items-center gap-1 justify-end font-bold text-gray-800">
+            {{ $cityText }}
+            <i class="bxf bx-location text-red-400"></i>
+        </span>
 
-            @if($streetText)
-            <span class="max-w-[220px] truncate text-xs text-gray-400 flex items-center gap-1">
+        @if($streetText)
+        <div class="flex items-center justify-end gap-1 w-full text-gray-400">
+            <p class="truncate text-xs text-right">
                 {{ $streetText }}
-                <i class="bxf bx-chevron-down"></i>
-            </span>
-            @endif
+            </p>
+            <i class="bxf bx-chevron-down shrink-0"></i>
         </div>
-
-
+        @endif
     </a>
 </div>

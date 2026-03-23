@@ -9,7 +9,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\FileUpload;
 use Illuminate\Support\Str;
-
+use League\Flysystem\Visibility;
 
 class BusinessForm
 {
@@ -23,19 +23,10 @@ class BusinessForm
                         FileUpload::make('banner_path')
                             ->label('Banner')
                             ->image()
-                            ->disk( fn () => config('filesystems.default') )
+                            ->disk("r2")
                             ->openable()
                             ->visibility("private")
-                            ->directory('restaurants/banners')
-                            ->imageEditor()
-                            ->imageEditorAspectRatioOptions([
-                                '3:1',
-                            ])
-                            ->imageAspectRatio('3:1')
-                            ->automaticallyOpenImageEditorForAspectRatio()
-                            ->automaticallyCropImagesToAspectRatio('3:1')
-                            ->automaticallyResizeImagesToWidth('900')
-                            ->automaticallyResizeImagesToHeight('300'),
+                            ->directory('restaurants/banners'),
                     ]),
 
                 Section::make('Información general')
@@ -46,14 +37,8 @@ class BusinessForm
                             ->image()
                             ->openable()
                             ->disk( fn () => config('filesystems.default') )
-                            ->visibility("private")
-                            ->directory('restaurants/logos')
-                            ->imageEditor()
-                            ->imageAspectRatio('1:1')
-                            ->automaticallyOpenImageEditorForAspectRatio()
-                            ->automaticallyCropImagesToAspectRatio('1:1')
-                            ->automaticallyResizeImagesToWidth('300')
-                            ->automaticallyResizeImagesToHeight('300'),
+                            //->visibility("private")
+                            ->directory('restaurants/logos'),
 
                         Section::make()
                             ->schema([
@@ -69,23 +54,19 @@ class BusinessForm
 
                                 TextInput::make('slug')
                                     ->label('Slug')
-                                    ->required()
-                                    ->unique(ignoreRecord: true),
+                                    ->required(),
 
                                 TextInput::make('phone')
                                     ->label('Telefono')
-                                    ->required()
-                                    ->unique(ignoreRecord: true),
+                                    ->required(),
 
                                 TextInput::make('email')
                                     ->label('Correo')
-                                    ->required()
-                                    ->unique(ignoreRecord: true),
+                                    ->required(),
 
                                 TextInput::make('web_site')
                                     ->label('Sitio Web')
-                                    ->required()
-                                    ->unique(ignoreRecord: true),
+                                    ->required(),
 
                                 Select::make('category_id')
                                     ->label('Categoría')
@@ -109,8 +90,12 @@ class BusinessForm
                         TextInput::make('address')
                             ->label('Dirección'),
 
-                        TextInput::make('city')
-                            ->label('Ciudad'),
+                        Select::make('city_id')
+                            ->label('Ciudad')
+                            ->relationship('city', 'name')
+                            ->searchable()
+                            ->preload()
+                            ->required(),
 
                         TextInput::make('state')
                             ->label('Estado / Provincia'),
@@ -140,14 +125,8 @@ class BusinessForm
                             ->image()
                             ->openable()
                             ->disk( fn () => config('filesystems.default') )
-                            ->visibility("private")
-                            ->directory('restaurants/references')
-                            ->imageEditor()
-                            ->imageAspectRatio('16:9')
-                            ->automaticallyOpenImageEditorForAspectRatio()
-                            ->automaticallyCropImagesToAspectRatio('16:9')
-                            ->automaticallyResizeImagesToWidth('1280')
-                            ->automaticallyResizeImagesToHeight('720'),
+                            //->visibility("private")
+                            ->directory('restaurants/references'),
                     ]),
 
                 Section::make('Configuración')

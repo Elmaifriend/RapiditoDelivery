@@ -8,7 +8,7 @@ use App\Models\City;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
-class RestaurantFactory extends Factory
+class BusinessFactory extends Factory
 {
     protected $model = Business::class;
 

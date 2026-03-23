@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\DeliveryZoneResource\Schemas;
+namespace App\Filament\Resources\DeliveryZones\Schemas;
 
 use Filament\Forms;
 use Filament\Schemas\Schema;

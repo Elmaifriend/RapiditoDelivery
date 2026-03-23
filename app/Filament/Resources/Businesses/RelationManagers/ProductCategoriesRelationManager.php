@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\Restaurants\RelationManagers;
+namespace App\Filament\Resources\Businesses\RelationManagers;
 
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;

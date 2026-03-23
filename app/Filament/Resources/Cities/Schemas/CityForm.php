@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\CityResource\Schemas;
+namespace App\Filament\Resources\Cities\Schemas;
 
 use Filament\Forms;
 use Filament\Schemas\Schema;

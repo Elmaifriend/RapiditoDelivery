@@ -16,7 +16,7 @@
     <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/js/app.js']); ?>
     <?php echo \Livewire\Mechanisms\FrontendAssets\FrontendAssets::styles(); ?>
 
-    
+
     
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
@@ -25,8 +25,8 @@
     <script src="https://maps.googleapis.com/maps/api/js?key=<?php echo e(config('services.google_maps.key')); ?>&libraries=places" async defer></script>
 </head>
 
-<body class="flex min-h-dvh justify-center bg-gray-100 font-sans text-gray-800">
-    <div class="flex h-dvh w-full max-w-[900px] flex-col overflow-hidden bg-white shadow-xl relative">
+<body class="flex min-h-dvh justify-center bg-gray-50 font-sans text-gray-800">
+    <div class="mt-25 flex h-[85dvh] w-full max-w-[900px] flex-col overflow-hidden bg-gray-50 shadow-xl relative">
         <?php
 $__split = function ($name, $params = []) {
     return [$name, $params];
@@ -90,4 +90,5 @@ unset($__split);
     <?php echo \Livewire\Mechanisms\FrontendAssets\FrontendAssets::scripts(); ?>
 
 </body>
-</html><?php /**PATH C:\Users\Elmaifriend\Documents\Programacion\RapiditoDelivery\resources\views/layouts/app.blade.php ENDPATH**/ ?>
+</html>
+<?php /**PATH C:\Users\Elmaifriend\Documents\Programacion\RapiditoDelivery\resources\views/layouts/app.blade.php ENDPATH**/ ?>

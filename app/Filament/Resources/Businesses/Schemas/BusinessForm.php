@@ -26,7 +26,7 @@ class BusinessForm
                             ->disk("r2")
                             ->openable()
                             ->visibility("private")
-                            ->directory('restaurants/banners'),
+                            ->directory('restaurants/banner'),
                     ]),
 
                 Section::make('Información general')

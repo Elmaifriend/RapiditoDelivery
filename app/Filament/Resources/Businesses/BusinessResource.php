@@ -13,6 +13,8 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use App\Filament\Resources\Businesses\RelationManagers\ProductsRelationManager;
+use App\Filament\Resources\Businesses\RelationManagers\ProductCategoriesRelationManager;
 
 class BusinessResource extends Resource
 {
@@ -33,7 +35,8 @@ class BusinessResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            ProductCategoriesRelationManager::class,
+            ProductsRelationManager::class,
         ];
     }
 

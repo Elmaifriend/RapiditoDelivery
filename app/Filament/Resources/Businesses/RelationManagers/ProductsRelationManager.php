@@ -38,6 +38,7 @@ class ProductsRelationManager extends RelationManager
                 Section::make('Información General')
                     ->icon('heroicon-o-information-circle')
                     ->schema([
+                    
                         TextInput::make('name')
                             ->label('Nombre del producto')
                             ->required()

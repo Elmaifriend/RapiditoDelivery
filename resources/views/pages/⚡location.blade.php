@@ -5,6 +5,7 @@ use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Illuminate\Support\Facades\Http;
 use App\Models\DeliveryAddress;
+use App\Enums\AddressSource;
 
 new #[Title('Buscar Dirección')] class extends Component {
 
@@ -72,12 +73,13 @@ new #[Title('Buscar Dirección')] class extends Component {
                 'country' => $pais ?? 'México',
                 'lat' => $this->lat,
                 'lng' => $this->lng,
+                "source" => AddressSource::WEB,
                 'place_id' => $this->googleResult['place_id'] ?? null,
             ]
         );
 
         if ($this->mode === 'checkout') {
-            $this->redirect('/cart', navigate: true);
+            $this->redirect('/checkout', navigate: true);
         } else {
             $this->dispatch('addressUpdated');
             $this->redirect('/', navigate: true);

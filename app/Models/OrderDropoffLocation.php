@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Enums\AddressSource;
 
 class OrderDropoffLocation extends Model
 {
@@ -15,10 +16,10 @@ class OrderDropoffLocation extends Model
         'lat',
         'lng',
         'source',
-        'confirmed',
     ];
 
     protected $casts = [
+        'source' => AddressSource::class,
         'lat' => 'float',
         'lng' => 'float',
         'confirmed' => 'boolean',

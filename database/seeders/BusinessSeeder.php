@@ -24,9 +24,9 @@ class BusinessSeeder extends Seeder
         $basePath = database_path('seeders/files/restaurants');
 
         $folders = [
-            'banner' => $basePath . '/banner',
-            'logo' => $basePath . '/logo',
-            'reference' => $basePath . '/referencia',
+            'banners' => $basePath . '/banner',
+            'logos' => $basePath . '/logo',
+            'references' => $basePath . '/referencia',
         ];
 
         $storedFiles = [];
@@ -78,9 +78,9 @@ class BusinessSeeder extends Seeder
                     'is_open' => true,
                     'accepts_delivery' => true,
                     'accepts_pickup' => true,
-                    'banner_path' => $this->matchImage($slug, $storedFiles['banner']),
-                    'logo_path' => $this->matchImage($slug, $storedFiles['logo']),
-                    'reference_image' => $this->matchImage($slug, $storedFiles['reference']),
+                    'banner_path' => $this->matchImage($slug, $storedFiles['banners']),
+                    'logo_path' => $this->matchImage($slug, $storedFiles['logos']),
+                    'reference_image' => $this->matchImage($slug, $storedFiles['references']),
                 ]);
             }
         }

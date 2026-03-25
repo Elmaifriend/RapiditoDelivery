@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Enums\AddressSource;
 
 class DeliveryAddress extends Model
 {
@@ -13,25 +14,23 @@ class DeliveryAddress extends Model
         'user_id',
         'guest_token',
         'label',
-        'formatted_address',
-        'street',
-        'street_number',
-        'neighborhood',
+        'formatted_address', 
         'is_default',
-        'source',
-        'address_line',
+        'source',  //GPS, WEB, APP, WhatsApp
+        'address_line', 
         'reference',
         'photo_path',
         'city',
         'state',
-        'postal_code',
         'country',
         'lat',
         'lng',
         'place_id',
+        'last_used_at',
     ];
 
     protected $casts = [
+        'source' => AddressSource::class,
         'lat' => 'float',
         'lng' => 'float',
         'is_default' => 'boolean',

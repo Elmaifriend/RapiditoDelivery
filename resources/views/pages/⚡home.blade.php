@@ -9,6 +9,7 @@ use App\Models\Category;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use App\Enums\AddressSource;
 
 new #[Title('Home')] class extends Component {
     public ?int $selectedCategoryId = null;
@@ -120,6 +121,7 @@ new #[Title('Home')] class extends Component {
                 'country' => $pais ?? 'México',
                 'lat' => $this->lat,
                 'lng' => $this->lng,
+                "source" => AddressSource::GPS,
                 'place_id' => $result['place_id'] ?? null,
             ]
         );

@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use App\Models\Order;
 use App\Models\OrderDropoffLocation;
+use App\Enums\AddressSource;
 
 class OrderDropoffLocationSeeder extends Seeder
 {
@@ -17,8 +18,7 @@ class OrderDropoffLocationSeeder extends Seeder
                 'order_id' => $order->id,
                 'lat' => fake()->latitude(),
                 'lng' => fake()->longitude(),
-                'source' => 'user',
-                'confirmed' => true,
+                'source' => AddressSource::APP,
             ]);
         }
     }

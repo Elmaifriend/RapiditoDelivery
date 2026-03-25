@@ -12,13 +12,8 @@ class DeliveryAddressFactory extends Factory
             'label' => $this->faker->randomElement(['Casa', 'Trabajo', 'Otro']),
             'formatted_address' => $this->faker->address(),
 
-            'street' => $this->faker->streetName(),
-            'street_number' => $this->faker->buildingNumber(),
-            'neighborhood' => $this->faker->citySuffix(),
-
             'city' => $this->faker->city(),
             'state' => $this->faker->state(),
-            'postal_code' => $this->faker->postcode(),
             'country' => $this->faker->country(),
 
             'is_default' => null,

@@ -15,11 +15,9 @@ return new class extends Migration
             $table->decimal('lat', 10, 7);
             $table->decimal('lng', 10, 7);
             $table->string('source'); 
-            $table->boolean('confirmed')->default(false);
             $table->timestamps();
 
             $table->index('order_id');
-            $table->index('confirmed');
         });
     }
 

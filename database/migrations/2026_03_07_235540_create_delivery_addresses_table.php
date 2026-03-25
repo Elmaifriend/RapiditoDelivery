@@ -20,14 +20,11 @@ return new class extends Migration
             $table->string('formatted_address');
 
             // Address parts
-            $table->string('street')->nullable();
-            $table->string('street_number')->nullable();
-            $table->string('neighborhood')->nullable();
+            
+           
             $table->string('city');
             $table->string('state')->nullable();
-            $table->string('postal_code')->nullable();
             $table->string('country');
-            
             $table->boolean('is_default')->nullable()->default(false);
             $table->string('source')->nullable();
             $table->string('address_line')->nullable();

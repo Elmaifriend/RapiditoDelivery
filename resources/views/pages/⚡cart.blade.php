@@ -85,7 +85,7 @@ new #[Title('Cart')] class extends Component {
 
                             <div class="flex items-center gap-3">
                                 <div class="h-14 w-14 flex-none overflow-hidden rounded-xl bg-gray-50">
-                                    <img src="{{ $item->product_image_url_snapshot ? Storage::url($item->product_image_url_snapshot) : 'https://placehold.co/100x100' }}"
+                                    <img src="{{ $item->product_image_url_snapshot ? Storage::temporaryUrl($item->product_image_url_snapshot, now()->addMinutes(10)) : 'https://placehold.co/100x100' }}"
                                         class="h-full w-full object-cover">
                                 </div>
 

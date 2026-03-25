@@ -18,7 +18,6 @@ class OrderDropoffLocationFactory extends Factory
             'lat' => $this->faker->latitude(),
             'lng' => $this->faker->longitude(),
             'source' => 'user',
-            'confirmed' => true,
         ];
     }
 }

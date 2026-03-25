@@ -200,7 +200,7 @@ new #[Title('Business')] class extends Component {
                             </div>
                             <div class="flex flex-col items-center gap-2">
                                 <div class="relative h-20 w-20 overflow-hidden rounded-xl bg-gray-200">
-                                    <img src="{{ $product->image_path ? Storage::url($product->image_path) : 'https://placehold.co/150x150' }}"
+                                    <img src="{{ $product->image_path ? Storage::temporaryUrl($product->image_path, now()->addMinutes(10)) : 'https://placehold.co/150x150' }}"
                                         class="h-full w-full object-cover">
                                 </div>
                                 @php
@@ -237,7 +237,7 @@ new #[Title('Business')] class extends Component {
             class="relative w-full max-w-lg overflow-hidden rounded-t-3xl bg-white p-6 pb-28 shadow-xl sm:rounded-3xl">
             @if ($selectedProduct)
                 <div class="relative h-64 w-full overflow-hidden rounded-2xl bg-gray-100">
-                    <img src="{{ $selectedProduct->image_path ? Storage::url($selectedProduct->image_path) : 'https://placehold.co/600x400' }}"
+                    <img src="{{ $selectedProduct->image_path ? Storage::temporaryUrl($selectedProduct->image_path, now()->addMinutes(10)) : 'https://placehold.co/600x400' }}"
                         class="h-full w-full object-cover">
                     <button x-on:click="open = false"
                         class="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-black/20 text-white backdrop-blur-md">✕</button>

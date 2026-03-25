@@ -118,9 +118,16 @@ class BusinessForm
                                 FileUpload::make('reference_image')
                                     ->label('Foto de fachada')
                                     ->image()
-                                    ->directory('restaurants/references')
                                     ->openable()
                                     ->disk(fn() => config('filesystems.default'))
+                                    ->directory('restaurants/references')
+                                    ->imageEditor()
+                                    ->imageAspectRatio('16:9')
+                                    ->automaticallyOpenImageEditorForAspectRatio()
+                                    ->automaticallyCropImagesToAspectRatio('16:9')
+                                    ->automaticallyResizeImagesToWidth('1920')
+                                    ->automaticallyResizeImagesToHeight('1080')
+                                    ->openable()
                                     ->columnSpanFull(),
                             ]),
                     ])

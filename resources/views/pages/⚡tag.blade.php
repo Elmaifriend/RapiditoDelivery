@@ -54,7 +54,7 @@ new #[Title('Tag')] class extends Component {
 
 <div class="flex flex-col gap-4 pt-6">
     <div class="flex items-center gap-4 px-4">
-        <a wire:navigate href="/" class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-gray-800">
+        <a wire:navigate href="{{ url()->previous() ?? '/' }}" class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-gray-800">
             <i class="bxf bx-arrow-left-stroke text-2xl text-gray-800/40"></i>
         </a>
         <h1 class="text-2xl font-bold text-gray-800">{{ $tag->name }}</h1>

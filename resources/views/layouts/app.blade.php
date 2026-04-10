@@ -25,10 +25,10 @@
 </head>
 
 <body class="flex min-h-dvh justify-center bg-gray-50 font-sans text-gray-800">
-    <div class="mt-25 flex h-[85dvh] w-full max-w-[900px] flex-col overflow-hidden bg-gray-50 shadow-xl relative">
+    <div class="mt-25 flex h-[85dvh] w-full flex-col overflow-hidden bg-gray-50 shadow-xl relative">
         <livewire:header.bar />
 
-        <main class="no-scrollbar relative flex-1 overflow-y-auto pb-32">
+        <main class="no-scrollbar max-w-[900px] mx-auto w-full relative flex-1 overflow-y-auto pb-32">
             {{ $slot }}
         </main>
 

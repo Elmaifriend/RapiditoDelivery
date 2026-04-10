@@ -87,49 +87,32 @@
         </div>
 
         <div class="space-y-3">
-            {{-- SIMULACIÓN DE DIRECCIONES (Aquí idealmente harías un @foreach de las direcciones del usuario) --}}
-            
-            <button 
-                @click="flyTo(32.5312, -117.1226, 'Casa - Playas')"
-                wire:click="selectAddress(1)" {{-- Suponiendo que el ID es 1 --}}
-                class="flex w-full items-center gap-3 rounded-[1.5rem] border p-3 text-left transition-transform active:scale-95
-                       {{ $selectedAddressId === 1 ? 'border-red-500 bg-red-50/50' : 'border-gray-200 bg-white' }}"
-            >
-                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-red-100 bg-white text-red-500">
-                    <i class="fas fa-home"></i>
-                </div>
-                <div class="flex-1">
-                    <div class="flex items-center gap-2">
-                        <p class="text-sm font-bold text-gray-800">Casa</p>
+            {{-- Renderizado dinámico de las direcciones del usuario --}}
+            @forelse($this->addresses as $address)
+                <button 
+                    @click="flyTo({{ $address->lat }}, {{ $address->lng }}, '{{ $address->label ?? 'Dirección' }}')"
+                    wire:click="selectAddress({{ $address->id }})"
+                    class="flex w-full items-center gap-3 rounded-[1.5rem] border p-3 text-left transition-transform active:scale-95
+                           {{ $selectedAddressId === $address->id ? 'border-red-500 bg-red-50/50' : 'border-gray-200 bg-white hover:bg-gray-50' }}"
+                >
+                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-gray-100 {{ $selectedAddressId === $address->id ? 'bg-white text-red-500' : 'bg-gray-50 text-gray-400' }}">
+                        <i class="fas {{ $address->label === 'Casa' ? 'fa-home' : ($address->label === 'Oficina' ? 'fa-briefcase' : 'fa-map-marker-alt') }}"></i>
                     </div>
-                    <p class="line-clamp-1 text-[10px] text-gray-500">Paseo Ensenada 100, Playas de Tijuana</p>
-                </div>
-                @if($selectedAddressId === 1)
-                    <div class="flex h-5 w-5 items-center justify-center rounded-full border-[5px] border-red-500 bg-white"></div>
-                @else
-                    <div class="h-5 w-5 rounded-full border border-gray-300"></div>
-                @endif
-            </button>
-
-            <button 
-                @click="flyTo(32.5255, -117.0145, 'Oficina - Zona Río')"
-                wire:click="selectAddress(2)" {{-- Suponiendo que el ID es 2 --}}
-                class="flex w-full items-center gap-3 rounded-[1.5rem] border p-3 text-left transition-transform hover:bg-gray-50 active:scale-95
-                       {{ $selectedAddressId === 2 ? 'border-red-500 bg-red-50/50' : 'border-gray-200 bg-white' }}"
-            >
-                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-gray-100 bg-gray-50 text-gray-400">
-                    <i class="fas fa-briefcase"></i>
-                </div>
-                <div class="flex-1">
-                    <p class="text-sm font-bold text-gray-800">Oficina</p>
-                    <p class="line-clamp-1 text-[10px] text-gray-500">Blvd. Sánchez Taboada, Zona Río</p>
-                </div>
-                @if($selectedAddressId === 2)
-                    <div class="flex h-5 w-5 items-center justify-center rounded-full border-[5px] border-red-500 bg-white"></div>
-                @else
-                    <div class="h-5 w-5 rounded-full border border-gray-300"></div>
-                @endif
-            </button>
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2">
+                            <p class="text-sm font-bold text-gray-800">{{ $address->label ?? 'Dirección' }}</p>
+                        </div>
+                        <p class="line-clamp-1 text-[10px] text-gray-500">{{ $address->formatted_address ?? $address->address_line }}</p>
+                    </div>
+                    @if($selectedAddressId === $address->id)
+                        <div class="flex h-5 w-5 items-center justify-center rounded-full border-[5px] border-red-500 bg-white"></div>
+                    @else
+                        <div class="h-5 w-5 rounded-full border border-gray-300"></div>
+                    @endif
+                </button>
+            @empty
+                <p class="text-sm text-gray-500">No tienes direcciones guardadas. Por favor, agrega una nueva.</p>
+            @endforelse
         </div>
     </div>
 
@@ -182,29 +165,41 @@
         </div>
     </div>
 
-    <div class="mb-6 rounded-2xl border border-gray-100 bg-white p-5">
-        <div class="mb-1.5 flex justify-between text-xs text-gray-500">
-            <span>Comida</span>
-            <span>${{ number_format($cart ? $cart->subtotal : 0, 2) }}</span>
-        </div>
-        <div class="mb-1.5 flex justify-between text-xs text-gray-500">
-            <span>Envío</span>
-            <span>${{ number_format($cart ? $cart->delivery_fee : 0, 2) }}</span>
-        </div>
-        <div class="flex justify-between text-lg font-bold text-gray-800 mt-4 border-t border-gray-100 pt-3">
-            <span>Total a pagar</span>
-            <div class="flex flex-col items-end">
-                <span>${{ number_format($cart ? $cart->total : 0, 2) }}</span>
+    @if($this->cart)
+        <div class="mb-6 rounded-2xl border border-gray-100 bg-white p-5">
+            <div class="mb-1.5 flex justify-between text-xs text-gray-500">
+                <span>Comida</span>
+                <span>${{ number_format($this->cart->subtotal, 2) }}</span>
+            </div>
+            
+            {{-- Muestra si está fuera de cobertura o el costo exacto --}}
+            <div class="mb-1.5 flex justify-between text-xs font-bold {{ is_null($this->deliveryFee) ? 'text-red-500' : 'text-gray-500' }}">
+                <span>Envío Exacto</span>
+                <span>
+                    @if(is_null($this->deliveryFee))
+                        Fuera de cobertura
+                    @else
+                        ${{ number_format($this->deliveryFee, 2) }}
+                    @endif
+                </span>
+            </div>
+            <div class="flex justify-between text-lg font-bold text-gray-800 mt-4 border-t border-gray-100 pt-3">
+                <span>Total a pagar</span>
+                <div class="flex flex-col items-end">
+                    <span>${{ number_format($this->totalAmount, 2) }}</span>
+                </div>
             </div>
         </div>
-    </div>
+    @endif
 
+    {{-- Deshabilita el botón si la dirección no tiene cobertura (deliveryFee es null) --}}
     <button wire:click="confirmPayment" wire:loading.attr="disabled"
-        class="flex w-full items-center justify-center gap-2 rounded-2xl bg-red-500 py-4 font-bold text-white opacity-95 transition-transform hover:opacity-100 active:scale-90 disabled:opacity-50">
+        @if(is_null($this->deliveryFee)) disabled @endif
+        class="flex w-full items-center justify-center gap-2 rounded-2xl py-4 font-bold text-white opacity-95 transition-transform hover:opacity-100 active:scale-90 disabled:opacity-50 disabled:cursor-not-allowed {{ is_null($this->deliveryFee) ? 'bg-gray-400' : 'bg-red-500' }}">
         <i class="fas fa-lock" wire:loading.remove wire:target="confirmPayment"></i>
         <i class="fas fa-spinner fa-spin" wire:loading wire:target="confirmPayment"></i>
         <span wire:loading.remove wire:target="confirmPayment">
-            Confirmar Pago {{ $cart ? 'de '.$cart->items->count().' Productos' : '' }}
+            Confirmar Pago {{ $this->cart ? 'de '.$this->cart->items->count().' Productos' : '' }}
         </span>
         <span wire:loading wire:target="confirmPayment">Procesando...</span>
     </button>

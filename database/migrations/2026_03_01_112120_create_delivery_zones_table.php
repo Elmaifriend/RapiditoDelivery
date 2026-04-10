@@ -26,8 +26,6 @@ return new class extends Migration
 
             $table->decimal('delivery_price', 8, 2);
 
-            $table->unsignedInteger('priority')->default(100);
-
             $table->boolean('active')->default(true);
 
             $table->timestamps();

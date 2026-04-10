@@ -17,10 +17,10 @@ class ServiceZone extends Model
         'polygon',
         'active',
         'debug',
-        'min_lat',
-        'max_lat',
-        'min_lng',
-        'max_lng',
+        'bbox_min_lat',
+        'bbox_max_lat',
+        'bbox_min_lng',
+        'bbox_max_lng',
     ];
 
     protected $casts = [
@@ -47,10 +47,10 @@ class ServiceZone extends Model
                 $lats[] = $point[1];
             }
 
-            $zone->min_lat = min($lats);
-            $zone->max_lat = max($lats);
-            $zone->min_lng = min($lngs);
-            $zone->max_lng = max($lngs);
+            $zone->bbox_min_lat = min($lats);
+            $zone->bbox_max_lat = max($lats);
+            $zone->bbox_min_lng = min($lngs);
+            $zone->bbox_max_lng = max($lngs);
         });
     }
 
@@ -84,10 +84,10 @@ class ServiceZone extends Model
         }
 
         if (
-            $lat < $this->min_lat ||
-            $lat > $this->max_lat ||
-            $lng < $this->min_lng ||
-            $lng > $this->max_lng
+            $lat < $this->bbox_min_lat ||
+            $lat > $this->bbox_max_lat ||
+            $lng < $this->bbox_min_lng ||
+            $lng > $this->bbox_max_lng
         ) {
             return false;
         }

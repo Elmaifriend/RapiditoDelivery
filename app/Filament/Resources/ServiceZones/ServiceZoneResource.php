@@ -5,6 +5,7 @@ namespace App\Filament\Resources\ServiceZones;
 use App\Filament\Resources\ServiceZones\Pages\CreateServiceZone;
 use App\Filament\Resources\ServiceZones\Pages\EditServiceZone;
 use App\Filament\Resources\ServiceZones\Pages\ListServiceZones;
+use App\Filament\Resources\ServiceZones\RelationManagers\DeliveryZonesRelationManager;
 use App\Filament\Resources\ServiceZones\Schemas\ServiceZoneForm;
 use App\Filament\Resources\ServiceZones\Tables\ServiceZonesTable;
 use App\Models\ServiceZone;
@@ -35,7 +36,7 @@ class ServiceZoneResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            DeliveryZonesRelationManager::class,
         ];
     }
 

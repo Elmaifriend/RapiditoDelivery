@@ -16,8 +16,11 @@ class DeliveryZone extends Model
         'name',
         'polygon_json',
         'delivery_price',
-        'priority',
         'active',
+        'bbox_min_lat',
+        'bbox_max_lat',
+        'bbox_min_lng',
+        'bbox_max_lng',
     ];
 
     protected $casts = [
@@ -31,12 +34,16 @@ class DeliveryZone extends Model
     | Boot: calcular BBOX automáticamente
     |--------------------------------------------------------------------------
     */
-
     protected static function booted()
     {
         static::saving(function ($zone) {
 
-            $coordinates = $zone->polygon_json['coordinates'][0] ?? [];
+            $coordinates = [];
+
+            // Extraer las coordenadas validando la estructura GeoJSON (FeatureCollection)
+            if (isset($zone->polygon_json['features'][0]['geometry']['type']) && $zone->polygon_json['features'][0]['geometry']['type'] === 'Polygon') {
+                $coordinates = $zone->polygon_json['features'][0]['geometry']['coordinates'][0] ?? [];
+            }
 
             $lats = [];
             $lngs = [];
@@ -46,10 +53,19 @@ class DeliveryZone extends Model
                 $lats[] = $point[1];
             }
 
-            $zone->bbox_min_lat = min($lats);
-            $zone->bbox_max_lat = max($lats);
-            $zone->bbox_min_lng = min($lngs);
-            $zone->bbox_max_lng = max($lngs);
+            // Validación defensiva para evitar el error de min() vacío
+            if (!empty($lats) && !empty($lngs)) {
+                $zone->bbox_min_lat = min($lats);
+                $zone->bbox_max_lat = max($lats);
+                $zone->bbox_min_lng = min($lngs);
+                $zone->bbox_max_lng = max($lngs);
+            } else {
+                // Valores por defecto seguros si el polígono viene mal formado
+                $zone->bbox_min_lat = 0;
+                $zone->bbox_max_lat = 0;
+                $zone->bbox_min_lng = 0;
+                $zone->bbox_max_lng = 0;
+            }
         });
     }
 
@@ -76,12 +92,15 @@ class DeliveryZone extends Model
     {
         $polygon = new GeoPolygon();
 
-        $coordinates = $this->polygon_json['coordinates'][0] ?? [];
+        $coordinates = [];
+        
+        // Misma lógica de extracción robusta para cuando necesites instanciar el polígono
+        if (isset($this->polygon_json['features'][0]['geometry']['type']) && $this->polygon_json['features'][0]['geometry']['type'] === 'Polygon') {
+            $coordinates = $this->polygon_json['features'][0]['geometry']['coordinates'][0] ?? [];
+        }
 
         foreach ($coordinates as $point) {
-            $polygon->addPoint(
-                new Coordinate($point[1], $point[0]) // lat, lng
-            );
+            $polygon->addPoint(new Coordinate($point[1], $point[0])); // lat, lng
         }
 
         return $polygon;
@@ -93,6 +112,17 @@ class DeliveryZone extends Model
             return false;
         }
 
+        // Primero verificamos el BBOX (Caja delimitadora) para descartar rápido y ahorrar CPU
+        if (
+            $lat < $this->bbox_min_lat ||
+            $lat > $this->bbox_max_lat ||
+            $lng < $this->bbox_min_lng ||
+            $lng > $this->bbox_max_lng
+        ) {
+            return false;
+        }
+
+        // Si está dentro de la caja, hacemos la comprobación matemática exacta del polígono
         $coordinate = new Coordinate($lat, $lng);
 
         return $this->toPhpGeoPolygon()->contains($coordinate);

@@ -17,6 +17,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        //Force HTTPS in production ( Docker problem )
         if(config('app.env') !== 'local') {
             URL::forceScheme('https');
         }

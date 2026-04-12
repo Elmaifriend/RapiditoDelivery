@@ -13,18 +13,18 @@ return new class extends Migration
             $table->foreignId('city_id')->constrained()->cascadeOnDelete();
             $table->string('name');
             $table->json('polygon');
-            $table->decimal('min_lat', 10, 7);
-            $table->decimal('max_lat', 10, 7);
-            $table->decimal('min_lng', 10, 7);
-            $table->decimal('max_lng', 10, 7);
+            $table->decimal('bbox_min_lat', 10, 7);
+            $table->decimal('bbox_max_lat', 10, 7);
+            $table->decimal('bbox_min_lng', 10, 7);
+            $table->decimal('bbox_max_lng', 10, 7);
             $table->boolean('active')->default(true);
             $table->boolean('debug')->default(false);
             $table->timestamps();
 
             $table->index('city_id');
             $table->index(['active', 'debug']);
-            $table->index(['min_lat', 'max_lat']);
-            $table->index(['min_lng', 'max_lng']);
+            $table->index(['bbox_min_lat', 'bbox_max_lat']);
+            $table->index(['bbox_min_lng', 'bbox_max_lng']);
         });
     }
 

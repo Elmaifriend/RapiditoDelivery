@@ -69,14 +69,16 @@ class User extends Authenticatable implements FilamentUser
             ->implode('');
     }
 
-    public function businesses()
+    public function driver()
     {
-        return $this->belongsToMany(Business::class, "business_user", "user_id", "business_id");
+        return $this->hasOne(Driver::class);
     }
 
-    public function currentBusiness()
+    public function businesses()
     {
-        return $this->belongsTo(Business::class, 'current_business_id');
+        return $this->belongsToMany(Business::class)
+                    ->withPivot('role', 'is_responsible')
+                    ->withTimestamps();
     }
 
     public function orders()

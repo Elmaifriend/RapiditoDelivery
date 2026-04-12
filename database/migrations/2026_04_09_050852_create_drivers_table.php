@@ -11,16 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('business_user', function (Blueprint $table) {
+        Schema::create('drivers', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('business_id')->constrained()->cascadeOnDelete();
-            $table->string('role')->default('staff'); // owner, manager, staff
-            $table->boolean('is_responsible')->default(false); // Para notificaciones o alertas críticas
+            $table->foreignId('city_id')->constrained();
+            $table->enum('status', ['available', 'busy', 'offline'])->default('offline');
             $table->timestamps();
-            $table->unique(['user_id', 'business_id']);
         });
-
     }
 
     /**
@@ -28,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('restaurant_user');
+        Schema::dropIfExists('drivers');
     }
 };

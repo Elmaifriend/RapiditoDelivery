@@ -59,11 +59,6 @@ class Order extends Model
         return $this->belongsTo(Business::class);
     }
 
-    public function driver()
-    {
-        return $this->belongsTo(User::class, 'driver_id');
-    }
-
     public function items()
     {
         return $this->hasMany(OrderItem::class);
@@ -77,5 +72,10 @@ class Order extends Model
         $this->total = $subtotal + $this->delivery_fee;
 
         $this->save();
+    }
+
+    public function driver()
+    {
+        return $this->belongsTo(Driver::class, "driver_id");
     }
 }

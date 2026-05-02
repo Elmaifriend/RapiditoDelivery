@@ -1,3 +1,15 @@
+@assets
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css"/>
+<script src="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
+
+<link href='https://cdn.boxicons.com/3.0.8/fonts/basic/boxicons.min.css' rel='stylesheet'>
+<link href='https://cdn.boxicons.com/3.0.8/fonts/filled/boxicons-filled.min.css' rel='stylesheet'>
+<link href='https://cdn.boxicons.com/3.0.8/fonts/brands/boxicons-brands.min.css' rel='stylesheet'>
+@endassets
+
 <x-dynamic-component
     :component="$getFieldWrapperView()"
     :field="$field"
@@ -16,21 +28,6 @@
             class="w-full rounded-lg border border-gray-300 dark:border-gray-600 shadow-sm overflow-hidden"
             style="height: {{ $getHeight() }}px; min-height: 400px; z-index: 1;"
         ></div>
-
-        {{-- Leaflet Assets --}}
-        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-        {{-- Geoman Assets --}}
-        <link
-            rel="stylesheet"
-            href="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css"
-        />
-        <script src="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
-
-        <link href='https://cdn.boxicons.com/3.0.8/fonts/basic/boxicons.min.css' rel='stylesheet'>
-        <link href='https://cdn.boxicons.com/3.0.8/fonts/filled/boxicons-filled.min.css' rel='stylesheet'>
-        <link href='https://cdn.boxicons.com/3.0.8/fonts/brands/boxicons-brands.min.css' rel='stylesheet'>
     </div>
 </x-dynamic-component>
 
@@ -52,8 +49,6 @@
                     }
                 });
 
-                // Handle Filament Modal opening
-                window.addEventListener('open-modal', (event) => {
                     this.$nextTick(() => {
                         if (this.map) {
                             setTimeout(() => {
@@ -63,10 +58,9 @@
                                 } else {
                                     this.map.setView(this.center, this.zoom);
                                 }
-                            }, 300);
+                            }, 100);
                         }
                     });
-                });
 
                 const initMap = () => {
                     if (typeof L === 'undefined' || typeof this.$refs.map === 'undefined') {
@@ -79,7 +73,6 @@
                         attributionControl: false
                     }).setView(this.center, this.zoom);
 
-                    // Resize Observer to handle any container size changes
                     new ResizeObserver(() => {
                         if (this.map) {
                             this.map.invalidateSize();
@@ -122,27 +115,23 @@
                         },
                     });
 
-                    // Set global path options for existing and new layers
                     this.map.pm.setPathOptions({
                         color: this.primaryColor,
                         fillColor: this.primaryColor,
                         fillOpacity: 0.2,
                     });
 
-                    // Load initial state
                     if (this.state) {
                         this.loadPolygon(this.state);
                     }
 
                     this.map.on('pm:create', (e) => {
                         if (e.shape === 'Polygon') {
-                            // Enforce single polygon
                             if (this.polygonLayer) {
                                 this.map.removeLayer(this.polygonLayer);
                             }
                             this.polygonLayer = e.layer;
-                            
-                            // Ensure the new layer has the correct style
+
                             this.polygonLayer.setStyle({
                                 color: this.primaryColor,
                                 fillColor: this.primaryColor,
@@ -151,7 +140,7 @@
 
                             this.updateState();
                             this.setupLayerEvents(this.polygonLayer);
-                            this.updateMarker(true); // Center map on new polygon
+                            this.updateMarker(true);
                         }
                     });
 
@@ -206,12 +195,10 @@
                         return;
                     }
 
-                    // Check if it's a valid GeoJSON (Feature or FeatureCollection)
                     const hasFeatures = geojson.type === 'FeatureCollection' && geojson.features && geojson.features.length > 0;
                     const isFeature = geojson.type === 'Feature';
 
                     if (hasFeatures || isFeature) {
-                        // Clear existing layer if any
                         if (this.polygonLayer) {
                             this.map.removeLayer(this.polygonLayer);
                         }
@@ -251,7 +238,6 @@
             updateState() {
                 if (this.polygonLayer) {
                     const feature = this.polygonLayer.toGeoJSON();
-                    // Wrap in FeatureCollection to match model expectation and GeoJSON standards
                     this.state = {
                         type: 'FeatureCollection',
                         features: [feature]

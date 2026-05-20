@@ -2,8 +2,6 @@
 
 namespace App\Filament\Resources\Cities;
 
-use App\Filament\Resources\Cities\Pages\CreateCity;
-use App\Filament\Resources\Cities\Pages\EditCity;
 use App\Filament\Resources\Cities\Pages\ListCities;
 use App\Filament\Resources\Cities\Schemas\CityForm;
 use App\Filament\Resources\Cities\Tables\CitiesTable;
@@ -18,9 +16,20 @@ class CityResource extends Resource
 {
     protected static ?string $model = City::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::MapPin;
 
-    protected static ?string $recordTitleAttribute = 'Ciudades';
+    protected static \UnitEnum|string|null $navigationGroup = 'Logística';
+
+    protected static ?string $modelLabel = 'Ciudad';
+
+    protected static ?string $pluralModelLabel = 'Ciudades';
+
+    protected static ?string $recordTitleAttribute = 'name';
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['name'];
+    }
 
     public static function form(Schema $schema): Schema
     {
@@ -43,8 +52,6 @@ class CityResource extends Resource
     {
         return [
             'index' => ListCities::route('/'),
-            'create' => CreateCity::route('/create'),
-            'edit' => EditCity::route('/{record}/edit'),
         ];
     }
 }

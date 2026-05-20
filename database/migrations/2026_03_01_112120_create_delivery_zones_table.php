@@ -29,10 +29,6 @@ return new class extends Migration
             $table->boolean('active')->default(true);
 
             $table->timestamps();
-
-            $table->index(['service_zone_id', 'active', 'priority']);
-            $table->index(['bbox_min_lat', 'bbox_max_lat']);
-            $table->index(['bbox_min_lng', 'bbox_max_lng']);
         });
     }
 

@@ -147,6 +147,8 @@ class BusinessForm
                                             ->directory('restaurants/references')
                                             ->imageEditor()
                                             ->imageAspectRatio('16:9')
+                                            ->automaticallyOpenImageEditorForAspectRatio()
+                                            ->automaticallyCropImagesToAspectRatio('16:9')
                                             ->columnSpanFull(),
                                     ]),
 
@@ -168,6 +170,7 @@ class BusinessForm
 
                                         TextInput::make('web_site')
                                             ->label('Sitio Web')
+                                            ->required()
                                             ->url()
                                             ->columnSpanFull(),
                                     ]),

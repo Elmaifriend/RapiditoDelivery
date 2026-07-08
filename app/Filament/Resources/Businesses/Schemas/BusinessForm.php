@@ -87,14 +87,48 @@ class BusinessForm
                                             ->relationship('category', 'name')
                                             ->searchable()
                                             ->preload()
-                                            ->required(),
+                                            ->required()
+                                            ->createOptionForm([
+                                                TextInput::make('name')
+                                                    ->label('Nombre')
+                                                    ->required()
+                                                    ->maxLength(255)
+                                                    ->unique('categories', 'name', ignoreRecord: true),
+                                                ToggleButtons::make('is_active')
+                                                    ->label('Visibilidad Global')
+                                                    ->helperText('Si se oculta, ningún restaurante de esta categoría se mostrará')
+                                                    ->options([
+                                                        'true' => 'Público',
+                                                        'false' => 'Oculto',
+                                                    ])
+                                                    ->colors([
+                                                        'true' => 'success',
+                                                        'false' => 'warning',
+                                                    ])
+                                                    ->icons([
+                                                        'true' => 'heroicon-m-eye',
+                                                        'false' => 'heroicon-m-eye-slash',
+                                                    ])
+                                                    ->inline()
+                                                    ->formatStateUsing(fn($state) => $state ? 'true' : 'false')
+                                                    ->dehydrateStateUsing(fn($state) => $state === 'true')
+                                                    ->default('true'),
+                                            ]),
 
                                         Select::make('tags')
                                             ->label('Etiquetas (Keywords)')
                                             ->relationship('tags', 'name')
                                             ->multiple()
                                             ->searchable()
-                                            ->preload(),
+                                            ->preload()
+                                            ->createOptionForm([
+                                                TextInput::make('name')
+                                                    ->label('Nombre de la etiqueta')
+                                                    ->placeholder('Ej: Comida Rápida, Vegano, Gourmet...')
+                                                    ->required()
+                                                    ->unique('tags', 'name', ignoreRecord: true)
+                                                    ->maxLength(255),
+                                            ]),
                                     ]),
 
                                 Tab::make('Ubicación')
@@ -111,7 +145,41 @@ class BusinessForm
                                             ->relationship('city', 'name')
                                             ->searchable()
                                             ->preload()
-                                            ->required(),
+                                            ->required()
+                                            ->createOptionForm([
+                                                TextInput::make('name')
+                                                    ->label('Nombre de la Ciudad')
+                                                    ->placeholder('Ej: Santo Domingo, Madrid...')
+                                                    ->required()
+                                                    ->maxLength(255),
+                                                TextInput::make('state')
+                                                    ->label('Estado / Provincia')
+                                                    ->placeholder('Ej: Distrito Nacional, Comunidad de Madrid...')
+                                                    ->maxLength(255),
+                                                TextInput::make('country')
+                                                    ->label('País')
+                                                    ->placeholder('Ej: República Dominicana, España...')
+                                                    ->default('República Dominicana')
+                                                    ->required()
+                                                    ->maxLength(255),
+                                                ToggleButtons::make('active')
+                                                    ->label('Estatus Operativo')
+                                                    ->boolean()
+                                                    ->options([
+                                                        true => 'Activa',
+                                                        false => 'Inactiva',
+                                                    ])
+                                                    ->colors([
+                                                        true => 'success',
+                                                        false => 'danger',
+                                                    ])
+                                                    ->icons([
+                                                        true => 'heroicon-m-check-circle',
+                                                        false => 'heroicon-m-x-circle',
+                                                    ])
+                                                    ->inline()
+                                                    ->default(true),
+                                            ]),
 
                                         TextInput::make('postal_code')
                                             ->label('Código postal')
@@ -147,6 +215,8 @@ class BusinessForm
                                             ->directory('restaurants/references')
                                             ->imageEditor()
                                             ->imageAspectRatio('16:9')
+                                            ->automaticallyOpenImageEditorForAspectRatio()
+                                            ->automaticallyCropImagesToAspectRatio('16:9')
                                             ->columnSpanFull(),
                                     ]),
 
@@ -168,6 +238,7 @@ class BusinessForm
 
                                         TextInput::make('web_site')
                                             ->label('Sitio Web')
+                                            ->required()
                                             ->url()
                                             ->columnSpanFull(),
                                     ]),

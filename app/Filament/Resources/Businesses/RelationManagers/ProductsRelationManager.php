@@ -95,7 +95,18 @@ class ProductsRelationManager extends RelationManager
                                     )
                                     ->searchable()
                                     ->preload()
-                                    ->required(),
+                                    ->required()
+                                    ->createOptionForm([
+                                        TextInput::make('name')
+                                            ->label('Nombre de la categoría')
+                                            ->required()
+                                            ->maxLength(255),
+                                    ])
+                                    ->createOptionUsing(function (array $data, $livewire): int {
+                                        return $livewire->ownerRecord->productCategories()->create([
+                                            'name' => $data['name'],
+                                        ])->getKey();
+                                    }),
                             ]),
 
                         Section::make('Estado Operativo')

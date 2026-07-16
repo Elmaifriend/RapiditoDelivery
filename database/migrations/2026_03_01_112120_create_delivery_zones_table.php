@@ -28,6 +28,8 @@ return new class extends Migration
 
             $table->boolean('active')->default(true);
 
+            $table->integer('priority')->default(0);
+
             $table->timestamps();
         });
     }

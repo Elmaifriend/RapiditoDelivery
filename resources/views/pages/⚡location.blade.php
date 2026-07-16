@@ -17,6 +17,38 @@ new #[Title('Buscar Dirección')] class extends Component {
     #[Url]
     public string $mode = 'settings';
 
+    // Se ejecuta al cargar la URL por primera vez
+    public function mount()
+    {
+        $guestToken = request()->cookie('guest_token');
+        $userId = auth()->id();
+
+        // Buscamos si ya existe una dirección previa
+        $existingAddress = DeliveryAddress::where(function ($query) use ($guestToken, $userId) {
+            if ($userId) {
+                $query->where('user_id', $userId);
+            } else if ($guestToken) {
+                $query->where('guest_token', $guestToken);
+            } else {
+                $query->whereRaw('1 = 0'); // Query vacía si no hay identificadores
+            }
+        })->latest('last_used_at')->first();
+
+        // Si existe, hacemos el prefill de las propiedades de Livewire
+        if ($existingAddress) {
+            $this->lat = $existingAddress->lat;
+            $this->lng = $existingAddress->lng;
+            $this->formattedAddress = $existingAddress->formatted_address;
+            
+            // Simulamos un esquema mínimo del resultado de Google para no romper las validaciones del botón save
+            $this->googleResult = [
+                'formatted_address' => $existingAddress->formatted_address,
+                'place_id' => $existingAddress->place_id,
+                'address_components' => [] // Se sobreescribirá si el usuario mueve el mapa
+            ];
+        }
+    }
+
     public function updateLocation($lat, $lng)
     {
         $this->lat = $lat;
@@ -50,31 +82,44 @@ new #[Title('Buscar Dirección')] class extends Component {
         if (!$this->lat || !$this->lng || !$this->googleResult) return;
 
         $guestToken = request()->cookie('guest_token');
-        $components = $this->googleResult['address_components'];
+        $components = $this->googleResult['address_components'] ?? [];
 
+        // Extraemos componentes si existen (si es una dirección nueva movida en el mapa)
         $calle = $this->extractComponent($components, ['route']);
         $numero = $this->extractComponent($components, ['street_number']);
         $colonia = $this->extractComponent($components, ['sublocality', 'sublocality_level_1', 'neighborhood']);
         $ciudad = $this->extractComponent($components, ['locality', 'administrative_area_level_2']);
         $estado = $this->extractComponent($components, ['administrative_area_level_1']);
-        $codigoPostal = $this->extractComponent($components, ['postal_code']);
         $pais = $this->extractComponent($components, ['country']);
 
+        if (!empty($components)) {
+            $addressLine = trim(($calle ? $calle : '') . ' ' . ($numero ? $numero : ''));
+            if ($colonia) {
+                $addressLine = trim($addressLine . ', ' . $colonia);
+            }
+        } else {
+            // Si le dio guardar a la dirección cargada por defecto sin mover el mapa
+            $addressLine = $this->formattedAddress;
+        }
+
+        $userId = auth()->id();
+
         DeliveryAddress::updateOrCreate(
-            ['guest_token' => $guestToken],
             [
-                'formatted_address' => $this->googleResult['formatted_address'],
-                'street' => trim($calle . ' ' . $numero),
-                'street_number' => $numero,
-                'neighborhood' => $colonia,
+                'guest_token' => $guestToken,
+                'user_id' => $userId,
+            ],
+            [
+                'formatted_address' => $this->formattedAddress,
+                'address_line' => $addressLine ?: $this->formattedAddress,
                 'city' => $ciudad,
                 'state' => $estado,
-                'postal_code' => $codigoPostal,
                 'country' => $pais ?? 'México',
                 'lat' => $this->lat,
                 'lng' => $this->lng,
-                "source" => AddressSource::WEB,
+                'source' => AddressSource::WEB,
                 'place_id' => $this->googleResult['place_id'] ?? null,
+                'last_used_at' => now(),
             ]
         );
 
@@ -98,13 +143,13 @@ new #[Title('Buscar Dirección')] class extends Component {
 };
 ?>
 
-{{-- El componente Alpine completo en línea. Se ejecuta CADA VEZ que Livewire lo inyecta al DOM --}}
+
+{{-- El componente Alpine completo en línea --}}
 <div x-data="{
         map: null,
         autocomplete: null,
         loadingLocation: false,
 
-        // init() arranca mágicamente en cuanto pisas esta página
         init() {
             this.initLeaflet();
             this.initGooglePlaces();
@@ -114,18 +159,19 @@ new #[Title('Buscar Dirección')] class extends Component {
             const container = document.getElementById('map');
             if(!container) return;
 
-            // Limpiar instancia previa para Livewire Navigate
             if (container._leaflet_id) {
                 container._leaflet_id = null;
             }
 
-            // Mapa con controles ocultos para minimalismo
+            // Leemos si ya viene una ubicación asignada desde el mount de Livewire
+            const startLat = this.$wire.lat ? this.$wire.lat : 32.5149;
+            const startLng = this.$wire.lng ? this.$wire.lng : -117.0382;
+
             this.map = L.map('map', {
                 zoomControl: false,
                 attributionControl: false
-            }).setView([32.5149, -117.0382], 16);
+            }).setView([startLat, startLng], 16);
 
-            // MAPA SIMPLIFICADO: CartoDB Positron (Gris claro, pocos detalles)
             L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
                 maxZoom: 20
             }).addTo(this.map);
@@ -135,7 +181,7 @@ new #[Title('Buscar Dirección')] class extends Component {
             this.map.on('moveend', () => {
                 let center = this.map.getCenter();
 
-                // Usamos $wire que Livewire inyecta automáticamente en Alpine
+                // Notifica a Livewire del cambio de coordenadas al arrastrar el mapa
                 this.$wire.updateLocation(center.lat, center.lng);
 
                 if(this.autocomplete && typeof google !== 'undefined') {
@@ -174,7 +220,6 @@ new #[Title('Buscar Dirección')] class extends Component {
             const input = document.getElementById('google-places-input');
             if(!input) return;
 
-            // Vigilamos hasta que el script de Google (que está en tu layout) termine de descargar
             const checkGoogle = () => {
                 if (typeof google !== 'undefined' && google.maps && google.maps.places) {
                     input.addEventListener('keydown', (e) => { if(e.key === 'Enter') e.preventDefault() });
@@ -187,7 +232,11 @@ new #[Title('Buscar Dirección')] class extends Component {
                     this.autocomplete.addListener('place_changed', () => {
                         const place = this.autocomplete.getPlace();
                         if (place.geometry && place.geometry.location) {
-                            this.map.flyTo([place.geometry.location.lat(), place.geometry.location.lng()], 16, { animate: true, duration: 1.5 });
+                            const newLat = place.geometry.location.lat();
+                            const newLng = place.geometry.location.lng();
+                            
+                            this.map.flyTo([newLat, newLng], 16, { animate: true, duration: 1.5 });
+                            this.$wire.updateLocation(newLat, newLng);
                         }
                     });
                 } else {
@@ -221,13 +270,14 @@ new #[Title('Buscar Dirección')] class extends Component {
         </div>
     </div>
 
+    {{-- ZONA DEL MAPA --}}
     <div class="flex-1 relative z-0" wire:ignore>
         <div id="map" class="absolute inset-0"></div>
 
+        {{-- Pin Central Fijo --}}
         <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[90%] z-[1000] pointer-events-none flex flex-col items-center">
             <div class="relative group">
                 <div class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-4 h-1.5 bg-black/20 rounded-[100%] blur-[1px]"></div>
-
                 <div class="relative animate-bounce-slow">
                     <svg width="50" height="60" viewBox="0 0 50 60" fill="none" xmlns="http://www.w3.org/2000/svg" class="drop-shadow-2xl">
                         <path d="M25 0C11.1929 0 0 11.1929 0 25C0 39.5 25 60 25 60C25 60 50 39.5 50 25C50 11.1929 38.8071 0 25 0Z" fill="#e7000b"/>
@@ -240,6 +290,7 @@ new #[Title('Buscar Dirección')] class extends Component {
             </div>
         </div>
 
+        {{-- Botón de Mi Ubicación --}}
         <button
             x-on:click="locateMe()"
             class="absolute bottom-8 right-4 z-[1000] flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-2xl text-red-600 active:scale-90 transition-all border border-gray-100"
@@ -255,7 +306,6 @@ new #[Title('Buscar Dirección')] class extends Component {
 
     {{-- PANEL INFERIOR --}}
     <div class="p-4 bg-white rounded-t-3xl shadow-[0_-10px_30px_rgba(0,0,0,0.08)] z-10 flex-shrink-0 flex flex-col gap-4">
-
         <div class="flex items-start gap-3 p-2">
             <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
                 <i class="bxf bx-location-plus text-red-500 text-xl"></i>
@@ -279,6 +329,5 @@ new #[Title('Buscar Dirección')] class extends Component {
         >
             {{ $mode === 'checkout' ? 'Confirmar Ubicación' : 'Guardar ubicación' }}
         </button>
-
     </div>
 </div>

@@ -7,7 +7,7 @@ use App\Models\Cart;
 
 class Bar extends Component
 {
-    protected $listeners = ['cart-updated' => '$refresh'];
+    protected $listeners = ['cart-updated' => '$refresh', 'cart-updated' => '$refresh'];
 
     public function getCartProperty()
     {
@@ -23,6 +23,17 @@ class Bar extends Component
                 }
             })
             ->first();
+    }
+
+    // Acción para forzar la revisión de ubicación antes del checkout
+    public function goToLocation()
+    {
+        if (!$this->cart || $this->cart->items->count() === 0) {
+            return;
+        }
+
+        // Lo mandamos al mapa obligatoriamente
+        $this->redirect('/location?mode=checkout', navigate: true);
     }
 
     public function render()

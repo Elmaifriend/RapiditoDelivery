@@ -1,4 +1,3 @@
-
 <div class="fixed bottom-24 left-0 right-0 z-40 flex justify-center px-4">
     @if($this->cart && $this->cart->items->count())
     <div class="flex w-full max-w-[900px] items-center justify-between rounded-2xl bg-gray-900 px-5 py-4 text-white shadow-2xl">
@@ -13,9 +12,13 @@
             </div>
         </div>
 
-        <a href="{{ route("cart") }}" wire:navigate class="rounded-xl bg-red-500 px-6 py-2 font-bold active:scale-95">
+        {{-- Cambiamos el <a> por un botón que llama a la lógica del componente --}}
+        <button 
+            wire:click="goToLocation" 
+            class="rounded-xl bg-red-500 px-6 py-2 font-bold active:scale-95 transition-transform"
+        >
             Comprar
-        </a>
+        </button>
 
     </div>
     @endif

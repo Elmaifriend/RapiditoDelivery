@@ -15,7 +15,7 @@
     :field="$field"
 >
     <div
-        x-data="polygonMapPicker({
+        x-data="window.polygonMapPicker({
             state: $wire.$entangle('{{ $getStatePath() }}'),
             center: [{{ $getCenter()[0] }}, {{ $getCenter()[1] }}],
             zoom: {{ $getZoom() }}
@@ -31,9 +31,12 @@
     </div>
 </x-dynamic-component>
 
+@script
 <script>
-    document.addEventListener('alpine:init', () => {
-        Alpine.data('polygonMapPicker', ({ state, center, zoom }) => ({
+    // Asignamos la función directamente al objeto window global 
+    // para garantizar disponibilidad inmediata cuando Alpine procese el HTML
+    window.polygonMapPicker = function({ state, center, zoom }) {
+        return {
             state,
             center,
             zoom,
@@ -49,18 +52,18 @@
                     }
                 });
 
-                    this.$nextTick(() => {
-                        if (this.map) {
-                            setTimeout(() => {
-                                this.map.invalidateSize();
-                                if (this.polygonLayer) {
-                                    this.map.fitBounds(this.polygonLayer.getBounds());
-                                } else {
-                                    this.map.setView(this.center, this.zoom);
-                                }
-                            }, 100);
-                        }
-                    });
+                this.$nextTick(() => {
+                    if (this.map) {
+                        setTimeout(() => {
+                            this.map.invalidateSize();
+                            if (this.polygonLayer) {
+                                this.map.fitBounds(this.polygonLayer.getBounds());
+                            } else {
+                                this.map.setView(this.center, this.zoom);
+                            }
+                        }, 100);
+                    }
+                });
 
                 const initMap = () => {
                     if (typeof L === 'undefined' || typeof this.$refs.map === 'undefined') {
@@ -272,6 +275,7 @@
                     this.marker = null;
                 }
             }
-        }))
-    })
+        };
+    };
 </script>
+@endscript

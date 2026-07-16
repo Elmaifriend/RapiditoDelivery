@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Enums\AddressSource;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class OrderDropoffLocation extends Model
 {
@@ -13,9 +13,15 @@ class OrderDropoffLocation extends Model
     protected $fillable = [
         'order_id',
         'formatted_address',
+        'address_line',
+        'reference',
+        'source',
+        'city',
+        'state',
+        'country',
         'lat',
         'lng',
-        'source',
+        'place_id',
     ];
 
     protected $casts = [

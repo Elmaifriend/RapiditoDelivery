@@ -3,14 +3,13 @@
 namespace App\Filament\Resources\ServiceZones\Schemas;
 
 use App\Filament\Forms\Components\PolygonMapPicker;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ToggleButtons;
-use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Filament\Support\Enums\FontFamily;
 
 class ServiceZoneForm
 {
@@ -50,29 +49,37 @@ class ServiceZoneForm
                                 Grid::make(4)
                                     ->visible(fn ($record) => $record !== null)
                                     ->schema([
-                                        TextEntry::make('bbox_min_lat')
+                                        Placeholder::make('bbox_min_lat')
                                             ->label('Min Lat')
-                                            ->state(fn ($record) => $record->bbox_min_lat)
-                                            ->fontFamily(FontFamily::Mono)
-                                            ->copyable(),
-                                        TextEntry::make('bbox_max_lat')
+                                            ->content(fn ($record) => $record?->bbox_min_lat)
+                                            ->extraAttributes([
+                                                'style' => 'font-family: monospace;',
+                                            ]),
+
+                                        Placeholder::make('bbox_max_lat')
                                             ->label('Max Lat')
-                                            ->state(fn ($record) => $record->bbox_max_lat)
-                                            ->fontFamily(FontFamily::Mono)
-                                            ->copyable(),
-                                        TextEntry::make('bbox_min_lng')
+                                            ->content(fn ($record) => $record?->bbox_max_lat)
+                                            ->extraAttributes([
+                                                'style' => 'font-family: monospace;',
+                                            ]),
+
+                                        Placeholder::make('bbox_min_lng')
                                             ->label('Min Lng')
-                                            ->state(fn ($record) => $record->bbox_min_lng)
-                                            ->fontFamily(FontFamily::Mono)
-                                            ->copyable(),
-                                        TextEntry::make('bbox_max_lng')
+                                            ->content(fn ($record) => $record?->bbox_min_lng)
+                                            ->extraAttributes([
+                                                'style' => 'font-family: monospace;',
+                                            ]),
+
+                                        Placeholder::make('bbox_max_lng')
                                             ->label('Max Lng')
-                                            ->state(fn ($record) => $record->bbox_max_lng)
-                                            ->fontFamily(FontFamily::Mono)
-                                            ->copyable(),
+                                            ->content(fn ($record) => $record?->bbox_max_lng)
+                                            ->extraAttributes([
+                                                'style' => 'font-family: monospace;',
+                                            ]),
                                     ]),
                             ]),
-                    ])->grow(true),
+                    ])
+                    ->grow(true),
 
                 Section::make('Configuración Adicional')
                     ->description('Ajusta el estatus operativo y otras configuraciones avanzadas de esta zona de servicio.')
@@ -114,9 +121,9 @@ class ServiceZoneForm
                             ->inline()
                             ->default(false),
 
-                        TextEntry::make('delivery_zones_count')
+                        Placeholder::make('delivery_zones_count')
                             ->label('Zonas de Entrega')
-                            ->state(fn ($record) => $record->deliveryZones()->count()),
+                            ->content(fn ($record) => $record?->deliveryZones()->count() ?? 0),
                     ]),
             ]);
     }

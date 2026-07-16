@@ -270,29 +270,40 @@ new #[Title('Home')] class extends Component {
     </div>
     @endif
 
+    @script
     <script>
-        document.addEventListener('livewire:navigated', () => {
-            // Evaluamos la propiedad del componente directamente de forma limpia, sin usar Eloquent aquí
-            const alreadyHasAddress = {{ $hasAddress ? 'true' : 'false' }};
+    document.addEventListener('livewire:navigated', () => {
 
-            if (alreadyHasAddress) {
-                return;
+        const alreadyHasAddress = @js($hasAddress);
+
+        if (alreadyHasAddress) {
+            return;
+        }
+
+        if (!navigator.geolocation) {
+            console.warn('Geolocation no soportada.');
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                Livewire.dispatch('locationDetected', {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude,
+                });
+            },
+            (error) => {
+                console.error('Geolocation error:', error);
+                Livewire.dispatch('locationDenied');
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 60000,
             }
+        );
 
-            if (!navigator.geolocation) return;
-
-            navigator.geolocation.getCurrentPosition(
-                function (position) {
-                    Livewire.dispatch('locationDetected', {
-                        lat: position.coords.latitude,
-                        lng: position.coords.longitude
-                    });
-                },
-                function (error) {
-                    console.log('Geolocation error:', error);
-                    Livewire.dispatch('locationDenied');
-                }
-            );
-        });
+    });
     </script>
+    @endscript
 </div>

@@ -26,15 +26,15 @@ class DatabaseSeeder extends Seeder
             ProductCategorySeeder::class,
             ProductSeeder::class,
             OptionGroupSeeder::class,
-            OrderSeeder::class,
-            OrderItemSeeder::class,
-            OrderDropoffLocationSeeder::class,
             ServiceZoneSeeder::class,
             DeliveryZoneSeeder::class,
             DeliveryZoneFareSeeder::class,
-            DeliveryAddressSeeder::class,
-            CartSeeder::class,
-            CartItemSeeder::class,
+            //DeliveryAddressSeeder::class,
+            //CartSeeder::class,
+            //CartItemSeeder::class,
+            //OrderSeeder::class,
+            //OrderItemSeeder::class,
+            //OrderDropoffLocationSeeder::class,
         ]);
     }
 }

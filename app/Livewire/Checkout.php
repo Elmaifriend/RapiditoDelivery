@@ -16,6 +16,7 @@ class Checkout extends Component
 {
     // Datos del formulario
     public string $specialInstructions = '';
+    public string $reference = ''; // Nuevo campo obligatorio requerido
     public string $paymentMethod = 'card';
     
     // Datos de tarjeta
@@ -23,28 +24,25 @@ class Checkout extends Component
     public string $cardExpiry = '';
     public string $cardCvv = '';
 
-    // Dirección seleccionada
+    // Dirección única activa para el Checkout
     public ?int $selectedAddressId = null;
 
     public function mount()
     {
-        // Pre-seleccionamos la dirección por defecto o la primera que encontremos
+        // Traemos la dirección que se acaba de guardar o confirmar obligatoriamente en el paso previo
         $defaultAddress = $this->addresses->where('is_default', true)->first() 
             ?? $this->addresses->first();
 
         if ($defaultAddress) {
             $this->selectedAddressId = $defaultAddress->id;
+            // Precargamos la referencia existente si el usuario ya tenía una guardada
+            $this->reference = $defaultAddress->reference ?? '';
         }
     }
 
     public function setPaymentMethod(string $method)
     {
         $this->paymentMethod = $method;
-    }
-
-    public function selectAddress(int $addressId)
-    {
-        $this->selectedAddressId = $addressId;
     }
 
     #[Computed]
@@ -65,22 +63,27 @@ class Checkout extends Component
     public function addresses()
     {
         $guestToken = Cookie::get('guest_token');
-
         return DeliveryAddress::where('guest_token', $guestToken)->get();
+    }
+
+    #[Computed]
+    public function currentAddress()
+    {
+        return $this->addresses->firstWhere('id', $this->selectedAddressId);
     }
 
     #[Computed]
     public function deliveryFee()
     {
-        if (!$this->cart || !$this->cart->business || !$this->selectedAddressId) {
+        if (!$this->cart || !$this->cart->business || !$this->currentAddress) {
             return null;
         }
 
         $business = $this->cart->business;
-        $address = $this->addresses->firstWhere('id', $this->selectedAddressId);
+        $address = $this->currentAddress;
 
-        if (!$business->lat || !$business->lng || !$address || !$address->lat || !$address->lng) {
-            return null; // Faltan coordenadas para calcular
+        if (!$business->lat || !$business->lng || !$address->lat || !$address->lng) {
+            return null; 
         }
 
         return app(DeliveryFeeCalculatorService::class)->calculate(
@@ -102,8 +105,22 @@ class Checkout extends Component
 
     public function confirmPayment(ConvertCartToOrderService $orderService)
     {
+        $this->validate([
+            'reference' => 'required|string|max:255',
+            'specialInstructions' => 'nullable|string|max:255',
+            'paymentMethod' => 'required|in:card,cash',
+            'cardNumber' => 'required_if:paymentMethod,card',
+            'cardExpiry' => 'required_if:paymentMethod,card',
+            'cardCvv' => 'required_if:paymentMethod,card',
+        ], [
+            'reference.required' => 'Es importante escribir una referencia para ayudar al repartidor.',
+            'cardNumber.required_if' => 'El número de tarjeta es obligatorio.',
+            'cardExpiry.required_if' => 'La fecha de expiración es obligatoria.',
+            'cardCvv.required_if' => 'El código de seguridad CVV es obligatorio.'
+        ]);
+
         $cart = $this->cart;
-        $address = $this->addresses->firstWhere('id', $this->selectedAddressId);
+        $address = $this->currentAddress;
 
         if (!$cart) {
             $this->addError('general', 'El carrito no es válido.');
@@ -111,22 +128,30 @@ class Checkout extends Component
         }
 
         if (!$address) {
-            $this->addError('address', 'Por favor selecciona una dirección de entrega.');
+            $this->addError('address', 'Por favor selecciona una dirección de entrega válida.');
             return;
         }
 
-        // Si el servicio retornó null, significa que la dirección está fuera de los polígonos
         if (is_null($this->deliveryFee)) {
             $this->addError('address', 'La dirección seleccionada está fuera de nuestra zona de cobertura.');
             return;
         }
 
-        // Actualizamos el costo exacto antes de mandar la orden a crear
+        // 1. Guardamos la nueva referencia directamente en el modelo de la dirección
+        $address->update([
+            'reference' => $this->reference,
+            'last_used_at' => now()
+        ]);
+
+        // 2. Actualizamos los totales del carrito actual
         $cart->update([
             'delivery_fee' => $this->deliveryFee,
             'total' => $this->totalAmount
         ]);
 
+        // 3. Convertimos el carrito en una Orden
+        // El ConvertCartToOrderService se encarga de instanciar la Order y transferir
+        // los campos correspondientes, incluyendo la creación del OrderDropoffLocation.
         $order = $orderService->execute(
             $cart, 
             $address, 
@@ -134,7 +159,13 @@ class Checkout extends Component
             $this->specialInstructions
         );
 
-        // return redirect()->route('orders.show', $order->id);
+        // Si tu Service no inyecta automáticamente la referencia al OrderDropoffLocation,
+        // lo actualizamos manualmente aquí para garantizar la consistencia en el modelo:
+        if ($order && method_exists($order, 'dropoffLocations')) {
+            $order->dropoffLocations()->update(['reference' => $this->reference]);
+        }
+
+        return redirect()->route('orders.show', $order->id);
     }
 
     public function render()

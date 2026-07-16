@@ -4,6 +4,7 @@ namespace App\Enums;
 
 enum OrderLifecycleStatus: string
 {
+    case PENDING = 'pending';
     case DRAFT = 'draft';
     case CONFIRMED = 'confirmed';
     case ACCEPTED_BY_RESTAURANT = 'accepted_by_restaurant';

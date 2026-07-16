@@ -19,15 +19,15 @@ class BusinessFactory extends Factory
         return [
             'name' => $name,
             'slug' => Str::slug($name),
-            "phone" => fake()->phoneNumber(),
-            "email" => fake()->email(),
-            "web_site" => fake()->url(),
+            'phone' => fake()->phoneNumber(),
+            'email' => fake()->email(),
+            'web_site' => fake()->url(),
 
             'status' => $this->faker->randomElement(['active', 'inactive']),
-            'category_id' => Category::inRandomOrder()->first()->id,
+            'category_id' => fn () => Category::inRandomOrder()->first()?->id ?? Category::factory()->create()->id,
 
             'address' => $this->faker->streetAddress(),
-            'city_id' => City::inRandomOrder()->first()->id,
+            'city_id' => fn () => City::inRandomOrder()->first()?->id ?? City::factory()->create()->id,
             'state' => $this->faker->state(),
             'postal_code' => $this->faker->postcode(),
             'country' => 'MX',

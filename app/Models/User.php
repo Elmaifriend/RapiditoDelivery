@@ -30,6 +30,7 @@ class User extends Authenticatable implements FilamentUser
         'name',
         'email',
         'password',
+        "business_id",
     ];
 
     /**
@@ -84,5 +85,10 @@ class User extends Authenticatable implements FilamentUser
     public function orders()
     {
         return $this->hasMany(Order::class);
+    }
+
+    public function business()
+    {
+        return $this->belongsTo(Business::class, 'business_id');
     }
 }

@@ -12,8 +12,9 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ToggleButtons;
+use Filament\Forms\Components\Repeater;
+use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\TextSize;
@@ -22,6 +23,8 @@ use Filament\Tables\Columns\Layout\Split;
 use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Filament\Actions\Action;
+use Filament\Schemas\Components\Group;
 
 class ProductsRelationManager extends RelationManager
 {
@@ -218,6 +221,82 @@ class ProductsRelationManager extends RelationManager
             ])
             ->filters([])
             ->headerActions([
+                // Acción consolidada y corregida
+                Action::make('manageCategories')
+                    ->label('Gestionar Categorías')
+                    ->link()
+                    ->color('gray')
+                    ->icon('heroicon-m-cog-6-tooth')
+                    ->modalWidth('lg')
+                    ->modalHeading('Gestionar Categorías de Menú')
+                    ->mountUsing(function (Schema $schema, $livewire) {
+                        // 1. Obtenemos las categorías de la base de datos
+                        $categories = $livewire->ownerRecord->productCategories()
+                            ->orderBy('name')
+                            ->get()
+                            ->map(fn ($cat) => [
+                                'id' => $cat->id,
+                                'name' => $cat->name,
+                            ])
+                            ->toArray();
+
+                        // 2. Rellenamos el schema/formulario utilizando ->fill()
+                        $schema->fill([
+                            'categories' => $categories,
+                        ]);
+                    })
+                    ->form([
+                        Repeater::make('categories')
+                            ->hiddenLabel()
+                            ->schema([
+                                TextInput::make('id')
+                                    ->hidden(),
+                                    
+                                TextInput::make('name')
+                                    ->label('Nombre de la categoría')
+                                    ->placeholder('Ej. Entradas, Bebidas...')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->columnSpan(1),
+                            ])
+                            ->columns(1)
+                            ->addActionLabel('Agregar Categoría')
+                            ->reorderable(false)
+                            ->defaultItems(0),
+                    ])
+                    ->action(function (array $data, $livewire): void {
+                        $business = $livewire->ownerRecord;
+                        
+                        $submittedIds = collect($data['categories'] ?? [])
+                            ->pluck('id')
+                            ->filter()
+                            ->toArray();
+
+                        // 1. Eliminamos las que el usuario borró en la interfaz
+                        $business->productCategories()
+                            ->whereNotIn('id', $submittedIds)
+                            ->delete();
+
+                        // 2. Insertamos las nuevas o actualizamos las existentes
+                        foreach ($data['categories'] ?? [] as $categoryData) {
+                            if (!empty($categoryData['id'])) {
+                                $business->productCategories()
+                                    ->where('id', $categoryData['id'])
+                                    ->update(['name' => $categoryData['name']]);
+                            } else {
+                                $business->productCategories()->create([
+                                    'name' => $categoryData['name'],
+                                ]);
+                            }
+                        }
+
+                        Notification::make()
+                            ->success()
+                            ->title('Categorías actualizadas')
+                            ->body('Los cambios en las categorías se han guardado correctamente.')
+                            ->send();
+                    }),
+
                 CreateAction::make()
                     ->slideOver(),
             ])

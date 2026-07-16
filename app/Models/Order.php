@@ -2,14 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use App\Enums\OrderStatus;
 use App\Enums\DeliveryStatus;
 use App\Enums\OrderLifecycleStatus;
 use App\Enums\PaymentStatus;
 use App\Enums\RestaurantDecisionStatus;
-
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class Order extends Model
 {
@@ -19,18 +17,18 @@ class Order extends Model
         'user_id',
         'business_id',
         'driver_id',
-
+        'guest_token',
+        'customer_name',
+        'customer_phone',
         'lifecycle_status',
         'business_decision_status',
         'delivery_status',
         'payment_status',
-
-        "special_instructions",
-
+        'special_instructions',
         'subtotal',
         'delivery_fee',
         'total',
-        "payment_method",
+        'payment_method',
     ];
 
     protected $casts = [
@@ -76,6 +74,6 @@ class Order extends Model
 
     public function driver()
     {
-        return $this->belongsTo(Driver::class, "driver_id");
+        return $this->belongsTo(Driver::class, 'driver_id');
     }
 }

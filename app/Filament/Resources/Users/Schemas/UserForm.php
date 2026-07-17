@@ -23,6 +23,9 @@ class UserForm
                     ->unique(ignoreRecord: true)
                     ->maxLength(255),
 
+                TextInput::make('phone')
+                    ->maxLength(255),
+
                 TextInput::make('password')
                     ->password()
                     ->dehydrateStateUsing(fn ($state) => Hash::make($state))

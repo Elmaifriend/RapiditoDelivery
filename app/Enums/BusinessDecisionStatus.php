@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-enum RestaurantDecisionStatus: string
+enum BusinessDecisionStatus: string
 {
     case PENDING = 'pending';
     case ACCEPTED = 'accepted';

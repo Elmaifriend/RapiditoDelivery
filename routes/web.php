@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Livewire\BusinessOrdersDashboard;
+use App\Livewire\CheckoutSuccess;
 
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
@@ -25,3 +26,4 @@ Route::livewire('/checkout', 'checkout')->name('checkout');
 Route::livewire('/location', 'pages::location')->name('location');
 Route::livewire('/checkout/address', 'pages::location')->name('checkout.address');
 Route::get('/kitchen/orders/{businessId}', BusinessOrdersDashboard::class)->name('kitchen.orders');
+Route::get('/checkout/success/{order}', CheckoutSuccess::class)->name('checkout.success');

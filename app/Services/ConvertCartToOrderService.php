@@ -6,33 +6,39 @@ use App\Models\Cart;
 use App\Models\Order;
 use App\Models\DeliveryAddress;
 use App\Enums\OrderLifecycleStatus;
-use App\Enums\RestaurantDecisionStatus;
+use App\Enums\BusinessDecisionStatus;
 use App\Enums\DeliveryStatus;
 use App\Enums\PaymentStatus;
+use App\Enums\PaymentMethod; // <-- Importado para tipado estricto
 use App\Enums\AddressSource;
 use Illuminate\Support\Facades\DB;
 
 class ConvertCartToOrderService
 {
     /**
-     * Convierte un carrito activo en una nueva orden.
+     * Convierte un carrito activo en una nueva orden con sus estados iniciales correspondientes.
      */
     public function execute(
         Cart $cart, 
         DeliveryAddress $address, 
-        string $paymentMethod, 
+        PaymentMethod $paymentMethod, // <-- Tipado estricto usando tu Enum
         ?string $specialInstructions = null
     ): Order {
         return DB::transaction(function () use ($cart, $address, $paymentMethod, $specialInstructions) {
             
-            // 1. Crear la Orden principal
+            // 1. Crear la Orden principal con la nueva lógica de estados independientes
             $order = Order::create([
-                'user_id' => $cart->user_id, // Soporta null para guests
+                'user_id' => $cart->user_id, // Soporta null para usuarios invitados (guests)
                 'business_id' => $cart->business_id,
-                'lifecycle_status' => OrderLifecycleStatus::DRAFT, 
-                'business_decision_status' => RestaurantDecisionStatus::PENDING,
-                'delivery_status' => DeliveryStatus::WAITING_DRIVER,
+                
+                // El cliente finalizó el checkout; la orden es real y válida en el sistema
+                'lifecycle_status' => OrderLifecycleStatus::CONFIRMED, 
+                
+                // Flujos paralelos operativos en estado inicial pendiente
+                'business_decision_status' => BusinessDecisionStatus::PENDING,
+                'delivery_status' => DeliveryStatus::PENDING,
                 'payment_status' => PaymentStatus::PENDING,
+                
                 'special_instructions' => $specialInstructions,
                 'subtotal' => $cart->subtotal,
                 'delivery_fee' => $cart->delivery_fee,
@@ -61,7 +67,7 @@ class ConvertCartToOrderService
                 'source' => $address->source ?? AddressSource::WEB,
             ]);
 
-            // 4. Marcar el carrito como convertido
+            // 4. Marcar el carrito como convertido y completado
             $cart->update([
                 'status' => 'completed', 
                 'converted_to_order' => true,

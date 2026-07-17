@@ -5,7 +5,8 @@ namespace App\Models;
 use App\Enums\DeliveryStatus;
 use App\Enums\OrderLifecycleStatus;
 use App\Enums\PaymentStatus;
-use App\Enums\RestaurantDecisionStatus;
+use App\Enums\BusinessDecisionStatus;
+use App\Enums\PaymentMethod;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -37,9 +38,10 @@ class Order extends Model
         'total' => 'decimal:2',
 
         'lifecycle_status' => OrderLifecycleStatus::class,
-        'business_decision_status' => RestaurantDecisionStatus::class,
+        'business_decision_status' => BusinessDecisionStatus::class,
         'delivery_status' => DeliveryStatus::class,
         'payment_status' => PaymentStatus::class,
+        "payment_method" => PaymentMethod::class,
     ];
 
     public function dropoffLocations()

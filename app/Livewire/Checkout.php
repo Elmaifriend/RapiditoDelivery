@@ -9,14 +9,20 @@ use App\Models\Cart;
 use App\Models\DeliveryAddress;
 use App\Services\DeliveryFeeCalculatorService;
 use App\Services\ConvertCartToOrderService;
+use App\Services\WhatsAppNotifierService; 
 use Illuminate\Support\Facades\Cookie;
+use App\Enums\PaymentMethod; // <-- Enum importado correctamente
 
 #[Title('Checkout')] 
 class Checkout extends Component 
 {
+    // Datos del cliente (NUEVO)
+    public string $customerName = '';
+    public string $customerPhone = '';
+
     // Datos del formulario
     public string $specialInstructions = '';
-    public string $reference = ''; // Nuevo campo obligatorio requerido
+    public string $reference = ''; 
     public string $paymentMethod = 'card';
     
     // Datos de tarjeta
@@ -29,6 +35,13 @@ class Checkout extends Component
 
     public function mount()
     {
+        // NUEVO: Intentar precargar datos si el usuario ya está autenticado
+        if (auth()->check()) {
+            $user = auth()->user();
+            $this->customerName = $user->name ?? '';
+            $this->customerPhone = $user->phone ?? ''; // Ajusta 'phone' si en tu BD de usuarios se llama diferente
+        }
+
         // Traemos la dirección que se acaba de guardar o confirmar obligatoriamente en el paso previo
         $defaultAddress = $this->addresses->where('is_default', true)->first() 
             ?? $this->addresses->first();
@@ -105,7 +118,10 @@ class Checkout extends Component
 
     public function confirmPayment(ConvertCartToOrderService $orderService)
     {
+        // Validamos incluyendo los nuevos campos (NUEVO)
         $this->validate([
+            'customerName' => 'required|string|max:100',
+            'customerPhone' => 'required|string|min:8|max:20', // Validación flexible de teléfono
             'reference' => 'required|string|max:255',
             'specialInstructions' => 'nullable|string|max:255',
             'paymentMethod' => 'required|in:card,cash',
@@ -113,6 +129,8 @@ class Checkout extends Component
             'cardExpiry' => 'required_if:paymentMethod,card',
             'cardCvv' => 'required_if:paymentMethod,card',
         ], [
+            'customerName.required' => 'Por favor escribe tu nombre completo para la entrega.',
+            'customerPhone.required' => 'El número de teléfono es obligatorio para contactarte.',
             'reference.required' => 'Es importante escribir una referencia para ayudar al repartidor.',
             'cardNumber.required_if' => 'El número de tarjeta es obligatorio.',
             'cardExpiry.required_if' => 'La fecha de expiración es obligatoria.',
@@ -149,23 +167,33 @@ class Checkout extends Component
             'total' => $this->totalAmount
         ]);
 
-        // 3. Convertimos el carrito en una Orden
-        // El ConvertCartToOrderService se encarga de instanciar la Order y transferir
-        // los campos correspondientes, incluyendo la creación del OrderDropoffLocation.
+        // 3. Convertimos el carrito en una Orden casteando la cadena a un Enum de PaymentMethod (CORREGIDO)
         $order = $orderService->execute(
             $cart, 
             $address, 
-            $this->paymentMethod, 
+            PaymentMethod::from($this->paymentMethod), 
             $this->specialInstructions
         );
 
-        // Si tu Service no inyecta automáticamente la referencia al OrderDropoffLocation,
-        // lo actualizamos manualmente aquí para garantizar la consistencia en el modelo:
-        if ($order && method_exists($order, 'dropoffLocations')) {
-            $order->dropoffLocations()->update(['reference' => $this->reference]);
-        }
+        if ($order) {
+            // NUEVO: Asignamos directamente los campos a la orden recién creada para que se guarden
+            $order->update([
+                'customer_name' => $this->customerName,
+                'customer_phone' => $this->customerPhone,
+            ]);
 
-        return redirect()->route('orders.show', $order->id);
+            // Si tu Service no inyecta automáticamente la referencia al OrderDropoffLocation:
+            if (method_exists($order, 'dropoffLocations')) {
+                $order->dropoffLocations()->update(['reference' => $this->reference]);
+            }
+
+            // 4. Mandar notificaciones de WhatsApp
+            $notifier = new WhatsAppNotifierService();
+            $notifier->notifyCustomerOrderCreated($order);
+            $notifier->notifyRestaurantNewOrder($order);
+
+            return redirect()->route('checkout.success', $order->id);
+        }
     }
 
     public function render()

@@ -1,5 +1,5 @@
 <?php
-
+//Legacy. Do not use
 namespace App\Enums;
 
 enum OrderStatus: string

@@ -4,7 +4,7 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use App\Models\Order;
-use App\Enums\RestaurantDecisionStatus;
+use App\Enums\BusinessDecisionStatus;
 use App\Enums\OrderLifecycleStatus;
 use App\Enums\DeliveryStatus;
 
@@ -19,29 +19,25 @@ class BusinessOrdersDashboard extends Component
     }
 
     /**
-     * PESTAÑA: POR ACEPTAR
+     * PESTAÑA: POR ACEPTAR (NUEVOS)
      * Filtra pedidos pendientes de decisión por parte del restaurante.
      */
     public function getOrdersProperty()
     {
         return Order::where('business_id', $this->businessId)
-            ->where('business_decision_status', RestaurantDecisionStatus::PENDING->value)
+            ->where('business_decision_status', BusinessDecisionStatus::PENDING)
             ->latest()
             ->get();
     }
 
     /**
-     * PESTAÑA: EN COCINA
-     * Filtra los que ya fueron aceptados pero siguen en el ciclo de preparación o listos.
+     * PESTAÑA: EN COCINA (PREPARACIÓN)
+     * Filtra los que ya fueron confirmados y están en cocina.
      */
     public function getAcceptedOrdersProperty()
     {
         return Order::where('business_id', $this->businessId)
-            ->whereIn('lifecycle_status', [
-                OrderLifecycleStatus::ACCEPTED_BY_RESTAURANT->value,
-                OrderLifecycleStatus::IN_PREPARATION->value,
-                OrderLifecycleStatus::READY->value
-            ])
+            ->where('lifecycle_status', OrderLifecycleStatus::CONFIRMED)
             ->latest()
             ->get();
     }
@@ -58,8 +54,8 @@ class BusinessOrdersDashboard extends Component
         $pedido = Order::where('business_id', $this->businessId)->findOrFail($orderId);
         
         $pedido->update([
-            'business_decision_status' => RestaurantDecisionStatus::ACCEPTED->value,
-            'lifecycle_status' => OrderLifecycleStatus::ACCEPTED_BY_RESTAURANT->value
+            'business_decision_status' => BusinessDecisionStatus::ACCEPTED,
+            'lifecycle_status' => OrderLifecycleStatus::CONFIRMED, // Al aceptar, pasa a cocina (CONFIRMED)
         ]);
         
         session()->flash('message', "Order #{$pedido->id} accepted.");
@@ -70,8 +66,8 @@ class BusinessOrdersDashboard extends Component
         $pedido = Order::where('business_id', $this->businessId)->findOrFail($orderId);
         
         $pedido->update([
-            'business_decision_status' => RestaurantDecisionStatus::REJECTED->value,
-            'lifecycle_status' => OrderLifecycleStatus::CANCELLED->value
+            'business_decision_status' => BusinessDecisionStatus::REJECTED,
+            'lifecycle_status' => OrderLifecycleStatus::CANCELLED
         ]);
     }
 
@@ -80,10 +76,7 @@ class BusinessOrdersDashboard extends Component
         $pedido = Order::where('business_id', $this->businessId)->findOrFail($orderId);
         
         $pedido->update([
-            'lifecycle_status' => OrderLifecycleStatus::IN_PREPARATION->value,
-            'delivery_status' => DeliveryStatus::WAITING_DRIVER->value
-            // Nota: Si no tienes 'driver_called_at' en tu migración, puedes usar 
-            // timestamps del sistema o manejarlo mediante el delivery_status anterior.
+            'delivery_status' => DeliveryStatus::WAITING_DRIVER
         ]);
     }
 
@@ -92,7 +85,7 @@ class BusinessOrdersDashboard extends Component
         $pedido = Order::where('business_id', $this->businessId)->findOrFail($orderId);
         
         $pedido->update([
-            'lifecycle_status' => OrderLifecycleStatus::READY->value
+            'lifecycle_status' => OrderLifecycleStatus::COMPLETED // Usamos COMPLETED que sí existe en tu Enum
         ]);
     }
 

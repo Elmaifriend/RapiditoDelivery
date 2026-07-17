@@ -1,8 +1,3 @@
-@assets
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-@endassets
-
 <div class="flex flex-col min-h-screen bg-white pb-36"
      x-data="{
         map: null,
@@ -69,6 +64,27 @@
         <p class="text-base font-bold text-gray-900 leading-snug">
             {{ $this->currentAddress?->formatted_address ?? $this->currentAddress?->address_line ?? 'Sin dirección seleccionada' }}
         </p>
+    </div>
+
+    {{-- NUEVA SECCIÓN: DATOS DE CONTACTO DE ENTREGA --}}
+    <div class="p-4 border-b border-gray-100 space-y-4">
+        <h3 class="text-xs font-black uppercase tracking-wider text-gray-400">Datos de entrega</h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-0.5">Tu Nombre Completo *</label>
+                <input type="text" wire:model.blur="customerName" placeholder="Ej. Juan Pérez"
+                    class="w-full border-0 border-b-2 border-gray-200 px-0 py-2 text-sm font-semibold text-gray-800 placeholder-gray-400 focus:ring-0 focus:border-red-500 focus:outline-none rounded-none transition-colors">
+                @error('customerName') <span class="text-xs font-bold text-red-500 mt-1 block">{{ $message }}</span> @enderror
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-0.5">Número de WhatsApp / Teléfono *</label>
+                <input type="tel" wire:model.blur="customerPhone" placeholder="Ej. 6641234567"
+                    class="w-full border-0 border-b-2 border-gray-200 px-0 py-2 text-sm font-semibold text-gray-800 placeholder-gray-400 focus:ring-0 focus:border-red-500 focus:outline-none rounded-none transition-colors">
+                @error('customerPhone') <span class="text-xs font-bold text-red-500 mt-1 block">{{ $message }}</span> @enderror
+            </div>
+        </div>
     </div>
 
     {{-- SECCIÓN 2: FORMULARIO INTEGRADO (REFERENCIAS E INSTRUCCIONES) --}}
@@ -146,7 +162,7 @@
         </div>
     @endif
 
-    {{-- FOOTER SEGURO ELEVADO EN EL AIRE (A VALOR DE BOTTOM-24 PARA SALVAR EL MENÚ MOBILE) --}}
+    {{-- FOOTER SEGURO ELEVADO EN EL AIRE --}}
     <div class="fixed bottom-24 left-0 right-0 z-40 px-4 pointer-events-none">
         <div class="max-w-md mx-auto pointer-events-auto">
             <button wire:click="confirmPayment" wire:loading.attr="disabled"

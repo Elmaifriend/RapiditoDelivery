@@ -10,7 +10,7 @@
 
     {{-- SI NO HAY PEDIDO ASIGNADO --}}
     @if(!$currentOrder)
-        <div class="bg-white px-4 pt-16 pb-12 border-b border-gray-100 text-center space-y-4 my-auto max-w-md mx-auto w-full">
+        <div wire:key="no-order-assigned" class="bg-white px-4 pt-16 pb-12 border-b border-gray-100 text-center space-y-4 my-auto max-w-md mx-auto w-full">
             <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-gray-100 text-gray-400 text-3xl">
                 <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
@@ -32,7 +32,6 @@
 
     @else
         {{-- SI HAY UN PEDIDO ASIGNADO --}}
-        
         @php
             $dropoff = $currentOrder->dropoffLocations->first();
             $restaurant = $currentOrder->business;
@@ -49,7 +48,7 @@
         @endphp
 
         {{-- CABECERA DE TAREA ACTUAL --}}
-        <div class="bg-white px-4 pt-10 pb-6 border-b border-gray-100 text-center space-y-3">
+        <div wire:key="header-order-{{ $currentOrder->id }}-{{ $currentOrder->delivery_status->value }}" class="bg-white px-4 pt-10 pb-6 border-b border-gray-100 text-center space-y-3">
             <div class="inline-block bg-gray-100 px-4 py-1.5 rounded-full">
                 <p class="text-xs font-black text-gray-700 tracking-wider uppercase">
                     Orden #{{ str_pad($currentOrder->id, 6, '0', STR_PAD_LEFT) }}
@@ -71,7 +70,11 @@
             @endif
         </div>
 
-        <div class="max-w-md mx-auto w-full space-y-4 p-4" x-data="{ step: '{{ $isHeadingToRestaurant ? 'pickup' : 'deliver' }}' }">
+        {{-- CONTENEDOR PRINCIPAL CON ALPINE Y WIRE:KEY UNIFICADO --}}
+        <div wire:key="order-container-{{ $currentOrder->id }}-{{ $currentOrder->delivery_status->value }}" 
+             class="max-w-md mx-auto w-full space-y-4 p-4" 
+             x-data="{ step: '{{ $isHeadingToRestaurant ? 'pickup' : 'deliver' }}' }"
+             x-effect="step = '{{ $isHeadingToRestaurant ? 'pickup' : 'deliver' }}'">
 
             {{-- ======================================================== --}}
             {{-- ETAPA 1: IR AL RESTAURANTE --}}
@@ -88,8 +91,8 @@
                             Restaurante de Origen
                         </h3>
                         <div>
-                            <p class="text-base font-bold text-gray-900">{{ $restaurant->name }}</p>
-                            <p class="text-xs text-gray-500 mt-0.5">{{ $restaurant->address }}</p>
+                            <p class="text-base font-bold text-gray-900">{{ $restaurant->name ?? 'Restaurante' }}</p>
+                            <p class="text-xs text-gray-500 mt-0.5">{{ $restaurant->address ?? 'Sin dirección' }}</p>
                         </div>
 
                         {{-- MINIATURA VISUAL DE MAPA PREVIEW --}}
@@ -114,7 +117,7 @@
                         </a>
                     </div>
 
-                    {{-- SLIDER IPHONE PARA REVISAR ORDEN --}}
+                    {{-- SLIDER PARA LLEGAR AL RESTAURANTE --}}
                     <div class="bg-white rounded-2xl p-4 border border-gray-100/80 space-y-2">
                         <p class="text-[10px] font-black uppercase tracking-wider text-gray-400 text-center">Desliza cuando llegues al restaurante</p>
                         
@@ -156,20 +159,25 @@
                     </div>
                 </div>
 
-                {{-- SUPERVISIÓN / CHECKLIST DE LA ORDEN EN RESTAURANTE --}}
+                {{-- CHECKLIST Y CONFIRMACIÓN DE PRODUCTOS EN RESTAURANTE --}}
                 <div x-show="step === 'checklist'" x-cloak class="space-y-4">
                     <div class="bg-white rounded-2xl p-4 border border-gray-100/80 space-y-3">
-                        <h3 class="text-[10px] font-black uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            Verificación de Productos
-                        </h3>
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-[10px] font-black uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                Verificación de Productos
+                            </h3>
+                            <button @click="step = 'pickup'" class="text-[10px] font-bold text-gray-400 hover:text-gray-600">
+                                Volver
+                            </button>
+                        </div>
 
                         <div class="divide-y divide-gray-50 border-t border-b border-gray-50">
                             @foreach($currentOrder->items as $item)
                                 <div class="py-2.5 flex items-center justify-between">
-                                    <span class="text-xs font-bold text-gray-900">{{ $item->quantity }}x {{ $item->name ?? $item->menuItem?->name }}</span>
+                                    <span class="text-xs font-bold text-gray-900">{{ $item->quantity }}x {{ $item->product->name ?? $item->name ?? 'Producto' }}</span>
                                     <span class="text-[10px] font-black text-green-600 bg-green-50 px-2 py-0.5 rounded-md">Verificado</span>
                                 </div>
                             @endforeach
@@ -194,7 +202,7 @@
                         </div>
                     </div>
 
-                    {{-- SLIDER IPHONE DE CONFIRMACIÓN DE RECOGIDA --}}
+                    {{-- SLIDER CONFIRMACIÓN DE RECOGIDA CON ACCIÓN DE LIVEWIRE --}}
                     <div class="bg-white rounded-2xl p-4 border border-gray-100/80 space-y-2">
                         <p class="text-[10px] font-black uppercase tracking-wider text-gray-400 text-center">Desliza para Iniciar Viaje al Cliente</p>
 
@@ -202,30 +210,34 @@
                             startX: 0, 
                             currentX: 0, 
                             maxSwipe: 0, 
-                            init() { this.maxSwipe = $refs.track.clientWidth - $refs.thumb.clientWidth - 8; },
-                            touchStart(e) { this.startX = e.touches[0].clientX; },
+                            completed: false,
+                            init() { this.maxSwipe = $refs.trackPickup.clientWidth - $refs.thumbPickup.clientWidth - 8; },
+                            touchStart(e) { if(!this.completed) this.startX = e.touches[0].clientX; },
                             touchMove(e) { 
+                                if(this.completed) return;
                                 let diff = e.touches[0].clientX - this.startX;
                                 if(diff > 0 && diff <= this.maxSwipe) this.currentX = diff;
                             },
                             touchEnd() {
+                                if(this.completed) return;
                                 if(this.currentX >= this.maxSwipe * 0.85) {
                                     this.currentX = this.maxSwipe;
+                                    this.completed = true;
                                     $wire.markAsPickedUp();
                                 } else {
                                     this.currentX = 0;
                                 }
                             }
                         }" class="relative select-none">
-                            <div x-ref="track" class="h-14 bg-green-600 rounded-2xl p-1 flex items-center justify-center relative overflow-hidden">
-                                <span class="text-xs font-bold text-white tracking-wider uppercase opacity-90 pointer-events-none">Confirmar Recogida &gt;&gt;</span>
-                                <div x-ref="thumb" 
+                            <div x-ref="trackPickup" class="h-14 bg-emerald-600 rounded-2xl p-1 flex items-center justify-center relative overflow-hidden">
+                                <span class="text-xs font-bold text-white tracking-wider uppercase opacity-90 pointer-events-none" x-text="completed ? 'Procesando...' : 'Confirmar Recolección >>'"></span>
+                                <div x-ref="thumbPickup" 
                                      :style="`transform: translateX(${currentX}px)`"
                                      @touchstart="touchStart" 
                                      @touchmove="touchMove" 
                                      @touchend="touchEnd"
                                      class="absolute left-1 top-1 bottom-1 w-12 bg-white rounded-xl flex items-center justify-center shadow-lg cursor-pointer transition-transform duration-75">
-                                    <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
                                     </svg>
                                 </div>
@@ -233,115 +245,106 @@
                         </div>
                     </div>
                 </div>
-
+                
             {{-- ======================================================== --}}
-            {{-- ETAPA 2: IR AL DOMICILIO DEL CLIENTE --}}
+            {{-- ETAPA 2: IR AL CLIENTE (EN DOS PASOS) --}}
             {{-- ======================================================== --}}
             @else
                 
-                <div class="space-y-4">
-                    {{-- DATOS DEL CLIENTE Y DIRECCIÓN --}}
+                {{-- PASO 2A: VISTA DE DIRECCIÓN Y NAVEGACIÓN HASTA LLEGAR AL DOMICILIO --}}
+                <div x-show="step === 'deliver'" class="space-y-4">
+                    {{-- TARJETA DEL CLIENTE --}}
                     <div class="bg-white rounded-2xl p-4 border border-gray-100/80 space-y-3">
                         <h3 class="text-[10px] font-black uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                             </svg>
-                            Cliente
+                            Punto de Entrega
                         </h3>
+
                         <div>
-                            <p class="text-base font-bold text-gray-900">{{ $currentOrder->customer_name }}</p>
-                            <p class="text-xs text-gray-500 mt-0.5">{{ $currentOrder->customer_phone }}</p>
+                            <p class="text-base font-bold text-gray-900">{{ $dropoff?->recipient_name ?? 'Cliente' }}</p>
+                            <p class="text-xs text-gray-500 mt-0.5">{{ $dropoff?->formatted_address ?? $dropoff?->address_line ?? 'Sin dirección disponible' }}</p>
                         </div>
 
-                        <div class="pt-2 border-t border-gray-50 space-y-1">
-                            <h3 class="text-[10px] font-black uppercase tracking-wider text-gray-400">Dirección de Entrega</h3>
-                            <p class="text-sm font-bold text-gray-900 leading-snug">
-                                {{ $dropoff?->formatted_address ?? $dropoff?->address_line ?? 'Dirección registrada' }}
-                            </p>
-                            @if($dropoff?->reference)
-                                <p class="text-xs text-amber-800 bg-amber-50 p-2 rounded-lg mt-1 font-medium">Ref: {{ $dropoff->reference }}</p>
-                            @endif
-                        </div>
+                        @if($dropoff?->notes)
+                            <div class="bg-amber-50 rounded-xl p-3 border border-amber-100 text-xs text-amber-800">
+                                <span class="font-bold block mb-0.5">Notas del cliente:</span>
+                                {{ $dropoff->notes }}
+                            </div>
+                        @endif
 
-                        {{-- MINIATURA VISUAL DE MAPA PREVIEW --}}
+                        {{-- MINIATURA VISUAL DE MAPA CLIENTE --}}
                         <div class="relative w-full h-32 bg-gray-100 rounded-xl overflow-hidden border border-gray-200/60 flex items-center justify-center group">
                             <div class="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] opacity-70"></div>
                             <div class="z-10 flex flex-col items-center gap-1">
                                 <div class="p-2 bg-blue-500 text-white rounded-full shadow-lg animate-bounce">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                                     </svg>
                                 </div>
-                                <span class="text-[10px] font-black text-gray-600 bg-white/90 px-2 py-0.5 rounded-md shadow-sm">Casa del Cliente</span>
+                                <span class="text-[10px] font-black text-gray-600 bg-white/90 px-2 py-0.5 rounded-md shadow-sm">Destino Cliente</span>
                             </div>
                         </div>
 
-                        {{-- LINK A GOOGLE MAPS GPS --}}
+                        {{-- LINK A GOOGLE MAPS GPS CLIENTE --}}
                         <a href="{{ $dropoffMapsUrl }}" target="_blank" class="flex items-center justify-center gap-2 w-full py-3 bg-blue-50 text-blue-600 rounded-xl font-bold text-xs border border-blue-100 hover:bg-blue-100 transition-colors">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
                             </svg>
-                            Navegar hacia el Domicilio GPS
+                            Abrir en Google Maps GPS
                         </a>
                     </div>
 
-                    {{-- RESUMEN DE COBRO Y PAGO --}}
-                    <div class="bg-white rounded-2xl p-4 border border-gray-100/80 space-y-3">
-                        <div class="flex items-center justify-between">
-                            <span class="text-[10px] font-black uppercase tracking-wider text-gray-400">Total a Cobrar</span>
-                            <span class="text-lg font-black text-red-500 font-mono">${{ number_format($currentOrder->total, 2) }}</span>
+                    {{-- RESUMEN DE LA ORDEN --}}
+                    <div class="bg-white rounded-2xl p-4 border border-gray-100/80 space-y-2">
+                        <h3 class="text-[10px] font-black uppercase tracking-wider text-gray-400">Resumen del Pedido</h3>
+                        <div class="divide-y divide-gray-50">
+                            @foreach($currentOrder->items as $item)
+                                <div class="py-1.5 flex items-center justify-between text-xs">
+                                    <span class="text-gray-700 font-medium"><strong class="text-gray-900">{{ $item->quantity }}x</strong> {{ $item->product->name ?? $item->name ?? 'Producto' }}</span>
+                                </div>
+                            @endforeach
                         </div>
-
-                        <div class="space-y-1">
-                            <label class="text-[10px] font-black uppercase tracking-wider text-gray-400">Confirmación de Cobro / Estado</label>
-                            <select wire:model="paymentOutcome" class="w-full text-xs rounded-xl border-gray-200 focus:border-gray-900 focus:ring-0 p-2.5 bg-gray-50 font-bold text-gray-800">
-                                <option value="paid_correctly">✓ Pagado y entregado correctamente</option>
-                                <option value="client_refused_payment">✕ Cliente no quiso pagar</option>
-                                <option value="client_refused_delivery">✕ Cliente rechaza el paquete</option>
-                            </select>
-                        </div>
-
-                        @if($paymentOutcome !== 'paid_correctly')
-                            <div class="space-y-1">
-                                <label class="text-[10px] font-black uppercase tracking-wider text-red-500">Motivo del Problema / Observación</label>
-                                <textarea wire:model="incidentNotes" rows="2" class="w-full text-xs rounded-xl border-red-200 focus:border-red-500 focus:ring-0 p-2.5 bg-red-50/50" placeholder="Explica brevemente qué sucedió..."></textarea>
-                            </div>
-                        @endif
                     </div>
 
-                    {{-- SLIDER IPHONE COMPLETAR ENTREGA --}}
+                    {{-- SLIDER: LLEGUÉ AL DOMICILIO (CAMBIA VISTA EN FRONTEND) --}}
                     <div class="bg-white rounded-2xl p-4 border border-gray-100/80 space-y-2">
-                        <p class="text-[10px] font-black uppercase tracking-wider text-gray-400 text-center">Desliza para Finalizar Pedido</p>
+                        <p class="text-[10px] font-black uppercase tracking-wider text-gray-400 text-center">Desliza cuando llegues con el cliente</p>
 
                         <div x-data="{ 
                             startX: 0, 
                             currentX: 0, 
                             maxSwipe: 0, 
-                            init() { this.maxSwipe = $refs.track.clientWidth - $refs.thumb.clientWidth - 8; },
-                            touchStart(e) { this.startX = e.touches[0].clientX; },
+                            completed: false,
+                            init() { this.maxSwipe = $refs.trackArrived.clientWidth - $refs.thumbArrived.clientWidth - 8; },
+                            touchStart(e) { if(!this.completed) this.startX = e.touches[0].clientX; },
                             touchMove(e) { 
+                                if(this.completed) return;
                                 let diff = e.touches[0].clientX - this.startX;
                                 if(diff > 0 && diff <= this.maxSwipe) this.currentX = diff;
                             },
                             touchEnd() {
+                                if(this.completed) return;
                                 if(this.currentX >= this.maxSwipe * 0.85) {
                                     this.currentX = this.maxSwipe;
-                                    $wire.completeDelivery();
+                                    this.completed = true;
+                                    setTimeout(() => { step = 'arrived'; }, 200);
                                 } else {
                                     this.currentX = 0;
                                 }
                             }
                         }" class="relative select-none">
-                            <div x-ref="track" class="h-14 bg-gray-900 rounded-2xl p-1 flex items-center justify-center relative overflow-hidden">
-                                <span class="text-xs font-bold text-white tracking-wider uppercase opacity-90 pointer-events-none">Finalizar Entrega &gt;&gt;</span>
-                                <div x-ref="thumb" 
+                            <div x-ref="trackArrived" class="h-14 bg-gray-900 rounded-2xl p-1 flex items-center justify-center relative overflow-hidden">
+                                <span class="text-xs font-bold text-gray-300 tracking-wider uppercase opacity-80 pointer-events-none">Llegué al Domicilio >></span>
+                                <div x-ref="thumbArrived" 
                                      :style="`transform: translateX(${currentX}px)`"
                                      @touchstart="touchStart" 
                                      @touchmove="touchMove" 
                                      @touchend="touchEnd"
                                      class="absolute left-1 top-1 bottom-1 w-12 bg-white rounded-xl flex items-center justify-center shadow-lg cursor-pointer transition-transform duration-75">
                                     <svg class="w-5 h-5 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
                                     </svg>
                                 </div>
                             </div>
@@ -349,8 +352,111 @@
                     </div>
                 </div>
 
+                {{-- PASO 2B: REGISTRO DE ESTADO DE PAGO, INCIDENCIAS Y FINALIZACIÓN --}}
+                <div x-show="step === 'arrived'" x-cloak class="space-y-4">
+                    <div class="bg-white rounded-2xl p-4 border border-gray-100/80 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-[10px] font-black uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                </svg>
+                                Confirmación de Pago y Entrega
+                            </h3>
+                            <button @click="step = 'deliver'" class="text-[10px] font-bold text-gray-400 hover:text-gray-600">
+                                Volver al Mapa
+                            </button>
+                        </div>
+
+                        {{-- Opciones de Pago / Resultado --}}
+                        <div class="space-y-1.5">
+                            <label class="text-[10px] font-black uppercase tracking-wider text-gray-400">Resultado de la entrega</label>
+                            <div class="grid grid-cols-1 gap-2">
+                                <button type="button" 
+                                        wire:click="$set('paymentOutcome', 'paid_correctly')"
+                                        class="flex items-center justify-between p-3 rounded-xl border text-xs font-bold transition-all {{ $paymentOutcome === 'paid_correctly' ? 'border-emerald-500 bg-emerald-50 text-emerald-900' : 'border-gray-200 bg-gray-50 text-gray-600' }}">
+                                    <span>✓ Pagado correctamente</span>
+                                    @if($paymentOutcome === 'paid_correctly')
+                                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                    @endif
+                                </button>
+
+                                <button type="button" 
+                                        wire:click="$set('paymentOutcome', 'client_refused_payment')"
+                                        class="flex items-center justify-between p-3 rounded-xl border text-xs font-bold transition-all {{ $paymentOutcome === 'client_refused_payment' ? 'border-amber-500 bg-amber-50 text-amber-900' : 'border-gray-200 bg-gray-50 text-gray-600' }}">
+                                    <span>⚠️ Cliente rechaza pagar</span>
+                                    @if($paymentOutcome === 'client_refused_payment')
+                                        <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                                    @endif
+                                </button>
+
+                                <button type="button" 
+                                        wire:click="$set('paymentOutcome', 'client_refused_delivery')"
+                                        class="flex items-center justify-between p-3 rounded-xl border text-xs font-bold transition-all {{ $paymentOutcome === 'client_refused_delivery' ? 'border-red-500 bg-red-50 text-red-900' : 'border-gray-200 bg-gray-50 text-gray-600' }}">
+                                    <span>✕ Cliente rechaza pedido / Devolución</span>
+                                    @if($paymentOutcome === 'client_refused_delivery')
+                                        <span class="w-2 h-2 rounded-full bg-red-500"></span>
+                                    @endif
+                                </button>
+                            </div>
+                        </div>
+
+                        {{-- Campo opcional para notas si hay alguna incidencia --}}
+                        @if($paymentOutcome !== 'paid_correctly')
+                            <div class="space-y-1 pt-1" x-transition>
+                                <label class="text-[10px] font-black uppercase tracking-wider text-amber-700">Detalle de la incidencia</label>
+                                <textarea wire:model="incidentNotes" 
+                                        rows="2" 
+                                        class="w-full text-xs rounded-xl border-amber-300 focus:border-amber-500 focus:ring-0 p-2.5 bg-amber-50/50 text-amber-900 placeholder-amber-400" 
+                                        placeholder="Describe por qué el cliente no pagó o rechazó el pedido..."></textarea>
+                            </div>
+                        @endif
+                    </div>
+
+                    {{-- SLIDER FINALIZAR ENTREGA --}}
+                    <div class="bg-white rounded-2xl p-4 border border-gray-100/80 space-y-2">
+                        <p class="text-[10px] font-black uppercase tracking-wider text-gray-400 text-center">Desliza para Finalizar Entrega</p>
+
+                        <div x-data="{ 
+                            startX: 0, 
+                            currentX: 0, 
+                            maxSwipe: 0, 
+                            completed: false,
+                            init() { this.maxSwipe = $refs.trackDeliver.clientWidth - $refs.thumbDeliver.clientWidth - 8; },
+                            touchStart(e) { if(!this.completed) this.startX = e.touches[0].clientX; },
+                            touchMove(e) { 
+                                if(this.completed) return;
+                                let diff = e.touches[0].clientX - this.startX;
+                                if(diff > 0 && diff <= this.maxSwipe) this.currentX = diff;
+                            },
+                            touchEnd() {
+                                if(this.completed) return;
+                                if(this.currentX >= this.maxSwipe * 0.85) {
+                                    this.currentX = this.maxSwipe;
+                                    this.completed = true;
+                                    $wire.completeDelivery();
+                                } else {
+                                    this.currentX = 0;
+                                }
+                            }
+                        }" class="relative select-none">
+                            <div x-ref="trackDeliver" class="h-14 bg-emerald-600 rounded-2xl p-1 flex items-center justify-center relative overflow-hidden">
+                                <span class="text-xs font-bold text-white tracking-wider uppercase opacity-90 pointer-events-none" x-text="completed ? 'Completando...' : 'Finalizar Entrega >>'"></span>
+                                <div x-ref="thumbDeliver" 
+                                     :style="`transform: translateX(${currentX}px)`"
+                                     @touchstart="touchStart" 
+                                     @touchmove="touchMove" 
+                                     @touchend="touchEnd"
+                                     class="absolute left-1 top-1 bottom-1 w-12 bg-white rounded-xl flex items-center justify-center shadow-lg cursor-pointer transition-transform duration-75">
+                                    <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             @endif
 
         </div>
-    @endif
+    @endif 
 </div>

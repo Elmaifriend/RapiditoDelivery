@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Enums\BusinessDecisionStatus;
 use App\Enums\OrderLifecycleStatus;
 use App\Services\OrderDispatchService;
+use App\Enums\DeliveryStatus;
 
 class BusinessOrdersDashboard extends Component
 {
@@ -35,7 +36,20 @@ class BusinessOrdersDashboard extends Component
     public function getAcceptedOrdersProperty()
     {
         return Order::where('business_id', $this->businessId)
+            // Filtramos para mantener los confirmados pero excluir los que ya fueron recogidos o entregados
             ->where('lifecycle_status', OrderLifecycleStatus::CONFIRMED)
+            ->whereNotIn('delivery_status', [
+                DeliveryStatus::PICKED_UP,
+                DeliveryStatus::ON_THE_WAY,
+                DeliveryStatus::DELIVERED,
+            ])
+            ->whereNotIn('business_decision_status',[
+                BusinessDecisionStatus::PENDING,
+                BusinessDecisionStatus::REJECTED,
+            ])
+            // Ordenamos: primero los que tienen delivery_status = 'pending' (aún no se llama al repartidor)
+            // UsamosorderByRaw para empujar los que ya llamaron al repartidor al final de la lista
+            ->orderByRaw("CASE WHEN delivery_status = 'pending' THEN 0 ELSE 1 END")
             ->latest()
             ->get();
     }

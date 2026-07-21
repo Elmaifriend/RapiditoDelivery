@@ -34,7 +34,8 @@ class DriverTasksManager extends Component
             return;
         }
 
-        // Buscar orden activa asignada al repartidor
+        $this->currentOrder = null;
+
         $this->currentOrder = Order::where('driver_id', $this->driver->id)
             ->whereIn('delivery_status', [
                 DeliveryStatus::DRIVER_HEADING_TO_RESTAURANT,
@@ -75,12 +76,14 @@ class DriverTasksManager extends Component
             return;
         }
 
-        if ($this->paymentOutcome !== 'paid_correctly') {
+        if ($this->paymentOutcome !== 'paid_correctly' || !empty($this->incidentNotes)) {
+            $incidentDetail = " | Incidencia Entrega: [{$this->paymentOutcome}] " . $this->incidentNotes;
             $this->currentOrder->update([
-                'special_instructions' => trim(($this->currentOrder->special_instructions ?? '') . " | Incidencia Entrega: [{$this->paymentOutcome}] " . $this->incidentNotes)
+                'special_instructions' => trim(($this->currentOrder->special_instructions ?? '') . $incidentDetail)
             ]);
         }
 
+        // Fixed method name call:
         $assignmentService->completeOrderAndPullNext($this->currentOrder);
 
         $this->reset(['paymentOutcome', 'incidentNotes']);
@@ -89,7 +92,6 @@ class DriverTasksManager extends Component
 
     public function render()
     {
-        return view('livewire.driver-tasks-manager')
-            ->layout('layouts.app');
+        return view('livewire.driver-tasks-manager');
     }
 }

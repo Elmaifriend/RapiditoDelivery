@@ -6,7 +6,7 @@ use Livewire\Component;
 use App\Models\Order;
 use App\Enums\BusinessDecisionStatus;
 use App\Enums\OrderLifecycleStatus;
-use App\Enums\DeliveryStatus;
+use App\Services\OrderDispatchService;
 
 class BusinessOrdersDashboard extends Component
 {
@@ -20,7 +20,6 @@ class BusinessOrdersDashboard extends Component
 
     /**
      * PESTAÑA: POR ACEPTAR (NUEVOS)
-     * Filtra pedidos pendientes de decisión por parte del restaurante.
      */
     public function getOrdersProperty()
     {
@@ -32,7 +31,6 @@ class BusinessOrdersDashboard extends Component
 
     /**
      * PESTAÑA: EN COCINA (PREPARACIÓN)
-     * Filtra los que ya fueron confirmados y están en cocina.
      */
     public function getAcceptedOrdersProperty()
     {
@@ -55,7 +53,7 @@ class BusinessOrdersDashboard extends Component
         
         $pedido->update([
             'business_decision_status' => BusinessDecisionStatus::ACCEPTED,
-            'lifecycle_status' => OrderLifecycleStatus::CONFIRMED, // Al aceptar, pasa a cocina (CONFIRMED)
+            'lifecycle_status' => OrderLifecycleStatus::CONFIRMED,
         ]);
         
         session()->flash('message', "Order #{$pedido->id} accepted.");
@@ -71,22 +69,17 @@ class BusinessOrdersDashboard extends Component
         ]);
     }
 
-    public function llamarRepartidor($orderId)
+    /**
+     * Dispara el servicio de asignación/despacho de repartidor.
+     */
+    public function llamarRepartidor($orderId, OrderDispatchService $dispatchService)
     {
         $pedido = Order::where('business_id', $this->businessId)->findOrFail($orderId);
         
-        $pedido->update([
-            'delivery_status' => DeliveryStatus::WAITING_DRIVER
-        ]);
-    }
+        // Ejecutamos la lógica de negocio para buscar y asignar un repartidor disponible
+        $dispatchService->dispatchOrder($pedido);
 
-    public function completarPedido($orderId)
-    {
-        $pedido = Order::where('business_id', $this->businessId)->findOrFail($orderId);
-        
-        $pedido->update([
-            'lifecycle_status' => OrderLifecycleStatus::COMPLETED // Usamos COMPLETED que sí existe en tu Enum
-        ]);
+        session()->flash('message', "Solicitud de repartidor enviada para el pedido #{$pedido->id}.");
     }
 
     public function render()

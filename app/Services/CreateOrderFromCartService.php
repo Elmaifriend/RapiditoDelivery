@@ -51,8 +51,8 @@ class CreateOrderFromCartService
                 'subtotal' => $cart->subtotal,
                 'delivery_fee' => $cart->delivery_fee,
                 'total' => $cart->total,
-            ]);
-
+            ]); 
+ 
             // 3. Duplicar la ubicación seleccionada en el Dropoff definitivo de la orden
             $order->dropoffLocations()->create([
                 'formatted_address' => $temporaryAddress->formatted_address,

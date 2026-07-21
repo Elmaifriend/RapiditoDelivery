@@ -47,7 +47,7 @@
                                         <p class="text-xs text-gray-500">Tel: {{ $pedido->customer_phone ?? 'N/A' }}</p>
                                     </div>
 
-                                    <!-- Listado de Ítems usando la relación -->
+                                    <!-- Listado de Ítems -->
                                     <div class="border-t border-b border-gray-100 py-3 my-3">
                                         <p class="text-xs font-semibold text-gray-400 mb-2 uppercase">Productos</p>
                                         <div class="space-y-1">
@@ -102,7 +102,6 @@
                                     <div class="flex justify-between items-start mb-3">
                                         <span class="text-sm font-semibold text-gray-500">ID: #{{ $pedido->id }}</span>
                                         
-                                        <!-- Badge dinámico usando el valor del Enum -->
                                         @if($pedido->lifecycle_status->value === 'accepted_by_restaurant')
                                             <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded">Aceptado</span>
                                         @elseif($pedido->lifecycle_status->value === 'in_preparation')
@@ -117,7 +116,7 @@
                                         <p class="text-xs text-gray-500">Tel: {{ $pedido->customer_phone ?? 'N/A' }}</p>
                                     </div>
 
-                                    <!-- Listado de Ítems usando la relación -->
+                                    <!-- Listado de Ítems -->
                                     <div class="border-t border-b border-gray-100 py-3 my-3">
                                         <p class="text-xs font-semibold text-gray-400 mb-2 uppercase">Productos</p>
                                         <div class="space-y-1">
@@ -142,27 +141,18 @@
                                     </div>
                                 </div>
 
-                                <div class="bg-gray-50 px-5 py-3 border-t border-gray-100 flex flex-col gap-2">
-                                    <!-- Botón para llamar repartidor si está pendiente en el delivery_status -->
+                                <!-- Acciones: Un solo botón de disparo -->
+                                <div class="bg-gray-50 px-5 py-3 border-t border-gray-100">
                                     @if($pedido->delivery_status->value === 'pending')
                                         <button 
                                             wire:click="llamarRepartidor({{ $pedido->id }})" 
                                             class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-3 rounded text-sm transition-colors shadow-sm">
-                                            Notificar / Llamar Repartidor
+                                            Llamar Repartidor
                                         </button>
                                     @else
-                                        <div class="text-center py-1 bg-indigo-50 text-indigo-700 rounded text-xs font-semibold">
+                                        <div class="text-center py-2 bg-indigo-50 text-indigo-700 rounded text-xs font-semibold border border-indigo-100">
                                             Repartidor Solicitado (Estado: {{ $pedido->delivery_status->value }})
                                         </div>
-                                    @endif
-
-                                    <!-- Botón para marcar el pedido como Listo en cocina -->
-                                    @if($pedido->lifecycle_status->value !== 'ready')
-                                        <button 
-                                            wire:click="completarPedido({{ $pedido->id }})" 
-                                            class="w-full bg-gray-800 hover:bg-gray-900 text-white font-medium py-2 px-3 rounded text-sm transition-colors mt-1">
-                                            Marcar como ¡LISTO!
-                                        </button>
                                     @endif
                                 </div>
                             </div>

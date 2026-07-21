@@ -11,8 +11,8 @@
     - Agregue el campo de telefono al resource para controlar los telefonos 
 
 ## Que no hice 
-    - Aun no he creado una estrategia para llamar a los repartidores
-    - aun no he creado un resource para gestionar los repartidores
+    - Aun no he creado una estrategia para llamar a los repartidores [DONE]
+    - aun no he creado un resource para gestionar los repartidores 
     - aun no no he creado el template de wa para los repartidores
     - aun no he creado la web app para los repartidores
     - aun no pruebo que funcione la el sistema desde la perspectiva de un repartidor

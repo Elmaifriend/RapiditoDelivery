@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Enums\DriverStatus;
 
 class Driver extends Model
 {
@@ -10,6 +11,10 @@ class Driver extends Model
         'user_id', 
         'city_id', 
         'status'
+    ];
+
+    protected $casts = [
+        'status' => DriverStatus::class,
     ];
 
     public function user()

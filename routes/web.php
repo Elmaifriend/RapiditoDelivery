@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Livewire\BusinessOrdersDashboard;
 use App\Livewire\CheckoutSuccess;
+use App\Livewire\DriverTasksManager;
 
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
@@ -27,3 +28,4 @@ Route::livewire('/location', 'pages::location')->name('location');
 Route::livewire('/checkout/address', 'pages::location')->name('checkout.address');
 Route::get('/kitchen/orders/{businessId}', BusinessOrdersDashboard::class)->name('kitchen.orders');
 Route::get('/checkout/success/{order}', CheckoutSuccess::class)->name('checkout.success');
+Route::get('/driver/{driver}', DriverTasksManager::class)->name('driver.tasks');

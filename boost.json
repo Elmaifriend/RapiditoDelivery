@@ -1,6 +1,7 @@
 {
     "agents": [
-        "gemini"
+        "opencode",
+        "antigravity"
     ],
     "cloud": false,
     "guidelines": true,
@@ -11,6 +12,7 @@
     ],
     "sail": false,
     "skills": [
+        "fortify-development",
         "laravel-best-practices",
         "fluxui-development",
         "livewire-development",

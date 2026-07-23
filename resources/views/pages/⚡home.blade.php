@@ -118,7 +118,7 @@ new #[Title('Home')] class extends Component {
                 'country' => $pais ?? 'México',
                 'lat' => $this->lat,
                 'lng' => $this->lng,
-                "source" => AddressSource::GPS,
+                'source' => AddressSource::GPS,
                 'place_id' => $result['place_id'] ?? null,
             ]
         );
@@ -155,7 +155,57 @@ new #[Title('Home')] class extends Component {
 };
 ?>
 
-<div class="flex flex-col gap-8 pt-4">
+<div class="flex flex-col gap-6 pt-3" x-data="{ showToast: false, toastTimer: null, triggerToast() { clearTimeout(this.toastTimer); this.showToast = true; this.toastTimer = setTimeout(() => { this.showToast = false; }, 3000); } }">
+
+    {{-- Banner CTA para Negocios (Optimizado para Conversión) --}}
+    <div class="px-4">
+        <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-red-600 via-orange-500 to-amber-500 p-5 text-white shadow-xl shadow-orange-500/15 transition-all hover:shadow-orange-500/25">
+            {{-- Destello difuminado decorativo en el fondo --}}
+            <div class="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-white/20 blur-2xl pointer-events-none"></div>
+            <div class="absolute -bottom-10 -left-10 h-32 w-32 rounded-full bg-black/10 blur-2xl pointer-events-none"></div>
+
+            <div class="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div class="flex items-start gap-3.5">
+                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-md text-xl shadow-inner">
+                        🚀
+                    </div>
+                    <div>
+                        <span class="inline-block px-2 py-0.5 mb-1 text-[10px] font-bold uppercase tracking-wider bg-white/20 backdrop-blur-sm rounded-full text-white/90">
+                            Únete a Rapidio
+                        </span>
+                        <h3 class="text-base font-extrabold leading-tight text-white tracking-tight">
+                            ¿Quieres vender más?
+                        </h3>
+                        <p class="text-xs text-white/85 mt-0.5 max-w-sm">
+                            Conecta tu negocio con miles de clientes cerca de ti y multiplica tus ventas hoy.
+                        </p>
+                    </div>
+                </div>
+
+                <a wire:navigate href="/register-business" 
+                   class="w-full sm:w-auto text-center shrink-0 bg-white text-gray-900 font-bold text-xs px-5 py-3 rounded-2xl shadow-lg hover:bg-gray-50 active:scale-[0.97] transition-all flex items-center justify-center gap-1.5 group">
+                    <span>Registrar mi negocio</span>
+                    <i class="bxf bx-right-arrow-alt text-base group-hover:translate-x-0.5 transition-transform"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {{-- Notificación flotante discreta --}}
+    <div 
+        x-show="showToast" 
+        x-transition:enter="transition ease-out duration-300 transform"
+        x-transition:enter-start="opacity-0 translate-y-4"
+        x-transition:enter-end="opacity-100 translate-y-0"
+        x-transition:leave="transition ease-in duration-200 transform"
+        x-transition:leave-start="opacity-100 translate-y-0"
+        x-transition:leave-end="opacity-0 translate-y-4"
+        class="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 bg-gray-900/90 backdrop-blur-md text-white text-xs font-semibold px-4 py-2.5 rounded-full shadow-lg flex items-center gap-2 border border-white/10 pointer-events-none max-w-[90%] w-auto"
+        style="display: none;"
+    >
+        <span class="text-base leading-none">✨</span>
+        <span class="truncate">Estamos sumando más opciones. Por ahora te mostramos todos los lugares disponibles.</span>
+    </div>
 
     {{-- Estado de ubicación denegada --}}
     @if($locationDenied)
@@ -192,7 +242,7 @@ new #[Title('Home')] class extends Component {
 
         <div class="no-scrollbar flex gap-8 overflow-x-auto px-4">
             @foreach($this->tags as $tag)
-            <a wire:navigate href="/tag/{{ $tag->id }}" class="flex flex-col items-center gap-1 shrink-0">
+            <button type="button" @click="triggerToast()" class="flex flex-col items-center gap-1 shrink-0 active:scale-95 transition-transform cursor-pointer">
                 <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-200 text-2xl">
                     @php
                         $icons = [
@@ -200,7 +250,6 @@ new #[Title('Home')] class extends Component {
                             'Hamburguesas' => '🍔',
                             'Pizza' => '🍕',
                             'Sushi' => '🍣',
-                            'Mariscos' => '🍤',
                             'Vegano' => '🥗',
                             'Postres' => '🍰',
                             'Café' => '☕',
@@ -211,7 +260,7 @@ new #[Title('Home')] class extends Component {
                     {{ $icons[$tag->name] ?? '🍴' }}
                 </div>
                 <span class="text-xs font-medium text-gray-600">{{ $tag->name }}</span>
-            </a>
+            </button>
             @endforeach
         </div>
     </div>

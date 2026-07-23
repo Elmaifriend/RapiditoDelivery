@@ -440,7 +440,7 @@
                             }
                         }" class="relative select-none">
                             <div x-ref="trackDeliver" class="h-14 bg-emerald-600 rounded-2xl p-1 flex items-center justify-center relative overflow-hidden">
-                                <span class="text-xs font-bold text-white tracking-wider uppercase opacity-90 pointer-events-none" x-text="completed ? 'Completando...' : 'Finalizar Entrega >>'"></span>
+                                <span class="text-xs font-bold text-white tracking-wider uppercase opacity-90 pointer-events-none" x-text="completed ? 'Finalizando...' : 'Finalizar Entrega >>'"></span>
                                 <div x-ref="thumbDeliver" 
                                      :style="`transform: translateX(${currentX}px)`"
                                      @touchstart="touchStart" 
@@ -458,5 +458,6 @@
             @endif
 
         </div>
-    @endif 
+    @endif
+
 </div>

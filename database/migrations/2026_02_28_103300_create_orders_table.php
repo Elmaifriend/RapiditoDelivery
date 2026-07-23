@@ -26,6 +26,8 @@ return new class extends Migration
             $table->string('business_decision_status');
             $table->string('delivery_status')->nullable(); // <-- Corrección del error crítico
             $table->string('payment_status');
+            $table->string('delivery_outcome')->nullable();
+            $table->text('delivery_notes')->nullable();
             
             // Detalles y montos
             $table->text('special_instructions')->nullable();

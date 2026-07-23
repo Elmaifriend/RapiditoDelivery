@@ -9,7 +9,7 @@
 ## Que no hice 
     - aun no he creado un resource para gestionar los repartidores 
     - aun no no he creado el template de wa para los repartidores
-    - aun no he borrado la tabla / migracion user_busines
+    - aun no he borrado la tabla / migracion user_busines [DONE]
     - aun no agrego el selector de lada +52, +1, etc en /checkout
     - aun no agrego un campo para registrar si hubo algun incidente con el cliete en el modelo order
     - al terminar una entrega orderLifeCycle -> completed, payment status = paid ( si si pago )

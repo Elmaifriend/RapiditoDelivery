@@ -7,6 +7,7 @@ use App\Enums\OrderLifecycleStatus;
 use App\Enums\PaymentStatus;
 use App\Enums\BusinessDecisionStatus;
 use App\Enums\PaymentMethod;
+use App\Enums\DeliveryOutcome;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -25,6 +26,8 @@ class Order extends Model
         'business_decision_status',
         'delivery_status',
         'payment_status',
+        'delivery_outcome',
+        'delivery_notes',
         'special_instructions',
         'subtotal',
         'delivery_fee',
@@ -36,12 +39,12 @@ class Order extends Model
         'subtotal' => 'decimal:2',
         'delivery_fee' => 'decimal:2',
         'total' => 'decimal:2',
-
         'lifecycle_status' => OrderLifecycleStatus::class,
         'business_decision_status' => BusinessDecisionStatus::class,
         'delivery_status' => DeliveryStatus::class,
         'payment_status' => PaymentStatus::class,
         "payment_method" => PaymentMethod::class,
+        'delivery_outcome' => DeliveryOutcome::class,
     ];
 
     public function dropoffLocations()

@@ -6,6 +6,7 @@ use Livewire\Component;
 use App\Models\Order;
 use App\Models\Driver;
 use App\Enums\DeliveryStatus;
+use App\Enums\DeliveryOutcome;
 use App\Services\DriverAssignmentService;
 
 class DriverTasksManager extends Component
@@ -18,7 +19,7 @@ class DriverTasksManager extends Component
     public string $driverNotes = '';
 
     // Campos de confirmación de entrega
-    public string $paymentOutcome = 'paid_correctly';
+    public string $paymentOutcome = DeliveryOutcome::PAID_CORRECTLY->value;
     public string $incidentNotes = '';
 
     public function mount(Driver $driver): void
@@ -33,8 +34,6 @@ class DriverTasksManager extends Component
             $this->currentOrder = null;
             return;
         }
-
-        $this->currentOrder = null;
 
         $this->currentOrder = Order::where('driver_id', $this->driver->id)
             ->whereIn('delivery_status', [
@@ -55,9 +54,10 @@ class DriverTasksManager extends Component
             return;
         }
 
+        // Si el repartidor dejó notas al recoger el paquete
         if (!empty($this->driverNotes)) {
             $this->currentOrder->update([
-                'special_instructions' => trim(($this->currentOrder->special_instructions ?? '') . " | Nota Driver: " . $this->driverNotes)
+                'delivery_notes' => trim(($this->currentOrder->delivery_notes ?? '') . " | Recogida: " . $this->driverNotes)
             ]);
         }
 
@@ -76,15 +76,19 @@ class DriverTasksManager extends Component
             return;
         }
 
-        if ($this->paymentOutcome !== 'paid_correctly' || !empty($this->incidentNotes)) {
-            $incidentDetail = " | Incidencia Entrega: [{$this->paymentOutcome}] " . $this->incidentNotes;
-            $this->currentOrder->update([
-                'special_instructions' => trim(($this->currentOrder->special_instructions ?? '') . $incidentDetail)
-            ]);
-        }
+        // Convertir el string del formulario al Enum
+        $outcome = DeliveryOutcome::tryFrom($this->paymentOutcome) ?? DeliveryOutcome::PAID_CORRECTLY;
 
-        // Fixed method name call:
-        $assignmentService->completeOrderAndPullNext($this->currentOrder);
+        // Guardar las notas e incidentes en la orden si existen
+        $this->currentOrder->update([
+            'delivery_outcome' => $outcome,
+            'delivery_notes'   => !empty($this->incidentNotes) 
+                ? trim(($this->currentOrder->delivery_notes ?? '') . " | Entrega: " . $this->incidentNotes)
+                : $this->currentOrder->delivery_notes,
+        ]);
+
+        // Delegar el cierre de la orden y la reasignación al servicio
+        $assignmentService->completeOrderAndPullNext($this->currentOrder, $outcome);
 
         $this->reset(['paymentOutcome', 'incidentNotes']);
         $this->loadActiveOrder();

@@ -15,6 +15,7 @@ class OrderDropoffLocation extends Model
         'formatted_address',
         'address_line',
         'reference',
+        'delivery_instructions',
         'source',
         'city',
         'state',

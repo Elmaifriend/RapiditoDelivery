@@ -11,19 +11,22 @@ use App\Services\DeliveryFeeCalculatorService;
 use App\Services\ConvertCartToOrderService;
 use App\Services\WhatsAppNotifierService; 
 use Illuminate\Support\Facades\Cookie;
-use App\Enums\PaymentMethod; // <-- Enum importado correctamente
+use App\Enums\PaymentMethod;
+use App\Enums\CountryCode;
 
 #[Title('Checkout')] 
 class Checkout extends Component 
 {
-    // Datos del cliente (NUEVO)
+    // Datos del cliente
     public string $customerName = '';
+    public string $countryCode = 'MX'; // Lada por defecto
     public string $customerPhone = '';
 
     // Datos del formulario
-    public string $specialInstructions = '';
+    public string $specialInstructions = ''; // Para la cocina (ej: sin cebolla)
+    public string $deliveryInstructions = ''; // Para el repartidor (ej: tocar timbre B)
     public string $reference = ''; 
-    public string $paymentMethod = 'card';
+    public string $paymentMethod = 'cash';
     
     // Datos de tarjeta
     public string $cardNumber = '';
@@ -35,22 +38,37 @@ class Checkout extends Component
 
     public function mount()
     {
-        // NUEVO: Intentar precargar datos si el usuario ya está autenticado
         if (auth()->check()) {
             $user = auth()->user();
             $this->customerName = $user->name ?? '';
-            $this->customerPhone = $user->phone ?? ''; // Ajusta 'phone' si en tu BD de usuarios se llama diferente
+            
+            // Si el usuario tiene teléfono guardado, intentamos extraer la lada si existe
+            if (!empty($user->phone)) {
+                $this->parsePhoneNumber($user->phone);
+            }
         }
 
-        // Traemos la dirección que se acaba de guardar o confirmar obligatoriamente en el paso previo
         $defaultAddress = $this->addresses->where('is_default', true)->first() 
             ?? $this->addresses->first();
 
         if ($defaultAddress) {
             $this->selectedAddressId = $defaultAddress->id;
-            // Precargamos la referencia existente si el usuario ya tenía una guardada
             $this->reference = $defaultAddress->reference ?? '';
         }
+    }
+
+    private function parsePhoneNumber(string $phone)
+    {
+        // Intenta separar el prefijo si ya viene guardado con lada (ej: +526641234567)
+        foreach (CountryCode::cases() as $code) {
+            $dial = $code->dialCode();
+            if (str_starts_with($phone, $dial)) {
+                $this->countryCode = $code->name;
+                $this->customerPhone = substr($phone, strlen($dial));
+                return;
+            }
+        }
+        $this->customerPhone = $phone;
     }
 
     public function setPaymentMethod(string $method)
@@ -118,11 +136,12 @@ class Checkout extends Component
 
     public function confirmPayment(ConvertCartToOrderService $orderService)
     {
-        // Validamos incluyendo los nuevos campos (NUEVO)
         $this->validate([
             'customerName' => 'required|string|max:100',
-            'customerPhone' => 'required|string|min:8|max:20', // Validación flexible de teléfono
+            'countryCode' => 'required|in:' . implode(',', array_column(CountryCode::cases(), 'name')),
+            'customerPhone' => 'required|string|min:7|max:15',
             'reference' => 'required|string|max:255',
+            'deliveryInstructions' => 'nullable|string|max:255',
             'specialInstructions' => 'nullable|string|max:255',
             'paymentMethod' => 'required|in:card,cash',
             'cardNumber' => 'required_if:paymentMethod,card',
@@ -131,6 +150,7 @@ class Checkout extends Component
         ], [
             'customerName.required' => 'Por favor escribe tu nombre completo para la entrega.',
             'customerPhone.required' => 'El número de teléfono es obligatorio para contactarte.',
+            'customerPhone.min' => 'El teléfono ingresado es muy corto.',
             'reference.required' => 'Es importante escribir una referencia para ayudar al repartidor.',
             'cardNumber.required_if' => 'El número de tarjeta es obligatorio.',
             'cardExpiry.required_if' => 'La fecha de expiración es obligatoria.',
@@ -155,6 +175,10 @@ class Checkout extends Component
             return;
         }
 
+        // Armamos el número completo con su lada internacional
+        $selectedEnum = CountryCode::fromName($this->countryCode) ?? CountryCode::MX;
+        $fullPhoneNumber = $selectedEnum->dialCode() . preg_replace('/\D/', '', $this->customerPhone);
+
         // 1. Guardamos la nueva referencia directamente en el modelo de la dirección
         $address->update([
             'reference' => $this->reference,
@@ -167,7 +191,7 @@ class Checkout extends Component
             'total' => $this->totalAmount
         ]);
 
-        // 3. Convertimos el carrito en una Orden casteando la cadena a un Enum de PaymentMethod (CORREGIDO)
+        // 3. Convertimos el carrito en una Orden (specialInstructions pasa al restaurante/cocina)
         $order = $orderService->execute(
             $cart, 
             $address, 
@@ -176,15 +200,17 @@ class Checkout extends Component
         );
 
         if ($order) {
-            // NUEVO: Asignamos directamente los campos a la orden recién creada para que se guarden
             $order->update([
                 'customer_name' => $this->customerName,
-                'customer_phone' => $this->customerPhone,
+                'customer_phone' => $fullPhoneNumber,
             ]);
 
-            // Si tu Service no inyecta automáticamente la referencia al OrderDropoffLocation:
+            // Guardamos las referencias e instrucciones de entrega en la tabla 'order_dropoff_locations'
             if (method_exists($order, 'dropoffLocations')) {
-                $order->dropoffLocations()->update(['reference' => $this->reference]);
+                $order->dropoffLocations()->update([
+                    'reference' => $this->reference,
+                    'delivery_instructions' => $this->deliveryInstructions,
+                ]);
             }
 
             // 4. Mandar notificaciones de WhatsApp

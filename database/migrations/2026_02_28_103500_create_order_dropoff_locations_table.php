@@ -14,6 +14,7 @@ return new class extends Migration
             $table->string('formatted_address')->nullable();
             $table->string('address_line')->nullable();
             $table->string('reference')->nullable();
+            $table->text('delivery_instructions')->nullable();
             $table->string('source')->default('WEB'); 
             $table->string('city')->nullable();
             $table->string('state')->nullable();

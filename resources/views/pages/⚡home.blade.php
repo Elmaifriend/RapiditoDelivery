@@ -159,7 +159,7 @@ new #[Title('Home')] class extends Component {
         triggerToast() {
             clearTimeout(this.toastTimer);
             this.showToast = true;
-            this.toastTimer = setTimeout(() => { this.showToast = false; }, 3000);
+            this.toastTimer = setTimeout(() => { this.showToast = false; }, 5000);
         }
     }"
 >
@@ -198,21 +198,19 @@ new #[Title('Home')] class extends Component {
         </div>
     </div>
 
-    {{-- Notificación flotante discreta --}}
     <div
-        class="pointer-events-none fixed bottom-20 left-1/2 z-50 flex w-auto max-w-[90%] -translate-x-1/2 items-center gap-2 rounded-full border border-white/10 bg-gray-900/90 px-4 py-2.5 text-xs font-semibold text-white shadow-lg backdrop-blur-md"
+        class="pointer-events-none fixed bottom-26 left-1/2 z-50 flex w-[90%] max-w-sm -translate-x-1/2 items-start gap-3 rounded-2xl bg-white p-4 text-xs font-semibold text-white shadow-xl backdrop-blur-md"
         style="display: none;"
         x-show="showToast"
-        x-transition:enter="transition ease-out duration-300 transform"
-        x-transition:enter-start="opacity-0 translate-y-4"
-        x-transition:enter-end="opacity-100 translate-y-0"
-        x-transition:leave="transition ease-in duration-200 transform"
-        x-transition:leave-start="opacity-100 translate-y-0"
-        x-transition:leave-end="opacity-0 translate-y-4"
+        x-transition
     >
-        <span class="text-base leading-none">✨</span>
-        <span class="truncate">Estamos sumando más opciones. Por ahora te mostramos todos los lugares
-            disponibles.</span>
+        <span class="text-lg leading-none mt-0.5">🚀</span>
+        <div class="flex flex-col gap-1 text-left">
+            <p class="font-bold text-gray-800 text-xs">¡Estamos creciendo!</p>
+            <p class="text-[11px] font-normal leading-relaxed text-gray-400">
+                Pocos restaurantes en esta zona para filtrar. ¡Recomiéndanos para crecer más rápido!
+            </p>
+        </div>
     </div>
 
     {{-- Estado de ubicación denegada --}}
@@ -252,30 +250,32 @@ new #[Title('Home')] class extends Component {
                 <h2 class="font-bold text-gray-800">Explorar por categorías</h2>
             </div>
 
-            <div class="no-scrollbar flex gap-8 overflow-x-auto px-4">
+            <div class="no-scrollbar grid grid-flow-col auto-cols-[78px] justify-items-center gap-4 overflow-x-auto px-4">
                 @foreach ($this->tags as $tag)
+                    @php
+                        $categories = [
+                            'Tacos' => ['icon' => '🌮', 'bg' => 'bg-amber-50 text-amber-700 border-amber-200/50'],
+                            'Hamburguesas' => ['icon' => '🍔', 'bg' => 'bg-orange-50 text-orange-700 border-orange-200/50'],
+                            'Pizza' => ['icon' => '🍕', 'bg' => 'bg-red-50 text-red-700 border-red-200/50'],
+                            'Sushi' => ['icon' => '🍣', 'bg' => 'bg-rose-50 text-rose-700 border-rose-200/50'],
+                            'Mariscos' => ['icon' => '🍤', 'bg' => 'bg-cyan-50 text-cyan-700 border-cyan-200/50'],
+                            'Vegano' => ['icon' => '🥗', 'bg' => 'bg-emerald-50 text-emerald-700 border-emerald-200/50'],
+                            'Postres' => ['icon' => '🍰', 'bg' => 'bg-pink-50 text-pink-700 border-pink-200/50'],
+                            'Café' => ['icon' => '☕', 'bg' => 'bg-amber-100 text-amber-900 border-amber-200'],
+                            'Alitas' => ['icon' => '🍗', 'bg' => 'bg-yellow-50 text-yellow-800 border-yellow-200/50'],
+                            'Desayunos' => ['icon' => '🍳', 'bg' => 'bg-blue-50 text-blue-700 border-blue-200/50'],
+                        ];
+                        $cat = $categories[$tag->name] ?? ['icon' => '🍴', 'bg' => 'bg-gray-50 text-gray-700 border-gray-200/50'];
+                    @endphp
                     <button
-                        class="flex shrink-0 cursor-pointer flex-col items-center gap-1 transition-transform active:scale-95"
+                        class="flex shrink-0 cursor-pointer flex-col items-center gap-2 transition-all active:scale-90"
                         type="button"
-                        @click="triggerToast()"
+                        x-on:click="triggerToast()"
                     >
-                        <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-200 text-2xl">
-                            @php
-                                $icons = [
-                                    'Tacos' => '🌮',
-                                    'Hamburguesas' => '🍔',
-                                    'Pizza' => '🍕',
-                                    'Sushi' => '🍣',
-                                    'Vegano' => '🥗',
-                                    'Postres' => '🍰',
-                                    'Café' => '☕',
-                                    'Alitas' => '🍗',
-                                    'Desayunos' => '🍳',
-                                ];
-                            @endphp
-                            {{ $icons[$tag->name] ?? '🍴' }}
+                        <div class="flex h-16 w-16 items-center justify-center rounded-2xl border text-3xl shadow-sm {{ $cat['bg'] }}">
+                            {{ $cat['icon'] }}
                         </div>
-                        <span class="text-xs font-medium text-gray-600">{{ $tag->name }}</span>
+                        <span class="text-[12px] font-semibold text-gray-700">{{ $tag->name }}</span>
                     </button>
                 @endforeach
             </div>

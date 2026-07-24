@@ -24,15 +24,12 @@ new #[Title('Buscar Dirección')] class extends Component {
         $userId = auth()->id();
 
         // Buscamos si ya existe una dirección previa
-        $existingAddress = DeliveryAddress::where(function ($query) use ($guestToken, $userId) {
-            if ($userId) {
-                $query->where('user_id', $userId);
-            } else if ($guestToken) {
-                $query->where('guest_token', $guestToken);
-            } else {
-                $query->whereRaw('1 = 0'); // Query vacía si no hay identificadores
-            }
-        })->latest('last_used_at')->first();
+        $existingAddress = null;
+        if ($userId) {
+            $existingAddress = DeliveryAddress::where('user_id', $userId)->latest('last_used_at')->first();
+        } elseif ($guestToken) {
+            $existingAddress = DeliveryAddress::where('guest_token', $guestToken)->latest('last_used_at')->first();
+        }
 
         // Si existe, hacemos el prefill de las propiedades de Livewire
         if ($existingAddress) {
@@ -92,17 +89,35 @@ new #[Title('Buscar Dirección')] class extends Component {
         $estado = $this->extractComponent($components, ['administrative_area_level_1']);
         $pais = $this->extractComponent($components, ['country']);
 
+        $userId = auth()->id();
+
+        $existingAddress = null;
+        if ($userId) {
+            $existingAddress = DeliveryAddress::where('user_id', $userId)->latest('last_used_at')->first();
+        } elseif ($guestToken) {
+            $existingAddress = DeliveryAddress::where('guest_token', $guestToken)->latest('last_used_at')->first();
+        }
+
+        $ciudad = $ciudad ?: $existingAddress?->city;
+        $estado = $estado ?: $existingAddress?->state;
+        $pais = $pais ?: ($existingAddress?->country ?? 'México');
+
+        if (!$ciudad || !$estado) {
+            $this->addError('location', 'No se pudo determinar la ciudad o estado. Por favor, selecciona otro punto en el mapa o busca una dirección.');
+            return;
+        }
+
+        $addressLine = null;
         if (!empty($components)) {
             $addressLine = trim(($calle ? $calle : '') . ' ' . ($numero ? $numero : ''));
             if ($colonia) {
                 $addressLine = trim($addressLine . ', ' . $colonia);
             }
-        } else {
-            // Si le dio guardar a la dirección cargada por defecto sin mover el mapa
-            $addressLine = $this->formattedAddress;
         }
 
-        $userId = auth()->id();
+        if (empty($addressLine)) {
+            $addressLine = $existingAddress?->address_line ?? $this->formattedAddress;
+        }
 
         DeliveryAddress::updateOrCreate(
             [
@@ -153,6 +168,9 @@ new #[Title('Buscar Dirección')] class extends Component {
         init() {
             this.initLeaflet();
             this.initGooglePlaces();
+            if (!this.$wire.lat) {
+                this.locateMe();
+            }
         },
 
         initLeaflet() {
@@ -163,14 +181,15 @@ new #[Title('Buscar Dirección')] class extends Component {
                 container._leaflet_id = null;
             }
 
-            // Leemos si ya viene una ubicación asignada desde el mount de Livewire
-            const startLat = this.$wire.lat ? this.$wire.lat : 32.5149;
-            const startLng = this.$wire.lng ? this.$wire.lng : -117.0382;
+            // Leemos si ya viene una ubicación asignada desde el mount de Livewire o centramos en México a nivel macro
+            const startLat = this.$wire.lat ? this.$wire.lat : 23.6345;
+            const startLng = this.$wire.lng ? this.$wire.lng : -102.5528;
+            const zoomLevel = this.$wire.lat ? 16 : 5;
 
             this.map = L.map('map', {
                 zoomControl: false,
                 attributionControl: false
-            }).setView([startLat, startLng], 16);
+            }).setView([startLat, startLng], zoomLevel);
 
             L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
                 maxZoom: 20

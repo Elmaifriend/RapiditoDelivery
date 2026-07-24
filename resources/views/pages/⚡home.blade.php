@@ -28,21 +28,28 @@ new #[Title('Home')] class extends Component {
     public function mount()
     {
         $guestToken = request()->cookie('guest_token');
+        $userId = auth()->id();
 
-        if ($guestToken) {
-            $address = DeliveryAddress::where('guest_token', $guestToken)->latest()->first();
+        $address = null;
+        if ($userId) {
+            $address = DeliveryAddress::where('user_id', $userId)->latest('last_used_at')->first();
+        } elseif ($guestToken) {
+            $address = DeliveryAddress::where('guest_token', $guestToken)->latest('last_used_at')->first();
+        }
 
-            if ($address && $address->lat && $address->lng) {
-                $this->lat = $address->lat;
-                $this->lng = $address->lng;
-                $this->hasAddress = true;
-                $this->resolveServiceZone();
-            }
+        if ($address && $address->lat && $address->lng) {
+            $this->lat = $address->lat;
+            $this->lng = $address->lng;
+            $this->hasAddress = true;
+            $this->resolveServiceZone();
         }
     }
 
     public function handleDenied()
     {
+        if ($this->hasAddress) {
+            return;
+        }
         $this->locationDenied = true;
         $this->noService = false;
         $this->city = null;
@@ -163,41 +170,6 @@ new #[Title('Home')] class extends Component {
         }
     }"
 >
-
-    <div class="px-4">
-        <div
-            class="rounded-4xl bg-linear-to-tr relative overflow-hidden border border-white/20 from-orange-400 via-red-500 to-rose-600 p-6 text-white shadow-2xl shadow-rose-500/25">
-            <div class="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-white/25 blur-xl"></div>
-            <div class="pointer-events-none absolute -bottom-10 -left-10 h-32 w-32 rounded-full bg-yellow-400/25 blur-xl"></div>
-
-            <div class="relative z-10 flex flex-col gap-4">
-                <span
-                    class="inline-flex items-center gap-1.5 self-start rounded-full border border-white/10 bg-white/20 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm"
-                >
-                    <i class="bxf bx-store-alt text-xs"></i> Unete a Rapidito
-                </span>
-
-                <div>
-                    <h3 class="text-2xl font-black leading-tight tracking-tight text-white drop-shadow-sm">
-                        ¿Quieres vender más?
-                    </h3>
-                    <p class="mt-1 max-w-sm text-xs leading-relaxed text-white/90">
-                        Conecta con miles de clientes locales y multiplica tus ventas de inmediato.
-                    </p>
-                </div>
-
-                <a
-                    class="group flex w-full select-none items-center justify-center gap-2 rounded-2xl bg-white py-3.5 text-center text-xs font-bold text-red-600 shadow-xl shadow-rose-950/10 transition-all active:scale-90 active:bg-rose-50"
-                    href="https://wa.me/5216647921114?text=Hola!%20Quiero%20registrar%20mi%20negocio%20y%20aumentar%20mis%20ventas%20con%20Rapidito!"
-                    wire:navigate
-                >
-                    <span>Registrar mi negocio</span>
-                    <i class="bxf bx-right-arrow-alt text-base transition-transform group-hover:translate-x-1"></i>
-                </a>
-            </div>
-        </div>
-    </div>
-
     <div
         class="pointer-events-none fixed bottom-26 left-1/2 z-50 flex w-[90%] max-w-sm -translate-x-1/2 items-start gap-3 rounded-2xl bg-white p-4 text-xs font-semibold text-white shadow-xl backdrop-blur-md"
         style="display: none;"
@@ -245,6 +217,40 @@ new #[Title('Home')] class extends Component {
 
         {{-- Hay ciudad y cobertura --}}
     @elseif($city)
+    <div class="px-4">
+        <div
+            class="rounded-4xl bg-linear-to-tr relative overflow-hidden border border-white/20 from-orange-400 via-red-500 to-rose-600 p-6 text-white shadow-2xl shadow-rose-500/25">
+            <div class="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-white/25 blur-xl"></div>
+            <div class="pointer-events-none absolute -bottom-10 -left-10 h-32 w-32 rounded-full bg-yellow-400/25 blur-xl"></div>
+
+            <div class="relative z-10 flex flex-col gap-4">
+                <span
+                    class="inline-flex items-center gap-1.5 self-start rounded-full border border-white/10 bg-white/20 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm"
+                >
+                    <i class="bxf bx-store-alt text-xs"></i> Unete a Rapidito
+                </span>
+
+                <div>
+                    <h3 class="text-2xl font-black leading-tight tracking-tight text-white drop-shadow-sm">
+                        ¿Quieres vender más?
+                    </h3>
+                    <p class="mt-1 max-w-sm text-xs leading-relaxed text-white/90">
+                        Conecta con miles de clientes locales y multiplica tus ventas de inmediato.
+                    </p>
+                </div>
+
+                <a
+                    class="group flex w-full select-none items-center justify-center gap-2 rounded-2xl bg-white py-3.5 text-center text-xs font-bold text-red-600 shadow-xl shadow-rose-950/10 transition-all active:scale-90 active:bg-rose-50"
+                    href="https://wa.me/5216647921114?text=Hola!%20Quiero%20registrar%20mi%20negocio%20y%20aumentar%20mis%20ventas%20con%20Rapidito!"
+                    wire:navigate
+                >
+                    <span>Registrar mi negocio</span>
+                    <i class="bxf bx-right-arrow-alt text-base transition-transform group-hover:translate-x-1"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    
         <div class="flex w-full flex-col gap-2">
             <div class="flex items-center justify-between px-4">
                 <h2 class="font-bold text-gray-800">Explorar por categorías</h2>

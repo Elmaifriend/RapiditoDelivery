@@ -60,7 +60,7 @@ new class extends Component {
     </a>
 
     <a class="flex items-end flex-col gap-1 text-gray-500 max-w-1/2" wire:navigate href="/location">
-        <span class="text-xl flex items-center gap-1 justify-end font-bold text-gray-800">
+        <span class="text-lg text-end flex items-center gap-1 justify-end font-semibold text-gray-800">
             {{ $cityText }}
             <i class="bxf bx-location text-red-400"></i>
         </span>

@@ -175,7 +175,7 @@
 
     <div class="shadow-xs flex flex-col gap-4 rounded-2xl border border-amber-100/60 bg-amber-50/40 p-4">
         <h3 class="flex items-center gap-1.5 text-sm font-bold text-amber-800">
-            <i class="fas fa-utensils text-xs"></i> Indicaciones para la cocina
+            <i class="bxf bx-restaurant text-xs"></i> Indicaciones para la cocina
         </h3>
 
         <div class="space-y-1.5">
@@ -205,7 +205,7 @@
                 wire:click="setPaymentMethod('cash')"
             >
                 <i
-                    class="fas fa-money-bill-wave {{ $paymentMethod === 'cash' ? 'text-emerald-500' : 'text-gray-400' }} text-base"></i>
+                    class="bxf bx-money {{ $paymentMethod === 'cash' ? 'text-emerald-500' : 'text-gray-400' }} text-base"></i>
                 <span>Efectivo</span>
             </button>
 
@@ -215,7 +215,7 @@
                 wire:click="setPaymentMethod('card')"
             >
                 <i
-                    class="fas fa-credit-card {{ $paymentMethod === 'card' ? 'text-blue-500' : 'text-gray-400' }} text-base"></i>
+                    class="bxf bx-credit-card {{ $paymentMethod === 'card' ? 'text-blue-500' : 'text-gray-400' }} text-base"></i>
                 <span>Tarjeta</span>
             </button>
         </div>
@@ -281,12 +281,12 @@
         >
             <div class="flex items-center gap-2 text-sm tracking-wide">
                 <i
-                    class="fas fa-lock text-xs"
+                    class="bxf bx-lock-alt text-xs"
                     wire:loading.remove
                     wire:target="confirmPayment"
                 ></i>
                 <i
-                    class="fas fa-spinner fa-spin text-xs"
+                    class="bxf bx-loader-alt animate-spin text-xs"
                     wire:loading
                     wire:target="confirmPayment"
                 ></i>
@@ -302,7 +302,7 @@
 
             <div class="flex items-center gap-1 font-mono text-sm font-bold">
                 <span>${{ number_format($this->totalAmount, 2) }}</span>
-                <i class="fas fa-chevron-right text-xs opacity-80"></i>
+                <i class="bxf bx-chevron-right text-xs opacity-80"></i>
             </div>
         </button>
     </div>

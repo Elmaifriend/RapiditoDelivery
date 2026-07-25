@@ -1,32 +1,30 @@
-<div class="flex flex-col min-h-screen bg-gray-50/50 pb-20">
+<div class="flex flex-col pb-8">
 
     {{-- CABECERA / IDENTIFICADOR DEL REPARTIDOR --}}
-    <div class="bg-gray-900 text-white px-4 py-2 text-center text-xs font-semibold flex items-center justify-between">
-        <span class="truncate">Panel Repartidor: <strong class="text-green-400">{{ $driver->name ?? 'ID #'.$driver->id }}</strong></span>
-        <span class="inline-flex items-center gap-1 bg-gray-800 px-2 py-0.5 rounded text-[10px] text-gray-300">
-            <span class="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span> Activo
+    <div class="bg-white text-gray-800 px-4 py-3.5 text-center text-xs font-semibold flex items-center justify-between shadow-xs border-b border-gray-100">
+        <span class="truncate">Panel Repartidor: <strong class="text-red-500">{{ $driver->name ?? 'ID #'.$driver->id }}</strong></span>
+        <span class="inline-flex items-center gap-1 bg-red-50 text-red-500 px-2.5 py-1 rounded-lg text-[10px] font-bold">
+            <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span> Activo
         </span>
     </div>
 
     {{-- SI NO HAY PEDIDO ASIGNADO --}}
     @if(!$currentOrder)
-        <div wire:key="no-order-assigned" class="bg-white px-4 pt-16 pb-12 border-b border-gray-100 text-center space-y-4 my-auto max-w-md mx-auto w-full">
-            <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-gray-100 text-gray-400 text-3xl">
-                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
-                </svg>
+        <div wire:key="no-order-assigned" class="bg-white p-8 rounded-3xl border border-gray-100 text-center space-y-4 my-auto max-w-md mx-4 md:mx-auto w-auto shadow-xs">
+            <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-gray-50 text-gray-400 text-3xl">
+                <i class="bxf bx-package text-4xl text-gray-300"></i>
             </div>
             
             <div class="space-y-1">
-                <h1 class="text-xl font-black tracking-tight text-gray-900">No hay pedidos en este momento</h1>
-                <p class="text-xs text-gray-500 max-w-xs mx-auto leading-relaxed">
+                <h1 class="text-xl font-bold tracking-tight text-gray-900">No hay pedidos en este momento</h1>
+                <p class="text-xs text-gray-500 max-w-xs mx-auto leading-relaxed font-semibold">
                     Estás en línea y disponible. Tan pronto como un restaurante marque una orden lista, se te asignará automáticamente.
                 </p>
             </div>
 
-            <div class="inline-flex items-center gap-2 bg-green-50 px-3 py-1.5 rounded-full border border-green-100">
+            <div class="inline-flex items-center gap-2 bg-green-50 px-3.5 py-1.5 rounded-full border border-green-100">
                 <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                <span class="text-[10px] font-black uppercase tracking-wider text-green-700">Esperando tareas...</span>
+                <span class="text-[10px] font-bold uppercase tracking-wider text-green-700">Esperando tareas...</span>
             </div>
         </div>
 
@@ -49,20 +47,20 @@
 
         {{-- CABECERA DE TAREA ACTUAL --}}
         <div wire:key="header-order-{{ $currentOrder->id }}-{{ $currentOrder->delivery_status->value }}" class="bg-white px-4 pt-10 pb-6 border-b border-gray-100 text-center space-y-3">
-            <div class="inline-block bg-gray-100 px-4 py-1.5 rounded-full">
-                <p class="text-xs font-black text-gray-700 tracking-wider uppercase">
+            <div class="inline-block bg-gray-50 border border-gray-100 px-4 py-1.5 rounded-full">
+                <p class="text-xs font-bold text-gray-700 tracking-wider uppercase">
                     Orden #{{ str_pad($currentOrder->id, 6, '0', STR_PAD_LEFT) }}
                 </p>
             </div>
 
             @if($isHeadingToRestaurant)
-                <h1 class="text-2xl font-black tracking-tight text-gray-900">Ve a recoger este pedido</h1>
+                <h1 class="text-2xl font-bold tracking-tight text-gray-900">Ve a recoger este pedido</h1>
                 <p class="text-xs font-bold text-amber-600 flex items-center justify-center gap-1.5">
                     <span class="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
                     Paso 1: Dirígete al Restaurante
                 </p>
             @else
-                <h1 class="text-2xl font-black tracking-tight text-gray-900">Entrega este pedido</h1>
+                <h1 class="text-2xl font-bold tracking-tight text-gray-900">Entrega este pedido</h1>
                 <p class="text-xs font-bold text-blue-600 flex items-center justify-center gap-1.5">
                     <span class="w-2 h-2 rounded-full bg-blue-500 animate-ping"></span>
                     Paso 2: En trayecto al cliente
@@ -83,57 +81,87 @@
                 
                 {{-- VISTA DE DIRECCIÓN DEL RESTAURANTE + MAPA --}}
                 <div x-show="step === 'pickup'" class="space-y-4">
-                    <div class="bg-white rounded-2xl p-4 border border-gray-100/80 space-y-3">
-                        <h3 class="text-[10px] font-black uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                            </svg>
+                    <div class="flex flex-col gap-4 shadow-xs rounded-2xl border border-gray-100/50 bg-white p-5">
+                        <h3 class="text-xs font-bold text-gray-900 flex items-center gap-1.5">
+                            <i class="bxf bx-store-alt text-base text-gray-400"></i>
                             Restaurante de Origen
                         </h3>
                         <div>
-                            <p class="text-base font-bold text-gray-900">{{ $restaurant->name ?? 'Restaurante' }}</p>
-                            <p class="text-xs text-gray-500 mt-0.5">{{ $restaurant->address ?? 'Sin dirección' }}</p>
+                            <p class="text-sm font-extrabold text-gray-800 leading-snug">{{ $restaurant->name ?? 'Restaurante' }}</p>
+                            <p class="text-xs font-semibold text-gray-500 mt-1">{{ $restaurant->address ?? 'Sin dirección' }}</p>
                         </div>
 
-                        {{-- MINIATURA VISUAL DE MAPA PREVIEW --}}
-                        <div class="relative w-full h-32 bg-gray-100 rounded-xl overflow-hidden border border-gray-200/60 flex items-center justify-center group">
-                            <div class="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] opacity-70"></div>
-                            <div class="z-10 flex flex-col items-center gap-1">
-                                <div class="p-2 bg-red-500 text-white rounded-full shadow-lg animate-bounce">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                        {{-- MAPA DEL RESTAURANTE --}}
+                        <div class="relative w-full h-40 bg-gray-50 rounded-2xl overflow-hidden border border-gray-100 shadow-xs">
+                            <div 
+                                x-init="
+                                    $nextTick(() => {
+                                        const map = L.map($el, {
+                                            zoomControl: false,
+                                            attributionControl: false,
+                                            dragging: false,
+                                            scrollWheelZoom: false,
+                                            touchZoom: false,
+                                            doubleClickZoom: false
+                                        }).setView([{{ $restaurant->lat ?? 32.5149 }}, {{ $restaurant->lng ?? -117.0382 }}], 14);
+
+                                        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                                            maxZoom: 20
+                                        }).addTo(map);
+                                    })
+                                "
+                                class="absolute inset-0 z-0 h-full w-full outline-none"
+                                wire:ignore
+                            ></div>
+
+                            <div class="pointer-events-none absolute left-1/2 top-1/2 z-10 flex -translate-x-1/2 -translate-y-[90%] flex-col items-center">
+                                <div class="relative">
+                                    <svg class="drop-shadow-2xl" width="50" height="60" viewBox="0 0 50 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M25 0C11.1929 0 0 11.1929 0 25C0 39.5 25 60 25 60C25 60 50 39.5 50 25C50 11.1929 38.8071 0 25 0Z" fill="#e7000b" />
+                                        <circle cx="25" cy="24" r="18" fill="white" />
                                     </svg>
+                                    <div class="absolute left-[13px] top-[12px]">
+                                        <i class="bxf bx-carrot text-2xl text-red-600"></i>
+                                    </div>
                                 </div>
-                                <span class="text-[10px] font-black text-gray-600 bg-white/90 px-2 py-0.5 rounded-md shadow-sm">Destino Restaurante</span>
                             </div>
                         </div>
 
                         {{-- LINK A GOOGLE MAPS GPS --}}
-                        <a href="{{ $restaurantMapsUrl }}" target="_blank" class="flex items-center justify-center gap-2 w-full py-3 bg-blue-50 text-blue-600 rounded-xl font-bold text-xs border border-blue-100 hover:bg-blue-100 transition-colors">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
-                            </svg>
+                        <a href="{{ $restaurantMapsUrl }}" target="_blank" class="flex items-center justify-center gap-2 w-full py-3 bg-red-50 text-red-500 rounded-2xl font-bold text-xs border border-red-100 hover:bg-red-100 transition-colors cursor-pointer">
+                            <i class="bxf bx-navigation text-base"></i>
                             Abrir en Google Maps GPS
                         </a>
                     </div>
 
                     {{-- SLIDER PARA LLEGAR AL RESTAURANTE --}}
-                    <div class="bg-white rounded-2xl p-4 border border-gray-100/80 space-y-2">
-                        <p class="text-[10px] font-black uppercase tracking-wider text-gray-400 text-center">Desliza cuando llegues al restaurante</p>
+                    <div class="flex flex-col gap-4 shadow-xs rounded-2xl border border-gray-100/50 bg-white p-5">
+                        <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400 text-center">Desliza cuando llegues al restaurante</p>
                         
                         <div x-data="{ 
                             startX: 0, 
                             currentX: 0, 
                             maxSwipe: 0, 
                             completed: false,
-                            init() { this.maxSwipe = $refs.track.clientWidth - $refs.thumb.clientWidth - 8; },
-                            touchStart(e) { this.startX = e.touches[0].clientX; },
-                            touchMove(e) { 
-                                let diff = e.touches[0].clientX - this.startX;
-                                if(diff > 0 && diff <= this.maxSwipe) this.currentX = diff;
+                            isDragging: false,
+                            dragStart(e) {
+                                if (this.completed) return;
+                                this.maxSwipe = this.$refs.track.clientWidth - this.$refs.thumb.clientWidth - 8; 
+                                this.isDragging = true;
+                                this.startX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
                             },
-                            touchEnd() {
-                                if(this.currentX >= this.maxSwipe * 0.85) {
+                            dragMove(e) {
+                                if (!this.isDragging || this.completed) return;
+                                const x = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
+                                let diff = x - this.startX;
+                                if (diff < 0) diff = 0;
+                                if (diff > this.maxSwipe) diff = this.maxSwipe;
+                                this.currentX = diff;
+                            },
+                            dragEnd() {
+                                if (!this.isDragging || this.completed) return;
+                                this.isDragging = false;
+                                if (this.currentX >= this.maxSwipe * 0.85) {
                                     this.currentX = this.maxSwipe;
                                     this.completed = true;
                                     setTimeout(() => { step = 'checklist'; }, 200);
@@ -141,18 +169,32 @@
                                     this.currentX = 0;
                                 }
                             }
-                        }" class="relative select-none">
-                            <div x-ref="track" class="h-14 bg-gray-900 rounded-2xl p-1 flex items-center justify-center relative overflow-hidden">
-                                <span class="text-xs font-bold text-gray-300 tracking-wider uppercase opacity-80 pointer-events-none">Llegué al Restaurante &gt;&gt;</span>
-                                <div x-ref="thumb" 
+                        }" 
+                        x-on:reset-pickup-slider.window="currentX = 0; completed = false; isDragging = false;"
+                        class="relative select-none">
+                            <div 
+                                x-ref="track" 
+                                @mousemove="dragMove"
+                                @mouseup="dragEnd"
+                                @mouseleave="dragEnd"
+                                @touchmove.prevent="dragMove"
+                                @touchend="dragEnd"
+                                class="h-14 bg-red-500 rounded-2xl p-1 flex items-center justify-center relative overflow-hidden shadow-inner"
+                            >
+                                <span 
+                                    :style="`opacity: ${maxSwipe > 0 ? 1 - (currentX / maxSwipe) : 1}; filter: blur(${maxSwipe > 0 ? (currentX / maxSwipe) * 4 : 0}px)`"
+                                    class="text-xs font-bold text-white tracking-wider uppercase opacity-90 pointer-events-none transition-all duration-75"
+                                >
+                                    Llegué al Restaurante &gt;&gt;
+                                </span>
+                                <div 
+                                     x-ref="thumb" 
                                      :style="`transform: translateX(${currentX}px)`"
-                                     @touchstart="touchStart" 
-                                     @touchmove="touchMove" 
-                                     @touchend="touchEnd"
-                                     class="absolute left-1 top-1 bottom-1 w-12 bg-white rounded-xl flex items-center justify-center shadow-lg cursor-pointer transition-transform duration-75">
-                                    <svg class="w-5 h-5 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-                                    </svg>
+                                     @mousedown="dragStart"
+                                     @touchstart="dragStart"
+                                     class="absolute left-1 top-1 bottom-1 w-12 bg-white rounded-xl flex items-center justify-center shadow-lg cursor-pointer transition-transform duration-75"
+                                >
+                                    <i class="bxf bx-chevron-right text-xl text-red-500"></i>
                                 </div>
                             </div>
                         </div>
@@ -160,67 +202,90 @@
                 </div>
 
                 {{-- CHECKLIST Y CONFIRMACIÓN DE PRODUCTOS EN RESTAURANTE --}}
-                <div x-show="step === 'checklist'" x-cloak class="space-y-4">
-                    <div class="bg-white rounded-2xl p-4 border border-gray-100/80 space-y-3">
+                <div x-show="step === 'checklist'" x-cloak x-data="{ checkedItems: {} }" class="space-y-4">
+                    <div class="flex flex-col gap-4 shadow-xs rounded-2xl border border-gray-100/50 bg-white p-5">
                         <div class="flex items-center justify-between">
-                            <h3 class="text-[10px] font-black uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
+                            <h3 class="text-xs font-bold text-gray-900 flex items-center gap-1.5">
+                                <i class="bxf bx-list-check text-base text-gray-400"></i>
                                 Verificación de Productos
                             </h3>
-                            <button @click="step = 'pickup'" class="text-[10px] font-bold text-gray-400 hover:text-gray-600">
+                            <button @click="step = 'pickup'; $dispatch('reset-pickup-slider')" class="text-[10px] font-bold text-red-500 hover:text-red-600 bg-red-50 px-2 py-1 rounded-lg cursor-pointer">
                                 Volver
                             </button>
                         </div>
 
-                        <div class="divide-y divide-gray-50 border-t border-b border-gray-50">
-                            @foreach($currentOrder->items as $item)
-                                <div class="py-2.5 flex items-center justify-between">
-                                    <span class="text-xs font-bold text-gray-900">{{ $item->quantity }}x {{ $item->product->name ?? $item->name ?? 'Producto' }}</span>
-                                    <span class="text-[10px] font-black text-green-600 bg-green-50 px-2 py-0.5 rounded-md">Verificado</span>
+                        <div class="divide-y divide-gray-100 border-t border-b border-gray-100 py-1">
+                            @foreach($currentOrder->items as $index => $item)
+                                <div 
+                                    @click="checkedItems[{{ $index }}] = !checkedItems[{{ $index }}]"
+                                    class="py-2.5 flex items-center justify-between cursor-pointer select-none active:bg-gray-50 transition-all px-2 -mx-2 rounded-xl"
+                                >
+                                    <span class="text-xs font-semibold text-gray-800 flex items-center gap-2">
+                                        <i 
+                                            class="bxf text-lg transition-all"
+                                            :class="checkedItems[{{ $index }}] ? 'bx-check-square text-emerald-600' : 'bx-checkbox text-gray-400'"
+                                        ></i>
+                                        <span>
+                                            <strong class="font-bold text-gray-900 bg-gray-200/50 px-1.5 py-0.5 rounded mr-1.5">{{ $item->quantity }}x</strong> 
+                                            {{ $item->product_name_snapshot }}
+                                        </span>
+                                    </span>
+                                    <span 
+                                        class="text-[10px] font-bold transition-all px-2.5 py-1 rounded-lg"
+                                        :class="checkedItems[{{ $index }}] ? 'text-green-600 bg-green-50' : 'text-gray-400 bg-gray-100'"
+                                        x-text="checkedItems[{{ $index }}] ? 'Listo' : 'Pendiente'"
+                                    ></span>
                                 </div>
                             @endforeach
                         </div>
 
                         {{-- REPORTES DEL CONDUCTOR --}}
                         <div class="space-y-2 pt-1">
-                            <label class="text-[10px] font-black uppercase tracking-wider text-gray-400">¿Todo está en orden?</label>
+                            <label class="text-[10px] font-bold uppercase tracking-wider text-gray-400">¿Todo está en orden?</label>
                             <div class="flex gap-2">
-                                <button type="button" @click="$wire.set('allItemsCorrect', true)" :class="$wire.allItemsCorrect ? 'bg-green-500 text-white' : 'bg-gray-100 text-gray-600'" class="flex-1 py-2 rounded-xl font-bold text-xs transition-colors">
+                                <button type="button" @click="$wire.set('allItemsCorrect', true)" :class="$wire.allItemsCorrect ? 'bg-emerald-600 text-white shadow-xs' : 'bg-gray-50 border border-gray-100 text-gray-600'" class="flex-1 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer">
                                     ✓ Todo Correcto
                                 </button>
-                                <button type="button" @click="$wire.set('allItemsCorrect', false)" :class="!$wire.allItemsCorrect ? 'bg-red-500 text-white' : 'bg-gray-100 text-gray-600'" class="flex-1 py-2 rounded-xl font-bold text-xs transition-colors">
+                                <button type="button" @click="$wire.set('allItemsCorrect', false)" :class="!$wire.allItemsCorrect ? 'bg-red-500 text-white shadow-xs' : 'bg-gray-50 border border-gray-100 text-gray-600'" class="flex-1 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer">
                                     ✕ Falta algo / Detalle
                                 </button>
                             </div>
                         </div>
 
-                        <div class="space-y-1">
-                            <label class="text-[10px] font-black uppercase tracking-wider text-gray-400">Notas / Comentarios adicionales</label>
-                            <textarea wire:model="driverNotes" rows="2" class="w-full text-xs rounded-xl border-gray-200 focus:border-gray-900 focus:ring-0 p-2.5 bg-gray-50" placeholder="Escribe aquí si hubo algún detalle con el empaque o producto..."></textarea>
+                        <div class="space-y-1.5">
+                            <label class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Notas / Comentarios adicionales</label>
+                            <textarea wire:model="driverNotes" rows="4" class="w-full text-xs rounded-2xl border border-gray-100 focus:border-red-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-red-500/10 p-3 bg-gray-50 text-gray-800 placeholder-gray-400 transition-all font-semibold" placeholder="Escribe aquí si hubo algún detalle con el empaque o producto..."></textarea>
                         </div>
                     </div>
 
                     {{-- SLIDER CONFIRMACIÓN DE RECOGIDA CON ACCIÓN DE LIVEWIRE --}}
-                    <div class="bg-white rounded-2xl p-4 border border-gray-100/80 space-y-2">
-                        <p class="text-[10px] font-black uppercase tracking-wider text-gray-400 text-center">Desliza para Iniciar Viaje al Cliente</p>
+                    <div class="flex flex-col gap-4 shadow-xs rounded-2xl border border-gray-100/50 bg-white p-5">
+                        <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400 text-center">Desliza para Iniciar Viaje al Cliente</p>
 
                         <div x-data="{ 
                             startX: 0, 
                             currentX: 0, 
                             maxSwipe: 0, 
                             completed: false,
-                            init() { this.maxSwipe = $refs.trackPickup.clientWidth - $refs.thumbPickup.clientWidth - 8; },
-                            touchStart(e) { if(!this.completed) this.startX = e.touches[0].clientX; },
-                            touchMove(e) { 
-                                if(this.completed) return;
-                                let diff = e.touches[0].clientX - this.startX;
-                                if(diff > 0 && diff <= this.maxSwipe) this.currentX = diff;
+                            isDragging: false,
+                            dragStart(e) {
+                                if (this.completed) return;
+                                this.maxSwipe = this.$refs.track.clientWidth - this.$refs.thumb.clientWidth - 8; 
+                                this.isDragging = true;
+                                this.startX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
                             },
-                            touchEnd() {
-                                if(this.completed) return;
-                                if(this.currentX >= this.maxSwipe * 0.85) {
+                            dragMove(e) {
+                                if (!this.isDragging || this.completed) return;
+                                const x = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
+                                let diff = x - this.startX;
+                                if (diff < 0) diff = 0;
+                                if (diff > this.maxSwipe) diff = this.maxSwipe;
+                                this.currentX = diff;
+                            },
+                            dragEnd() {
+                                if (!this.isDragging || this.completed) return;
+                                this.isDragging = false;
+                                if (this.currentX >= this.maxSwipe * 0.85) {
                                     this.currentX = this.maxSwipe;
                                     this.completed = true;
                                     $wire.markAsPickedUp();
@@ -229,17 +294,28 @@
                                 }
                             }
                         }" class="relative select-none">
-                            <div x-ref="trackPickup" class="h-14 bg-emerald-600 rounded-2xl p-1 flex items-center justify-center relative overflow-hidden">
-                                <span class="text-xs font-bold text-white tracking-wider uppercase opacity-90 pointer-events-none" x-text="completed ? 'Procesando...' : 'Confirmar Recolección >>'"></span>
-                                <div x-ref="thumbPickup" 
+                            <div 
+                                x-ref="track" 
+                                @mousemove="dragMove"
+                                @mouseup="dragEnd"
+                                @mouseleave="dragEnd"
+                                @touchmove.prevent="dragMove"
+                                @touchend="dragEnd"
+                                class="h-14 bg-emerald-600 rounded-2xl p-1 flex items-center justify-center relative overflow-hidden shadow-inner"
+                            >
+                                <span 
+                                    :style="`opacity: ${maxSwipe > 0 ? 1 - (currentX / maxSwipe) : 1}; filter: blur(${maxSwipe > 0 ? (currentX / maxSwipe) * 4 : 0}px)`"
+                                    class="text-xs font-bold text-white tracking-wider uppercase opacity-90 pointer-events-none transition-all duration-75"
+                                    x-text="completed ? 'Procesando...' : 'Confirmar Recolección >>'"
+                                ></span>
+                                <div 
+                                     x-ref="thumb" 
                                      :style="`transform: translateX(${currentX}px)`"
-                                     @touchstart="touchStart" 
-                                     @touchmove="touchMove" 
-                                     @touchend="touchEnd"
-                                     class="absolute left-1 top-1 bottom-1 w-12 bg-white rounded-xl flex items-center justify-center shadow-lg cursor-pointer transition-transform duration-75">
-                                    <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
-                                    </svg>
+                                     @mousedown="dragStart"
+                                     @touchstart="dragStart"
+                                     class="absolute left-1 top-1 bottom-1 w-12 bg-white rounded-xl flex items-center justify-center shadow-lg cursor-pointer transition-transform duration-75"
+                                >
+                                    <i class="bxf bx-chevron-right text-xl text-emerald-600"></i>
                                 </div>
                             </div>
                         </div>
@@ -254,79 +330,161 @@
                 {{-- PASO 2A: VISTA DE DIRECCIÓN Y NAVEGACIÓN HASTA LLEGAR AL DOMICILIO --}}
                 <div x-show="step === 'deliver'" class="space-y-4">
                     {{-- TARJETA DEL CLIENTE --}}
-                    <div class="bg-white rounded-2xl p-4 border border-gray-100/80 space-y-3">
-                        <h3 class="text-[10px] font-black uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                            </svg>
-                            Punto de Entrega
-                        </h3>
-
-                        <div>
-                            <p class="text-base font-bold text-gray-900">{{ $dropoff?->recipient_name ?? 'Cliente' }}</p>
-                            <p class="text-xs text-gray-500 mt-0.5">{{ $dropoff?->formatted_address ?? $dropoff?->address_line ?? 'Sin dirección disponible' }}</p>
+                    <div class="flex flex-col gap-4 shadow-xs rounded-2xl border border-gray-100/50 bg-white p-5">
+                        <div class="flex justify-between items-start gap-4">
+                            <div>
+                                <h3 class="text-xs font-bold text-gray-900 flex items-center gap-1.5 mb-1.5">
+                                    <i class="bxf bx-user text-base text-gray-400"></i>
+                                    Punto de Entrega
+                                </h3>
+                                <p class="text-sm font-extrabold text-gray-800 leading-snug">{{ $currentOrder->customer_name ?? 'Cliente' }}</p>
+                                <p class="text-xs font-semibold text-gray-500 mt-1 leading-snug">{{ $dropoff?->formatted_address ?? $dropoff?->address_line ?? 'Sin dirección disponible' }}</p>
+                            </div>
+                            @if($currentOrder->customer_phone)
+                                <a href="tel:{{ $currentOrder->customer_phone }}" class="shrink-0 flex items-center gap-1 text-xs font-bold text-red-500 bg-red-50 px-2.5 py-1.5 rounded-xl hover:bg-red-100 transition-colors active:scale-95">
+                                    <i class="bxf bx-phone text-sm"></i>
+                                    Llamar
+                                </a>
+                            @endif
                         </div>
 
-                        @if($dropoff?->notes)
-                            <div class="bg-amber-50 rounded-xl p-3 border border-amber-100 text-xs text-amber-800">
-                                <span class="font-bold block mb-0.5">Notas del cliente:</span>
-                                {{ $dropoff->notes }}
+                        @if($dropoff?->reference)
+                            <div class="bg-amber-50 rounded-2xl p-3 border border-amber-100 text-xs text-amber-800 font-semibold leading-relaxed">
+                                <span class="font-bold block mb-0.5">Referencias de entrega:</span>
+                                {{ $dropoff->reference }}
                             </div>
                         @endif
 
-                        {{-- MINIATURA VISUAL DE MAPA CLIENTE --}}
-                        <div class="relative w-full h-32 bg-gray-100 rounded-xl overflow-hidden border border-gray-200/60 flex items-center justify-center group">
-                            <div class="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] opacity-70"></div>
-                            <div class="z-10 flex flex-col items-center gap-1">
-                                <div class="p-2 bg-blue-500 text-white rounded-full shadow-lg animate-bounce">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                        @if($dropoff?->delivery_instructions)
+                            <div class="bg-blue-50 rounded-2xl p-3 border border-blue-100 text-xs text-blue-800 font-semibold leading-relaxed">
+                                <span class="font-bold block mb-0.5">Indicaciones para el repartidor:</span>
+                                {{ $dropoff->delivery_instructions }}
+                            </div>
+                        @endif
+
+                        {{-- MAPA DEL CLIENTE --}}
+                        <div class="relative w-full h-40 bg-gray-50 rounded-2xl overflow-hidden border border-gray-100 shadow-xs">
+                            <div 
+                                x-init="
+                                    $nextTick(() => {
+                                        const map = L.map($el, {
+                                            zoomControl: false,
+                                            attributionControl: false,
+                                            dragging: false,
+                                            scrollWheelZoom: false,
+                                            touchZoom: false,
+                                            doubleClickZoom: false
+                                        }).setView([{{ $dropoff->lat ?? 32.5149 }}, {{ $dropoff->lng ?? -117.0382 }}], 14);
+
+                                        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                                            maxZoom: 20
+                                        }).addTo(map);
+                                    })
+                                "
+                                class="absolute inset-0 z-0 h-full w-full outline-none"
+                                wire:ignore
+                            ></div>
+
+                            <div class="pointer-events-none absolute left-1/2 top-1/2 z-10 flex -translate-x-1/2 -translate-y-[90%] flex-col items-center">
+                                <div class="relative">
+                                    <svg class="drop-shadow-2xl" width="50" height="60" viewBox="0 0 50 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M25 0C11.1929 0 0 11.1929 0 25C0 39.5 25 60 25 60C25 60 50 39.5 50 25C50 11.1929 38.8071 0 25 0Z" fill="#e7000b" />
+                                        <circle cx="25" cy="24" r="18" fill="white" />
                                     </svg>
+                                    <div class="absolute left-[13px] top-[12px]">
+                                        <i class="bxf bx-carrot text-2xl text-red-600"></i>
+                                    </div>
                                 </div>
-                                <span class="text-[10px] font-black text-gray-600 bg-white/90 px-2 py-0.5 rounded-md shadow-sm">Destino Cliente</span>
                             </div>
                         </div>
 
                         {{-- LINK A GOOGLE MAPS GPS CLIENTE --}}
-                        <a href="{{ $dropoffMapsUrl }}" target="_blank" class="flex items-center justify-center gap-2 w-full py-3 bg-blue-50 text-blue-600 rounded-xl font-bold text-xs border border-blue-100 hover:bg-blue-100 transition-colors">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
-                            </svg>
+                        <a href="{{ $dropoffMapsUrl }}" target="_blank" class="flex items-center justify-center gap-2 w-full py-3 bg-red-50 text-red-500 rounded-2xl font-bold text-xs border border-red-100 hover:bg-red-100 transition-colors cursor-pointer">
+                            <i class="bxf bx-navigation text-base"></i>
                             Abrir en Google Maps GPS
                         </a>
                     </div>
 
                     {{-- RESUMEN DE LA ORDEN --}}
-                    <div class="bg-white rounded-2xl p-4 border border-gray-100/80 space-y-2">
-                        <h3 class="text-[10px] font-black uppercase tracking-wider text-gray-400">Resumen del Pedido</h3>
-                        <div class="divide-y divide-gray-50">
+                    <div class="flex flex-col gap-4 shadow-xs rounded-2xl border border-gray-100/50 bg-white p-5">
+                        <div class="flex justify-between items-center border-b border-gray-100 pb-3">
+                            <h3 class="text-xs font-bold text-gray-900 flex items-center gap-1.5">
+                                <i class="bxf bx-receipt text-base text-gray-400"></i>
+                                Resumen del Pedido
+                            </h3>
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-green-600 bg-green-50 px-2.5 py-1 rounded-full">
+                                {{ $currentOrder->payment_method->value === 'card' ? 'Tarjeta' : 'Efectivo' }}
+                            </span>
+                        </div>
+
+                        <div>
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Tienda de origen</p>
+                            <p class="text-sm font-extrabold text-gray-800 mt-1">{{ $restaurant->name ?? 'Restaurante' }}</p>
+                        </div>
+
+                        <div class="divide-y divide-gray-100 border-t border-b border-gray-100 py-1">
                             @foreach($currentOrder->items as $item)
-                                <div class="py-1.5 flex items-center justify-between text-xs">
-                                    <span class="text-gray-700 font-medium"><strong class="text-gray-900">{{ $item->quantity }}x</strong> {{ $item->product->name ?? $item->name ?? 'Producto' }}</span>
+                                <div class="py-2 flex items-center justify-between text-xs">
+                                    <span class="text-gray-800 font-semibold">
+                                        <strong class="font-bold text-gray-900 bg-gray-200/50 px-1.5 py-0.5 rounded mr-1.5">{{ $item->quantity }}x</strong> 
+                                        {{ $item->product_name_snapshot }}
+                                    </span>
+                                    <span class="font-bold text-gray-700 font-mono">${{ number_format($item->subtotal, 2) }}</span>
                                 </div>
                             @endforeach
+                        </div>
+
+                        @if($currentOrder->special_instructions)
+                            <div class="bg-gray-50 border border-gray-100 rounded-2xl p-3 text-xs text-gray-700 font-semibold">
+                                <span class="font-bold text-gray-500 block mb-0.5">Indicaciones de cocina:</span>
+                                {{ $currentOrder->special_instructions }}
+                            </div>
+                        @endif
+
+                        <div class="space-y-2 pt-1">
+                            <div class="flex justify-between text-xs font-semibold text-gray-500">
+                                <span>Subtotal</span>
+                                <span class="font-mono text-gray-700">${{ number_format($currentOrder->subtotal, 2) }}</span>
+                            </div>
+                            <div class="flex justify-between text-xs font-semibold text-gray-500">
+                                <span>Envío a domicilio</span>
+                                <span class="font-mono text-gray-700">${{ number_format($currentOrder->delivery_fee, 2) }}</span>
+                            </div>
+                            <div class="flex justify-between items-center text-sm font-bold text-gray-900 pt-3 border-t border-gray-100">
+                                <span>Total a cobrar</span>
+                                <span class="font-mono text-base text-red-600 font-bold">${{ number_format($currentOrder->total, 2) }}</span>
+                            </div>
                         </div>
                     </div>
 
                     {{-- SLIDER: LLEGUÉ AL DOMICILIO (CAMBIA VISTA EN FRONTEND) --}}
-                    <div class="bg-white rounded-2xl p-4 border border-gray-100/80 space-y-2">
-                        <p class="text-[10px] font-black uppercase tracking-wider text-gray-400 text-center">Desliza cuando llegues con el cliente</p>
+                    <div class="flex flex-col gap-4 shadow-xs rounded-2xl border border-gray-100/50 bg-white p-5">
+                        <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400 text-center">Desliza cuando llegues con el cliente</p>
 
                         <div x-data="{ 
                             startX: 0, 
                             currentX: 0, 
                             maxSwipe: 0, 
                             completed: false,
-                            init() { this.maxSwipe = $refs.trackArrived.clientWidth - $refs.thumbArrived.clientWidth - 8; },
-                            touchStart(e) { if(!this.completed) this.startX = e.touches[0].clientX; },
-                            touchMove(e) { 
-                                if(this.completed) return;
-                                let diff = e.touches[0].clientX - this.startX;
-                                if(diff > 0 && diff <= this.maxSwipe) this.currentX = diff;
+                            isDragging: false,
+                            dragStart(e) {
+                                if (this.completed) return;
+                                this.maxSwipe = this.$refs.track.clientWidth - this.$refs.thumb.clientWidth - 8; 
+                                this.isDragging = true;
+                                this.startX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
                             },
-                            touchEnd() {
-                                if(this.completed) return;
-                                if(this.currentX >= this.maxSwipe * 0.85) {
+                            dragMove(e) {
+                                if (!this.isDragging || this.completed) return;
+                                const x = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
+                                let diff = x - this.startX;
+                                if (diff < 0) diff = 0;
+                                if (diff > this.maxSwipe) diff = this.maxSwipe;
+                                this.currentX = diff;
+                            },
+                            dragEnd() {
+                                if (!this.isDragging || this.completed) return;
+                                this.isDragging = false;
+                                if (this.currentX >= this.maxSwipe * 0.85) {
                                     this.currentX = this.maxSwipe;
                                     this.completed = true;
                                     setTimeout(() => { step = 'arrived'; }, 200);
@@ -334,18 +492,32 @@
                                     this.currentX = 0;
                                 }
                             }
-                        }" class="relative select-none">
-                            <div x-ref="trackArrived" class="h-14 bg-gray-900 rounded-2xl p-1 flex items-center justify-center relative overflow-hidden">
-                                <span class="text-xs font-bold text-gray-300 tracking-wider uppercase opacity-80 pointer-events-none">Llegué al Domicilio >></span>
-                                <div x-ref="thumbArrived" 
+                        }" 
+                        x-on:reset-arrived-slider.window="currentX = 0; completed = false; isDragging = false;"
+                        class="relative select-none">
+                            <div 
+                                x-ref="track" 
+                                @mousemove="dragMove"
+                                @mouseup="dragEnd"
+                                @mouseleave="dragEnd"
+                                @touchmove.prevent="dragMove"
+                                @touchend="dragEnd"
+                                class="h-14 bg-red-500 rounded-2xl p-1 flex items-center justify-center relative overflow-hidden shadow-inner"
+                            >
+                                <span 
+                                    :style="`opacity: ${maxSwipe > 0 ? 1 - (currentX / maxSwipe) : 1}; filter: blur(${maxSwipe > 0 ? (currentX / maxSwipe) * 4 : 0}px)`"
+                                    class="text-xs font-bold text-white tracking-wider uppercase opacity-90 pointer-events-none transition-all duration-75"
+                                >
+                                    Llegué al Domicilio >>
+                                </span>
+                                <div 
+                                     x-ref="thumb" 
                                      :style="`transform: translateX(${currentX}px)`"
-                                     @touchstart="touchStart" 
-                                     @touchmove="touchMove" 
-                                     @touchend="touchEnd"
-                                     class="absolute left-1 top-1 bottom-1 w-12 bg-white rounded-xl flex items-center justify-center shadow-lg cursor-pointer transition-transform duration-75">
-                                    <svg class="w-5 h-5 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-                                    </svg>
+                                     @mousedown="dragStart"
+                                     @touchstart="dragStart"
+                                     class="absolute left-1 top-1 bottom-1 w-12 bg-white rounded-xl flex items-center justify-center shadow-lg cursor-pointer transition-transform duration-75"
+                                >
+                                    <i class="bxf bx-chevron-right text-xl text-red-500"></i>
                                 </div>
                             </div>
                         </div>
@@ -354,26 +526,24 @@
 
                 {{-- PASO 2B: REGISTRO DE ESTADO DE PAGO, INCIDENCIAS Y FINALIZACIÓN --}}
                 <div x-show="step === 'arrived'" x-cloak class="space-y-4">
-                    <div class="bg-white rounded-2xl p-4 border border-gray-100/80 space-y-3">
+                    <div class="flex flex-col gap-4 shadow-xs rounded-2xl border border-gray-100/50 bg-white p-5">
                         <div class="flex items-center justify-between">
-                            <h3 class="text-[10px] font-black uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                                </svg>
+                            <h3 class="text-xs font-bold text-gray-900 flex items-center gap-1.5">
+                                <i class="bxf bx-wallet text-base text-gray-400"></i>
                                 Confirmación de Pago y Entrega
                             </h3>
-                            <button @click="step = 'deliver'" class="text-[10px] font-bold text-gray-400 hover:text-gray-600">
+                            <button @click="step = 'deliver'; $dispatch('reset-arrived-slider')" class="text-[10px] font-bold text-red-500 hover:text-red-600 bg-red-50 px-2 py-1 rounded-lg cursor-pointer">
                                 Volver al Mapa
                             </button>
                         </div>
 
                         {{-- Opciones de Pago / Resultado --}}
                         <div class="space-y-1.5">
-                            <label class="text-[10px] font-black uppercase tracking-wider text-gray-400">Resultado de la entrega</label>
+                            <label class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Resultado de la entrega</label>
                             <div class="grid grid-cols-1 gap-2">
                                 <button type="button" 
                                         wire:click="$set('paymentOutcome', 'paid_correctly')"
-                                        class="flex items-center justify-between p-3 rounded-xl border text-xs font-bold transition-all {{ $paymentOutcome === 'paid_correctly' ? 'border-emerald-500 bg-emerald-50 text-emerald-900' : 'border-gray-200 bg-gray-50 text-gray-600' }}">
+                                        class="flex items-center justify-between p-3.5 rounded-2xl border text-xs font-bold transition-all cursor-pointer {{ $paymentOutcome === 'paid_correctly' ? 'border-emerald-500 bg-emerald-50 text-emerald-900' : 'border-gray-150 bg-gray-50 text-gray-600' }}">
                                     <span>✓ Pagado correctamente</span>
                                     @if($paymentOutcome === 'paid_correctly')
                                         <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
@@ -382,7 +552,7 @@
 
                                 <button type="button" 
                                         wire:click="$set('paymentOutcome', 'client_refused_payment')"
-                                        class="flex items-center justify-between p-3 rounded-xl border text-xs font-bold transition-all {{ $paymentOutcome === 'client_refused_payment' ? 'border-amber-500 bg-amber-50 text-amber-900' : 'border-gray-200 bg-gray-50 text-gray-600' }}">
+                                        class="flex items-center justify-between p-3.5 rounded-2xl border text-xs font-bold transition-all cursor-pointer {{ $paymentOutcome === 'client_refused_payment' ? 'border-amber-500 bg-amber-50 text-amber-900' : 'border-gray-150 bg-gray-50 text-gray-600' }}">
                                     <span>⚠️ Cliente rechaza pagar</span>
                                     @if($paymentOutcome === 'client_refused_payment')
                                         <span class="w-2 h-2 rounded-full bg-amber-500"></span>
@@ -391,7 +561,7 @@
 
                                 <button type="button" 
                                         wire:click="$set('paymentOutcome', 'client_refused_delivery')"
-                                        class="flex items-center justify-between p-3 rounded-xl border text-xs font-bold transition-all {{ $paymentOutcome === 'client_refused_delivery' ? 'border-red-500 bg-red-50 text-red-900' : 'border-gray-200 bg-gray-50 text-gray-600' }}">
+                                        class="flex items-center justify-between p-3.5 rounded-2xl border text-xs font-bold transition-all cursor-pointer {{ $paymentOutcome === 'client_refused_delivery' ? 'border-red-500 bg-red-50 text-red-900' : 'border-gray-150 bg-gray-50 text-gray-600' }}">
                                     <span>✕ Cliente rechaza pedido / Devolución</span>
                                     @if($paymentOutcome === 'client_refused_delivery')
                                         <span class="w-2 h-2 rounded-full bg-red-500"></span>
@@ -402,35 +572,44 @@
 
                         {{-- Campo opcional para notas si hay alguna incidencia --}}
                         @if($paymentOutcome !== 'paid_correctly')
-                            <div class="space-y-1 pt-1" x-transition>
-                                <label class="text-[10px] font-black uppercase tracking-wider text-amber-700">Detalle de la incidencia</label>
+                            <div class="space-y-1.5 pt-1" x-transition>
+                                <label class="text-[10px] font-bold uppercase tracking-wider text-amber-700">Detalle de la incidencia</label>
                                 <textarea wire:model="incidentNotes" 
-                                        rows="2" 
-                                        class="w-full text-xs rounded-xl border-amber-300 focus:border-amber-500 focus:ring-0 p-2.5 bg-amber-50/50 text-amber-900 placeholder-amber-400" 
+                                        rows="4" 
+                                        class="w-full text-xs rounded-2xl border-amber-200 focus:border-amber-500 focus:ring-0 p-3 bg-amber-50/50 text-amber-900 placeholder-amber-400 font-semibold" 
                                         placeholder="Describe por qué el cliente no pagó o rechazó el pedido..."></textarea>
                             </div>
                         @endif
                     </div>
 
                     {{-- SLIDER FINALIZAR ENTREGA --}}
-                    <div class="bg-white rounded-2xl p-4 border border-gray-100/80 space-y-2">
-                        <p class="text-[10px] font-black uppercase tracking-wider text-gray-400 text-center">Desliza para Finalizar Entrega</p>
+                    <div class="flex flex-col gap-4 shadow-xs rounded-2xl border border-gray-100/50 bg-white p-5">
+                        <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400 text-center">Desliza para Finalizar Entrega</p>
 
                         <div x-data="{ 
                             startX: 0, 
                             currentX: 0, 
                             maxSwipe: 0, 
                             completed: false,
-                            init() { this.maxSwipe = $refs.trackDeliver.clientWidth - $refs.thumbDeliver.clientWidth - 8; },
-                            touchStart(e) { if(!this.completed) this.startX = e.touches[0].clientX; },
-                            touchMove(e) { 
-                                if(this.completed) return;
-                                let diff = e.touches[0].clientX - this.startX;
-                                if(diff > 0 && diff <= this.maxSwipe) this.currentX = diff;
+                            isDragging: false,
+                            dragStart(e) {
+                                if (this.completed) return;
+                                this.maxSwipe = this.$refs.track.clientWidth - this.$refs.thumb.clientWidth - 8; 
+                                this.isDragging = true;
+                                this.startX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
                             },
-                            touchEnd() {
-                                if(this.completed) return;
-                                if(this.currentX >= this.maxSwipe * 0.85) {
+                            dragMove(e) {
+                                if (!this.isDragging || this.completed) return;
+                                const x = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
+                                let diff = x - this.startX;
+                                if (diff < 0) diff = 0;
+                                if (diff > this.maxSwipe) diff = this.maxSwipe;
+                                this.currentX = diff;
+                            },
+                            dragEnd() {
+                                if (!this.isDragging || this.completed) return;
+                                this.isDragging = false;
+                                if (this.currentX >= this.maxSwipe * 0.85) {
                                     this.currentX = this.maxSwipe;
                                     this.completed = true;
                                     $wire.completeDelivery();
@@ -439,17 +618,28 @@
                                 }
                             }
                         }" class="relative select-none">
-                            <div x-ref="trackDeliver" class="h-14 bg-emerald-600 rounded-2xl p-1 flex items-center justify-center relative overflow-hidden">
-                                <span class="text-xs font-bold text-white tracking-wider uppercase opacity-90 pointer-events-none" x-text="completed ? 'Finalizando...' : 'Finalizar Entrega >>'"></span>
-                                <div x-ref="thumbDeliver" 
+                            <div 
+                                x-ref="track" 
+                                @mousemove="dragMove"
+                                @mouseup="dragEnd"
+                                @mouseleave="dragEnd"
+                                @touchmove.prevent="dragMove"
+                                @touchend="dragEnd"
+                                class="h-14 bg-emerald-600 rounded-2xl p-1 flex items-center justify-center relative overflow-hidden shadow-inner"
+                            >
+                                <span 
+                                    :style="`opacity: ${maxSwipe > 0 ? 1 - (currentX / maxSwipe) : 1}; filter: blur(${maxSwipe > 0 ? (currentX / maxSwipe) * 4 : 0}px)`"
+                                    class="text-xs font-bold text-white tracking-wider uppercase opacity-90 pointer-events-none transition-all duration-75"
+                                    x-text="completed ? 'Finalizando...' : 'Finalizar Entrega >>'"
+                                ></span>
+                                <div 
+                                     x-ref="thumb" 
                                      :style="`transform: translateX(${currentX}px)`"
-                                     @touchstart="touchStart" 
-                                     @touchmove="touchMove" 
-                                     @touchend="touchEnd"
-                                     class="absolute left-1 top-1 bottom-1 w-12 bg-white rounded-xl flex items-center justify-center shadow-lg cursor-pointer transition-transform duration-75">
-                                    <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
-                                    </svg>
+                                     @mousedown="dragStart"
+                                     @touchstart="dragStart"
+                                     class="absolute left-1 top-1 bottom-1 w-12 bg-white rounded-xl flex items-center justify-center shadow-lg cursor-pointer transition-transform duration-75"
+                                >
+                                    <i class="bxf bx-chevron-right text-xl text-emerald-600"></i>
                                 </div>
                             </div>
                         </div>

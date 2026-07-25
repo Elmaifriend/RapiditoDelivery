@@ -45,7 +45,7 @@ new class extends Component {
 ?>
 
 <div
-    class="fixed top-0 z-100 flex gap-4 w-full items-center justify-between rounded-b-2xl bg-white px-6 pt-8 pb-6 cursor-pointer">
+    class="z-100 flex gap-4 w-full items-center justify-between rounded-b-2xl bg-white px-6 pt-8 pb-6 cursor-pointer">
     {{-- ETIQUETA DE DEBUG: Se muestra chiquito arriba a la derecha --}}
     @if($debugLat && $debugLng)
     <div

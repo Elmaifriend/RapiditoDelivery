@@ -272,9 +272,9 @@ new #[Title('Buscar Dirección')] class extends Component {
     <div class="absolute top-6 left-0 right-0 z-50 p-4 pointer-events-none">
         <div class="max-w-md mx-auto flex flex-col gap-3">
             <div class="flex items-center gap-2 pointer-events-auto">
-                <a wire:navigate href="/" class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white border border-gray-100 text-gray-800 active:scale-95 transition-all">
+                <button onclick="history.back();" class="cursor-pointer flex h-12 w-12 items-center justify-center rounded-2xl bg-white border border-gray-100 text-gray-800 active:scale-95 transition-all">
                     <i class="bxf bx-chevron-left text-3xl"></i>
-                </a>
+                </button>
 
                 <div class="relative flex-1" wire:ignore>
                     <input

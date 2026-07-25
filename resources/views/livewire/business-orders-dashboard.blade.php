@@ -105,7 +105,7 @@
                                                 <div class="py-1.5 flex justify-between items-center text-xs">
                                                     <span class="text-gray-800 font-medium">
                                                         <strong class="font-black text-gray-900 bg-gray-200/60 px-1.5 py-0.5 rounded mr-1">{{ $item->quantity }}x</strong> 
-                                                        {{ $item->name }}
+                                                        {{ $item->product_name_snapshot }}
                                                     </span>
                                                     <span class="font-bold text-gray-500">${{ number_format($item->subtotal, 2) }}</span>
                                                 </div>
@@ -189,8 +189,45 @@
                                         @endif
                                     </div>
 
-                                    {{-- Datos del Cliente, Productos, Notas y Total permanecen igual --}}
-                                    ...
+                                    {{-- Datos del Cliente --}}
+                                    <div>
+                                        <h4 class="text-xs font-bold uppercase tracking-wider text-gray-400">Cliente</h4>
+                                        <h3 class="font-bold text-gray-800 text-sm leading-snug mt-1">{{ $pedido->customer_name ?? 'Cliente Invitado' }}</h3>
+                                        <p class="text-xs font-semibold text-gray-500 flex items-center gap-1.5 mt-1">
+                                            <i class="bxf bx-phone text-xs text-gray-400"></i>
+                                            Tel: {{ $pedido->customer_phone ?? 'N/A' }}
+                                        </p>
+                                    </div>
+
+                                    {{-- Listado de Ítems --}}
+                                    <div class="bg-gray-50 rounded-2xl p-4 border border-gray-100 space-y-3">
+                                        <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Productos Solicitados</p>
+                                        <div class="divide-y divide-gray-100">
+                                            @foreach($pedido->items as $item)
+                                                <div class="py-2 flex justify-between items-center text-xs first:pt-0 last:pb-0">
+                                                    <span class="text-gray-800 font-semibold">
+                                                        <strong class="font-bold text-gray-900 bg-gray-200/50 px-1.5 py-0.5 rounded mr-1.5">{{ $item->quantity }}x</strong> 
+                                                        {{ $item->product_name_snapshot }}
+                                                    </span>
+                                                    <span class="font-bold text-gray-700 font-mono">${{ number_format($item->subtotal, 2) }}</span>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+
+                                    {{-- Notas Especiales --}}
+                                    @if($pedido->special_instructions)
+                                        <div class="bg-amber-50/70 border border-amber-100/50 p-3 rounded-2xl text-xs text-amber-900 space-y-0.5">
+                                            <p class="text-[10px] font-bold uppercase tracking-wider text-amber-700">Notas Especiales:</p>
+                                            <p class="leading-relaxed font-semibold">{{ $pedido->special_instructions }}</p>
+                                        </div>
+                                    @endif
+
+                                    {{-- Total --}}
+                                    <div class="flex justify-between items-center pt-2 border-t border-gray-100">
+                                        <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Total:</span>
+                                        <span class="text-lg font-bold text-red-500 font-mono">${{ number_format($pedido->total, 2) }}</span>
+                                    </div>
                                 </div>
 
                                 {{-- Acciones: Disparo de repartidor --}}

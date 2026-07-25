@@ -2,35 +2,42 @@
 
 namespace App\Livewire;
 
-use Livewire\Attributes\Title;
-use Livewire\Attributes\Computed;
-use Livewire\Component;
+use App\Enums\CountryCode;
+use App\Enums\PaymentMethod;
 use App\Models\Cart;
 use App\Models\DeliveryAddress;
-use App\Services\DeliveryFeeCalculatorService;
 use App\Services\ConvertCartToOrderService;
-use App\Services\WhatsAppNotifierService; 
+use App\Services\DeliveryFeeCalculatorService;
+use App\Services\WhatsAppNotifierService;
 use Illuminate\Support\Facades\Cookie;
-use App\Enums\PaymentMethod;
-use App\Enums\CountryCode;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\Title;
+use Livewire\Component;
 
-#[Title('Checkout')] 
-class Checkout extends Component 
+#[Title('Checkout')]
+class Checkout extends Component
 {
     // Datos del cliente
     public string $customerName = '';
+
     public string $countryCode = 'MX'; // Lada por defecto
+
     public string $customerPhone = '';
 
     // Datos del formulario
     public string $specialInstructions = ''; // Para la cocina (ej: sin cebolla)
+
     public string $deliveryInstructions = ''; // Para el repartidor (ej: tocar timbre B)
-    public string $reference = ''; 
+
+    public string $reference = '';
+
     public string $paymentMethod = 'cash';
-    
+
     // Datos de tarjeta
     public string $cardNumber = '';
+
     public string $cardExpiry = '';
+
     public string $cardCvv = '';
 
     // Dirección única activa para el Checkout
@@ -41,14 +48,14 @@ class Checkout extends Component
         if (auth()->check()) {
             $user = auth()->user();
             $this->customerName = $user->name ?? '';
-            
+
             // Si el usuario tiene teléfono guardado, intentamos extraer la lada si existe
-            if (!empty($user->phone)) {
+            if (! empty($user->phone)) {
                 $this->parsePhoneNumber($user->phone);
             }
         }
 
-        $defaultAddress = $this->addresses->where('is_default', true)->first() 
+        $defaultAddress = $this->addresses->where('is_default', true)->first()
             ?? $this->addresses->first();
 
         if ($defaultAddress) {
@@ -65,6 +72,7 @@ class Checkout extends Component
             if (str_starts_with($phone, $dial)) {
                 $this->countryCode = $code->name;
                 $this->customerPhone = substr($phone, strlen($dial));
+
                 return;
             }
         }
@@ -84,8 +92,8 @@ class Checkout extends Component
 
         return Cart::with(['business', 'items'])
             ->where('status', 'active')
-            ->where(fn ($query) => $userId 
-                ? $query->where('user_id', $userId) 
+            ->where(fn ($query) => $userId
+                ? $query->where('user_id', $userId)
                 : $query->where('guest_token', $guestToken)
             )->first();
     }
@@ -93,8 +101,13 @@ class Checkout extends Component
     #[Computed]
     public function addresses()
     {
+        $userId = auth()->id();
         $guestToken = Cookie::get('guest_token');
-        return DeliveryAddress::where('guest_token', $guestToken)->get();
+
+        return DeliveryAddress::where(fn ($query) => $userId
+            ? $query->where('user_id', $userId)
+            : $query->where('guest_token', $guestToken)
+        )->get();
     }
 
     #[Computed]
@@ -106,15 +119,15 @@ class Checkout extends Component
     #[Computed]
     public function deliveryFee()
     {
-        if (!$this->cart || !$this->cart->business || !$this->currentAddress) {
+        if (! $this->cart || ! $this->cart->business || ! $this->currentAddress) {
             return null;
         }
 
         $business = $this->cart->business;
         $address = $this->currentAddress;
 
-        if (!$business->lat || !$business->lng || !$address->lat || !$address->lng) {
-            return null; 
+        if (! $business->lat || ! $business->lng || ! $address->lat || ! $address->lng) {
+            return null;
         }
 
         return app(DeliveryFeeCalculatorService::class)->calculate(
@@ -128,9 +141,12 @@ class Checkout extends Component
     #[Computed]
     public function totalAmount()
     {
-        if (!$this->cart) return 0;
-        
+        if (! $this->cart) {
+            return 0;
+        }
+
         $fee = $this->deliveryFee ?? 0;
+
         return $this->cart->subtotal + $fee;
     }
 
@@ -138,7 +154,7 @@ class Checkout extends Component
     {
         $this->validate([
             'customerName' => 'required|string|max:100',
-            'countryCode' => 'required|in:' . implode(',', array_column(CountryCode::cases(), 'name')),
+            'countryCode' => 'required|in:'.implode(',', array_column(CountryCode::cases(), 'name')),
             'customerPhone' => 'required|string|min:7|max:15',
             'reference' => 'required|string|max:255',
             'deliveryInstructions' => 'nullable|string|max:255',
@@ -154,48 +170,51 @@ class Checkout extends Component
             'reference.required' => 'Es importante escribir una referencia para ayudar al repartidor.',
             'cardNumber.required_if' => 'El número de tarjeta es obligatorio.',
             'cardExpiry.required_if' => 'La fecha de expiración es obligatoria.',
-            'cardCvv.required_if' => 'El código de seguridad CVV es obligatorio.'
+            'cardCvv.required_if' => 'El código de seguridad CVV es obligatorio.',
         ]);
 
         $cart = $this->cart;
         $address = $this->currentAddress;
 
-        if (!$cart) {
+        if (! $cart) {
             $this->addError('general', 'El carrito no es válido.');
+
             return;
         }
 
-        if (!$address) {
+        if (! $address) {
             $this->addError('address', 'Por favor selecciona una dirección de entrega válida.');
+
             return;
         }
 
         if (is_null($this->deliveryFee)) {
             $this->addError('address', 'La dirección seleccionada está fuera de nuestra zona de cobertura.');
+
             return;
         }
 
         // Armamos el número completo con su lada internacional
         $selectedEnum = CountryCode::fromName($this->countryCode) ?? CountryCode::MX;
-        $fullPhoneNumber = $selectedEnum->dialCode() . preg_replace('/\D/', '', $this->customerPhone);
+        $fullPhoneNumber = $selectedEnum->dialCode().preg_replace('/\D/', '', $this->customerPhone);
 
         // 1. Guardamos la nueva referencia directamente en el modelo de la dirección
         $address->update([
             'reference' => $this->reference,
-            'last_used_at' => now()
+            'last_used_at' => now(),
         ]);
 
         // 2. Actualizamos los totales del carrito actual
         $cart->update([
             'delivery_fee' => $this->deliveryFee,
-            'total' => $this->totalAmount
+            'total' => $this->totalAmount,
         ]);
 
         // 3. Convertimos el carrito en una Orden (specialInstructions pasa al restaurante/cocina)
         $order = $orderService->execute(
-            $cart, 
-            $address, 
-            PaymentMethod::from($this->paymentMethod), 
+            $cart,
+            $address,
+            PaymentMethod::from($this->paymentMethod),
             $this->specialInstructions
         );
 
@@ -214,7 +233,7 @@ class Checkout extends Component
             }
 
             // 4. Mandar notificaciones de WhatsApp
-            $notifier = new WhatsAppNotifierService();
+            $notifier = new WhatsAppNotifierService;
             $notifier->notifyCustomerOrderCreated($order);
             $notifier->notifyRestaurantNewOrder($order);
 

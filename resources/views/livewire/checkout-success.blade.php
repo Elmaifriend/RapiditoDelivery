@@ -35,6 +35,26 @@
 
     <div class="max-w-md mx-auto w-full flex flex-col gap-4 px-4 pt-4">
         
+        @if($order->business)
+            <div class="flex flex-col gap-4 shadow-xs rounded-2xl border border-gray-100/50 bg-white p-4">
+                <h3 class="text-sm font-bold text-gray-900 flex items-center gap-1.5">
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                    </svg>
+                    Datos de la tienda
+                </h3>
+                <div class="space-y-1">
+                    <p class="text-sm font-extrabold text-gray-800">{{ $order->business->name }}</p>
+                    @if($order->business->address)
+                        <p class="text-xs font-semibold text-gray-500">{{ $order->business->address }}</p>
+                    @endif
+                    @if($order->business->phone)
+                        <p class="text-xs font-semibold text-gray-500">Tel: {{ $order->business->phone }}</p>
+                    @endif
+                </div>
+            </div>
+        @endif
+        
         {{-- SECCIÓN: DATOS DE CONTACTO --}}
         <div class="flex flex-col gap-4 shadow-xs rounded-2xl border border-gray-100/50 bg-white p-4">
             <h3 class="text-sm font-bold text-gray-900 flex items-center gap-1.5">
@@ -127,9 +147,9 @@
                                 {{ $item->quantity }}x
                             </div>
                             <div class="space-y-0.5">
-                                <p class="text-sm font-extrabold text-gray-800">{{ $item->name ?? $item->menuItem?->name }}</p>
-                                @if($item->notes)
-                                    <p class="text-[10px] font-medium text-gray-400 italic">"{{ $item->notes }}"</p>
+                                <p class="text-sm font-extrabold text-gray-800">{{ $item->product_name_snapshot }}</p>
+                                @if($item->product_description_snapshot)
+                                    <p class="text-[10px] font-medium text-gray-400 italic">{{ $item->product_description_snapshot }}</p>
                                 @endif
                             </div>
                         </div>

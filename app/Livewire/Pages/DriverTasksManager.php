@@ -1,25 +1,28 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\Pages;
 
-use Livewire\Component;
-use App\Models\Order;
-use App\Models\Driver;
-use App\Enums\DeliveryStatus;
 use App\Enums\DeliveryOutcome;
+use App\Enums\DeliveryStatus;
+use App\Models\Driver;
+use App\Models\Order;
 use App\Services\DriverAssignmentService;
+use Livewire\Component;
 
 class DriverTasksManager extends Component
 {
     public Driver $driver;
+
     public ?Order $currentOrder = null;
 
     // Campos de reporte / supervisión
     public bool $allItemsCorrect = true;
+
     public string $driverNotes = '';
 
     // Campos de confirmación de entrega
     public string $paymentOutcome = DeliveryOutcome::PAID_CORRECTLY->value;
+
     public string $incidentNotes = '';
 
     public function mount(Driver $driver): void
@@ -30,8 +33,9 @@ class DriverTasksManager extends Component
 
     public function loadActiveOrder(): void
     {
-        if (!$this->driver) {
+        if (! $this->driver) {
             $this->currentOrder = null;
+
             return;
         }
 
@@ -50,14 +54,14 @@ class DriverTasksManager extends Component
      */
     public function markAsPickedUp(DriverAssignmentService $assignmentService): void
     {
-        if (!$this->currentOrder) {
+        if (! $this->currentOrder) {
             return;
         }
 
         // Si el repartidor dejó notas al recoger el paquete
-        if (!empty($this->driverNotes)) {
+        if (! empty($this->driverNotes)) {
             $this->currentOrder->update([
-                'delivery_notes' => trim(($this->currentOrder->delivery_notes ?? '') . " | Recogida: " . $this->driverNotes)
+                'delivery_notes' => trim(($this->currentOrder->delivery_notes ?? '').' | Recogida: '.$this->driverNotes),
             ]);
         }
 
@@ -72,7 +76,7 @@ class DriverTasksManager extends Component
      */
     public function completeDelivery(DriverAssignmentService $assignmentService): void
     {
-        if (!$this->currentOrder) {
+        if (! $this->currentOrder) {
             return;
         }
 
@@ -82,8 +86,8 @@ class DriverTasksManager extends Component
         // Guardar las notas e incidentes en la orden si existen
         $this->currentOrder->update([
             'delivery_outcome' => $outcome,
-            'delivery_notes'   => !empty($this->incidentNotes) 
-                ? trim(($this->currentOrder->delivery_notes ?? '') . " | Entrega: " . $this->incidentNotes)
+            'delivery_notes' => ! empty($this->incidentNotes)
+                ? trim(($this->currentOrder->delivery_notes ?? '').' | Entrega: '.$this->incidentNotes)
                 : $this->currentOrder->delivery_notes,
         ]);
 
@@ -96,6 +100,6 @@ class DriverTasksManager extends Component
 
     public function render()
     {
-        return view('livewire.driver-tasks-manager');
+        return view('livewire.pages.driver-tasks-manager');
     }
 }

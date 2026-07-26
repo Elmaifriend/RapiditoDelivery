@@ -1,9 +1,17 @@
 <?php
 
+use App\Livewire\Pages\BusinessOrdersDashboard;
+use App\Livewire\Pages\BusinessPage;
+use App\Livewire\Pages\CartPage;
+use App\Livewire\Pages\Checkout;
+use App\Livewire\Pages\CheckoutSuccess;
+use App\Livewire\Pages\DriverTasksManager;
+use App\Livewire\Pages\Home;
+use App\Livewire\Pages\Location;
+use App\Livewire\Pages\Profile;
+use App\Livewire\Pages\Search;
+use App\Livewire\Pages\TagPage;
 use Illuminate\Support\Facades\Route;
-use App\Livewire\BusinessOrdersDashboard;
-use App\Livewire\CheckoutSuccess;
-use App\Livewire\DriverTasksManager;
 
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
@@ -11,21 +19,19 @@ Route::view('dashboard', 'dashboard')
 
 require __DIR__.'/settings.php';
 
-
-
 Route::get('/test', function () {
     return view('test');
 });
 
-Route::livewire('/', 'pages::home')->name('home');
-Route::livewire('/search', 'pages::search')->name('search');
-Route::livewire('/cart', 'pages::cart')->name('cart');
-Route::livewire('/profile', 'pages::profile')->name('profile');
-Route::livewire('/business/{business}', 'pages::business')->name('business');
-Route::livewire('/tag/{tag}', 'pages::tag')->name('tag');
-Route::livewire('/checkout', 'checkout')->name('checkout');
-Route::livewire('/location', 'pages::location')->name('location');
-Route::livewire('/checkout/address', 'pages::location')->name('checkout.address');
+Route::get('/', Home::class)->name('home');
+Route::get('/search', Search::class)->name('search');
+Route::get('/cart', CartPage::class)->name('cart');
+Route::get('/profile', Profile::class)->name('profile');
+Route::get('/business/{business}', BusinessPage::class)->name('business');
+Route::get('/tag/{tag}', TagPage::class)->name('tag');
+Route::get('/checkout', Checkout::class)->name('checkout');
+Route::get('/location', Location::class)->name('location');
+Route::get('/checkout/address', Location::class)->name('checkout.address');
 Route::get('/kitchen/orders/{businessId}', BusinessOrdersDashboard::class)->name('kitchen.orders');
 Route::get('/checkout/success/{order}', CheckoutSuccess::class)->name('checkout.success');
 Route::get('/driver/{driver}', DriverTasksManager::class)->name('driver.tasks');

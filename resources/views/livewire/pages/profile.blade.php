@@ -1,15 +1,4 @@
-<?php
-
-use Livewire\Attributes\Title;
-use Livewire\Component;
-
-new #[Title('Profile')] class extends Component {
-    //
-};
-?>
-
 <div class="flex flex-col gap-4 p-6">
-    {{-- The best way to take care of the future is to take care of the present moment. - Thich Nhat Hanh --}}
 
     <div class="flex items-center gap-4">
         <div class="size-20 rounded-full bg-gray-300">

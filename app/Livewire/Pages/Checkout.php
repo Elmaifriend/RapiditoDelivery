@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\Pages;
 
 use App\Enums\CountryCode;
 use App\Enums\PaymentMethod;
@@ -243,6 +243,6 @@ class Checkout extends Component
 
     public function render()
     {
-        return view('livewire.checkout');
+        return view('livewire.pages.checkout');
     }
 }

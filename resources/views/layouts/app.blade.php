@@ -30,13 +30,13 @@
 
 <body class="flex min-h-dvh justify-center bg-gray-100 font-sans text-gray-800">
     <div class="flex h-svh w-full flex-col overflow-hidden shadow-xl relative">
-        <livewire:header.bar />
+        <livewire:components.header-bar />
 
         <main class="no-scrollbar max-w-[900px] mx-auto w-full relative flex-1 overflow-y-auto pb-32">
             {{ $slot }}
         </main>
 
-        <livewire:nav.bar />
+        <x-ui.nav-bar />
     </div>
 
     @livewireScripts

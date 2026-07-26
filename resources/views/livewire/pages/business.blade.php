@@ -1,160 +1,3 @@
-<?php
-
-use Livewire\Attributes\Title;
-use Livewire\Attributes\Computed;
-use Livewire\Component;
-use App\Models\Business;
-use App\Models\Product;
-use App\Models\Cart;
-use App\Models\CartItem;
-use Illuminate\Support\Str;
-
-new #[Title('Business')] class extends Component {
-    public Business $business;
-    public ?Product $selectedProduct = null;
-    public int $quantity = 1;
-    public bool $showProductModal = false;
-    public bool $showStartNewCartModal = false;
-
-    public function mount(Business $business)
-    {
-        $this->business = $business->load(['category', 'productCategories.products']);
-        $guestToken = request()->cookie('guest_token');
-
-        return Cart::where('status', 'active')
-            ->where('business_id', $this->business->id)
-            ->where('guest_token', '=', $guestToken)
-            ->first();
-    }
-
-    #[Computed]
-    public function cart()
-    {
-        $userId = auth()->id();
-        $guestToken = request()->cookie('guest_token');
-
-        return Cart::where('status', 'active')
-            ->where('business_id', $this->business->id)
-            ->where(function ($query) use ($userId, $guestToken) {
-                if ($userId) {
-                    $query->where('user_id', $userId);
-                } else {
-                    $query->where('guest_token', $guestToken);
-                }
-            })
-            ->first();
-    }
-
-    public function openProductModal(Product $product)
-    {
-        $guestToken = request()->cookie('guest_token');
-        $otherCart = Cart::where('status', 'active')
-            ->where('business_id', '!=', $this->business->id)
-            ->where('guest_token', '=', $guestToken)
-            ->exists();
-
-        if ($otherCart) {
-            $this->selectedProduct = $product;
-            $this->showStartNewCartModal = true;
-            return;
-        }
-
-        $this->selectedProduct = $product;
-
-        $existingItem = $this->cart?->items->where('product_id', $product->id)->first();
-        $this->quantity = $existingItem ? $existingItem->quantity : 1;
-
-        $this->showProductModal = true;
-    }
-
-    public function closeModal()
-    {
-        $this->showProductModal = false;
-        $this->selectedProduct = null;
-    }
-
-    public function increment()
-    {
-        $this->quantity++;
-    }
-
-    public function decrement()
-    {
-        if ($this->quantity > 0) {
-            $this->quantity--;
-        }
-    }
-
-    public function addToCart()
-    {
-        if (!$this->selectedProduct) {
-            return;
-        }
-
-        $userId = auth()->id();
-        $guestToken = request()->cookie('guest_token');
-
-        $cart = Cart::firstOrCreate(
-            [
-                'user_id' => $userId,
-                'guest_token' => $guestToken,
-                'status' => 'active',
-                'business_id' => $this->business->id,
-            ],
-            ['expires_at' => now()->addDays(3)],
-        );
-
-        $cartItem = $cart->items()->where('product_id', $this->selectedProduct->id)->first();
-
-        if ($this->quantity <= 0) {
-            $cartItem?->delete();
-        } else {
-            if ($cartItem) {
-                $cartItem->update([
-                    'quantity' => $this->quantity,
-                    'subtotal' => $this->selectedProduct->price * $this->quantity,
-                ]);
-            } else {
-                $cart->items()->create([
-                    'product_id' => $this->selectedProduct->id,
-                    'product_name_snapshot' => $this->selectedProduct->name,
-                    'product_description_snapshot' => $this->selectedProduct->description,
-                    'product_image_url_snapshot' => $this->selectedProduct->image_path,
-                    'price_snapshot' => $this->selectedProduct->price,
-                    'quantity' => $this->quantity,
-                    'subtotal' => $this->selectedProduct->price * $this->quantity,
-                ]);
-            }
-        }
-
-        $cart->recalculateTotals();
-        $this->closeModal();
-        $this->dispatch('cart-updated');
-    }
-
-    public function clearCart()
-    {
-        $userId = auth()->id();
-        $guestToken = request()->cookie('guest_token');
-
-        Cart::where('status', 'active')
-            ->where('business_id', '!=', $this->business->id)
-            ->where(function ($query) use ($userId, $guestToken) {
-                if ($userId) {
-                    $query->where('user_id', $userId);
-                } else {
-                    $query->where('guest_token', $guestToken);
-                }
-            })
-            ->delete();
-
-        $this->showStartNewCartModal = false;
-        $this->quantity = 1;
-        $this->showProductModal = true;
-    }
-};
-?>
-
 <div class="min-h-screen bg-gray-50 pb-28">
     <div class="relative h-52 w-full overflow-hidden bg-gray-200">
         <img src="{{ $business->banner_path ? Storage::temporaryUrl($business->banner_path, now()->addMinutes(10)) : 'https://images.unsplash.com/photo-1571091718767-18b5b1457add?q=80&w=1000&auto=format&fit=crop' }}"
@@ -246,7 +89,7 @@ new #[Title('Business')] class extends Component {
                     <h3 class="text-xl font-bold text-gray-800">{{ $selectedProduct->name }}</h3>
                     <p class="mt-2 text-sm leading-relaxed text-gray-500">{{ $selectedProduct->description }}</p>
                     <span
-                        class="mt-4 block text-lg font-black text-gray-900">${{ number_format($selectedProduct->price, 2) }}</span>
+                        class="mt-4 block text-lg font-extrabold text-gray-900">${{ number_format($selectedProduct->price, 2) }}</span>
                 </div>
                 <div class="mt-8 flex items-center justify-between">
                     <div class="flex items-center gap-4 rounded-xl border border-gray-200 p-1">
@@ -279,10 +122,7 @@ new #[Title('Business')] class extends Component {
             class="relative w-full max-w-sm rounded-3xl bg-white p-6 text-center shadow-2xl">
 
             <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100 text-red-600">
-                <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.34c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-                </svg>
+                <i class="bxf bx-error-circle text-4xl"></i>
             </div>
 
             <h3 class="text-lg font-bold text-gray-900">¿Empezar un nuevo carrito?</h3>
@@ -305,5 +145,5 @@ new #[Title('Business')] class extends Component {
             </div>
         </div>
     </div>
-    <livewire:cart.bar />
+    <livewire:components.cart-bar />
 </div>

@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Livewire\Cart;
+namespace App\Livewire\Components;
 
-use Livewire\Component;
 use App\Models\Cart;
+use Livewire\Component;
 
-class Bar extends Component
+class CartBar extends Component
 {
     protected $listeners = ['cart-updated' => '$refresh', 'cart-updated' => '$refresh'];
 
@@ -15,7 +15,7 @@ class Bar extends Component
         $guestToken = request()->cookie('guest_token');
 
         return Cart::where('status', 'active')
-            ->where(function($query) use ($userId, $guestToken) {
+            ->where(function ($query) use ($userId, $guestToken) {
                 if ($userId) {
                     $query->where('user_id', $userId);
                 } else {
@@ -28,7 +28,7 @@ class Bar extends Component
     // Acción para forzar la revisión de ubicación antes del checkout
     public function goToLocation()
     {
-        if (!$this->cart || $this->cart->items->count() === 0) {
+        if (! $this->cart || $this->cart->items->count() === 0) {
             return;
         }
 
@@ -38,6 +38,6 @@ class Bar extends Component
 
     public function render()
     {
-        return view('livewire.cart.bar');
+        return view('livewire.components.cart-bar');
     }
 }

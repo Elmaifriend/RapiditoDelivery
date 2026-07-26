@@ -1,22 +1,23 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\Pages;
 
-use Livewire\Component;
-use App\Models\Order;
 use App\Enums\BusinessDecisionStatus;
-use App\Enums\OrderLifecycleStatus;
-use App\Services\OrderDispatchService;
 use App\Enums\DeliveryStatus;
+use App\Enums\OrderLifecycleStatus;
+use App\Models\Order;
+use App\Services\OrderDispatchService;
+use Livewire\Component;
 
 class BusinessOrdersDashboard extends Component
 {
     public int $businessId;
+
     public string $activeTab = 'nuevos';
 
     public function mount($businessId)
     {
-        $this->businessId = (int) $businessId; 
+        $this->businessId = (int) $businessId;
     }
 
     /**
@@ -43,7 +44,7 @@ class BusinessOrdersDashboard extends Component
                 DeliveryStatus::ON_THE_WAY,
                 DeliveryStatus::DELIVERED,
             ])
-            ->whereNotIn('business_decision_status',[
+            ->whereNotIn('business_decision_status', [
                 BusinessDecisionStatus::PENDING,
                 BusinessDecisionStatus::REJECTED,
             ])
@@ -64,22 +65,22 @@ class BusinessOrdersDashboard extends Component
     public function aceptarPedido($orderId)
     {
         $pedido = Order::where('business_id', $this->businessId)->findOrFail($orderId);
-        
+
         $pedido->update([
             'business_decision_status' => BusinessDecisionStatus::ACCEPTED,
             'lifecycle_status' => OrderLifecycleStatus::CONFIRMED,
         ]);
-        
+
         session()->flash('message', "Order #{$pedido->id} accepted.");
     }
 
     public function rechazarPedido($orderId)
     {
         $pedido = Order::where('business_id', $this->businessId)->findOrFail($orderId);
-        
+
         $pedido->update([
             'business_decision_status' => BusinessDecisionStatus::REJECTED,
-            'lifecycle_status' => OrderLifecycleStatus::CANCELLED
+            'lifecycle_status' => OrderLifecycleStatus::CANCELLED,
         ]);
     }
 
@@ -89,7 +90,7 @@ class BusinessOrdersDashboard extends Component
     public function llamarRepartidor($orderId, OrderDispatchService $dispatchService)
     {
         $pedido = Order::where('business_id', $this->businessId)->findOrFail($orderId);
-        
+
         // Ejecutamos la lógica de negocio para buscar y asignar un repartidor disponible
         $dispatchService->dispatchOrder($pedido);
 
@@ -98,9 +99,9 @@ class BusinessOrdersDashboard extends Component
 
     public function render()
     {
-        return view('livewire.business-orders-dashboard', [
+        return view('livewire.pages.business-orders-dashboard', [
             'pedidosNuevos' => $this->orders,
             'pedidosAceptados' => $this->acceptedOrders,
-        ])->layout('layouts.app'); 
+        ])->layout('layouts.app');
     }
 }

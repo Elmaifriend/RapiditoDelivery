@@ -1,110 +1,3 @@
-<?php
-
-use Livewire\Attributes\Title;
-use Livewire\Attributes\Computed;
-use Livewire\Component;
-use App\Models\Cart;
-use App\Models\CartItem;
-use App\Models\DeliveryAddress;
-use App\Services\DeliveryFeeCalculatorService;
-
-new #[Title('Cart')] class extends Component {
-    
-    #[Computed]
-    public function carts()
-    {
-        return Cart::with(['business', 'items'])
-            ->where('status', 'active')
-            ->where(fn ($query) => auth()->check() 
-                ? $query->where('user_id', auth()->id()) 
-                : $query->where('guest_token', request()->cookie('guest_token'))
-            )->get();
-    }
-
-    #[Computed]
-    public function defaultAddress()
-    {
-
-        //Comente este fragmento porque causa conflictos, aun no esta bien definido como manejar los auth
-        //Mientras hacia pruebas, inicie sesion en el panel de filament, y me lo tomo como que inicies sesion en la app
-        //y eso causo que nunca encontrara ninguna address, ya que hasta ahora, el sistema esta pensado solo para guardar 
-        //las direccion con un guest token
-
-        
-        /* $userId = auth()->id();
-
-        if ($userId) {
-            return DeliveryAddress::where('user_id', $userId)->where('is_default', true)->first()
-                ?? DeliveryAddress::where('user_id', $userId)->latest('last_used_at')->first();
-        } */
-
-        return DeliveryAddress::where('guest_token', request()->cookie('guest_token'))->first();
-    }
-
-    public function getEstimatedDeliveryFee(Cart $cart): float
-    {
-        $business = $cart->business;
-        $address = $this->defaultAddress; // Usamos el caché del #[Computed]
-
-        // Si el restaurante no tiene mapa configurado, no podemos hacer mucho
-        if (!$business || !$business->lat || !$business->lng) {
-            return (float) ($cart->delivery_fee ?? 0);
-        }
-
-        // Le pasamos todo al Service. Usamos el nullsafe operator (?->) por si el address no existe
-        $fee = app(DeliveryFeeCalculatorService::class)->calculate(
-            $business->lat, 
-            $business->lng, 
-            $address?->lat, 
-            $address?->lng
-        );
-
-        return $fee ?? (float) ($cart->delivery_fee ?? 0);
-    }
-
-    public function incrementItem(CartItem $item)
-    {
-        $item->incrementQuantity(1);
-        $item->cart->recalculateTotals();
-    }
-
-    public function decrementItem(CartItem $item)
-    {
-        if ($item->quantity > 1) {
-            $item->quantity--;
-            $item->recalculateSubtotal();
-            $item->cart->recalculateTotals();
-            return; 
-        } 
-        
-        $this->removeEmptyCartOrItem($item);
-    }
-
-    private function removeEmptyCartOrItem(CartItem $item)
-    {
-        $cart = $item->cart;
-        $item->delete();
-
-        $cart->items()->count() === 0 
-            ? $cart->delete() 
-            : $cart->recalculateTotals();
-    }
-
-    #[Computed]
-    public function totals()
-    {
-        $subtotal = $this->carts->sum('subtotal');
-        $delivery = $this->carts->reduce(fn($carry, $cart) => $carry + $this->getEstimatedDeliveryFee($cart), 0);
-
-        return [
-            'subtotal' => $subtotal,
-            'delivery' => $delivery,
-            'total'    => $subtotal + $delivery,
-        ];
-    }
-};
-?>
-
 <div class="flex flex-col gap-4 p-4">
     @forelse($this->carts as $index => $cart)
         <div class="overflow-hidden rounded-3xl border border-gray-100 bg-white">
@@ -114,7 +7,7 @@ new #[Title('Cart')] class extends Component {
                 </span>
                 <div class="flex items-center gap-1.5 text-xs font-medium text-gray-300">
                     <span>{{ $cart->business->delivery_time }} min</span>
-                    <i class="fas fa-motorcycle"></i>
+                    <i class="bxf bx-cycling"></i>
                 </div>
             </div>
 
@@ -131,7 +24,7 @@ new #[Title('Cart')] class extends Component {
                             <div class="flex items-center gap-3">
                                 <div class="h-14 w-14 flex-none overflow-hidden rounded-xl bg-gray-50">
                                     <img src="{{ $item->product_image_url_snapshot ? Storage::temporaryUrl($item->product_image_url_snapshot, now()->addMinutes(10)) : 'https://placehold.co/100x100' }}"
-                                        class="h-full w-full object-cover">
+                                         class="h-full w-full object-cover">
                                 </div>
 
                                 <div class="min-w-0 flex-1">
@@ -152,11 +45,11 @@ new #[Title('Cart')] class extends Component {
                                         @if ($item->quantity > 1)
                                             -
                                         @else
-                                            <i class="fas fa-trash text-[10px] text-red-400"></i>
+                                            <i class="bxf bx-trash text-sm text-red-400"></i>
                                         @endif
                                     </button>
 
-                                    <span class="w-6 text-center text-xs font-black text-gray-700"
+                                    <span class="w-6 text-center text-xs font-bold text-gray-700"
                                         wire:target="decrementItem({{ $item->id }}), incrementItem({{ $item->id }})">
                                         {{ $item->quantity }}
                                     </span>
@@ -168,7 +61,7 @@ new #[Title('Cart')] class extends Component {
                                     </button>
                                 </div>
 
-                                <span class="text-sm font-black text-gray-900">
+                                <span class="text-sm font-bold text-gray-900">
                                     ${{ number_format($item->subtotal, 2) }}
                                 </span>
                             </div>
@@ -184,7 +77,7 @@ new #[Title('Cart')] class extends Component {
                     <div class="flex justify-between font-bold text-gray-800">
                         <span class="flex items-center gap-1">
                             Envío Estimado
-                            <i class="fas fa-info-circle text-gray-400" title="Se calculará exacto al seleccionar dirección"></i>
+                            <i class="bxf bx-info-circle text-gray-400" title="Se calculará exacto al seleccionar dirección"></i>
                         </span>
                         <span>${{ number_format($this->getEstimatedDeliveryFee($cart), 2) }}</span>
                     </div>
@@ -199,27 +92,30 @@ new #[Title('Cart')] class extends Component {
     @endforelse
 
     @if ($this->carts->isNotEmpty())
-        <div class="rounded-4xl bg-white p-6">
-            <h3 class="mb-4 text-lg font-bold text-gray-800">Resumen Preliminar</h3>
-            <div class="mb-2 flex justify-between px-2.5 text-sm text-gray-600">
+        <div class="shadow-xs rounded-2xl border border-gray-100 bg-white p-5 space-y-3.5">
+            <h3 class="text-sm font-bold text-gray-900">Resumen Preliminar</h3>
+            
+            <div class="flex justify-between text-xs font-extrabold text-gray-500">
                 <span>Comida ({{ $this->carts->count() }} Rest.)</span>
-                <span>${{ number_format($this->totals['subtotal'], 2) }}</span>
+                <span class="font-mono text-gray-700">${{ number_format($this->totals['subtotal'], 2) }}</span>
             </div>
-            <div
-                class="mb-2 flex justify-between rounded-xl border border-blue-100 bg-blue-50 p-2.5 text-sm font-bold text-blue-600">
+            
+            <div class="flex justify-between text-xs font-extrabold text-gray-500">
                 <span>Envío Estimado</span>
-                <span>${{ number_format($this->totals['delivery'], 2) }}</span>
+                <span class="font-mono text-gray-700">${{ number_format($this->totals['delivery'], 2) }}</span>
             </div>
-            <div class="flex justify-between border-t border-gray-100 pt-4 text-2xl font-bold text-gray-900">
+            
+            <div class="flex justify-between items-center text-sm font-bold text-gray-900 pt-3 border-t border-gray-100">
                 <span>Total Aprox.</span>
-                <span>${{ number_format($this->totals['total'], 2) }} MXN</span>
+                <span class="font-mono text-base text-red-600 font-bold">${{ number_format($this->totals['total'], 2) }} MXN</span>
             </div>
-            <p class="mt-3 text-center text-[10px] text-gray-400">El total exacto se calculará en el siguiente paso.</p>
+            
+            <p class="text-center text-[10px] text-gray-400 font-semibold">El total exacto se calculará en el siguiente paso.</p>
         </div>
 
         <a href="{{ route('location', ['mode' => 'checkout']) }}" wire:navigate
-            class="w-full rounded-2xl bg-red-500 px-6 py-4 text-center font-bold text-white transition-all active:scale-90">
-            Seleccionar ubicacion
+            class="w-full rounded-2xl bg-red-500 p-4 text-center font-bold text-white transition-all active:scale-[0.98] shadow-md hover:bg-red-600 cursor-pointer">
+            Seleccionar ubicación
         </a>
     @endif
 </div>

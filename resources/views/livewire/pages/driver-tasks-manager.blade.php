@@ -1,4 +1,4 @@
-<div class="flex flex-col pb-8">
+<div class="flex flex-col pb-8 min-h-full">
 
     {{-- CABECERA / IDENTIFICADOR DEL REPARTIDOR --}}
     <div class="bg-white text-gray-800 px-4 py-3.5 text-center text-xs font-semibold flex items-center justify-between shadow-xs border-b border-gray-100">

@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\Pages;
 
+use App\Models\Order;
 use Livewire\Attributes\Title;
 use Livewire\Component;
-use App\Models\Order;
 
 #[Title('¡Pedido Completado!')]
 class CheckoutSuccess extends Component
@@ -15,14 +15,14 @@ class CheckoutSuccess extends Component
     {
         // Cargamos todas las relaciones necesarias para el desglose estilo recibo
         $this->order = $order->load([
-            'items.product', 
+            'items.product',
             'business',
-            'dropoffLocations'
+            'dropoffLocations',
         ]);
     }
 
     public function render()
     {
-        return view('livewire.checkout-success');
+        return view('livewire.pages.checkout-success');
     }
 }

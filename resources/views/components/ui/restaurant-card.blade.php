@@ -1,20 +1,14 @@
-<?php
-
-use Livewire\Component;
-use App\Models\Business;
-
-new class extends Component {
-    public Business $business;
-    public string $name;
-    public float $stars;
-    public string $type;
-    public string $time;
-    public string $image;
-};
-?>
+@props([
+    'business',
+    'name',
+    'stars',
+    'type',
+    'time',
+    'image'
+])
 
 <a wire:navigate href="{{ route('business', $business) }}"
-    class="rounded-4xl overflow-hidden bg-white transition-transform active:scale-90">
+    class="rounded-4xl overflow-hidden bg-white transition-all active:scale-[0.98] block border border-gray-150 shadow-xs">
 
     <div class="relative flex w-full items-center justify-center">
         <img class="h-46 w-full object-cover object-center" src="{{ $image }}" alt="{{ $name }}" />

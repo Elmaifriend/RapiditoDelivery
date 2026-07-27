@@ -120,7 +120,7 @@
                             x-on:click="triggerToast()"
                         >
                             <div
-                                class="{{ $category['bg'] }} flex h-16 w-16 items-center justify-center rounded-2xl border text-3xl shadow-sm">
+                                class="{{ $category['bg'] }} font-fluent flex h-16 w-16 items-center justify-center rounded-2xl border text-4xl shadow-sm drop-shadow-sm">
                                 {{ $category['icon'] }}
                             </div>
                             <span class="text-xs font-semibold text-gray-700">{{ $tag->name }}</span>

@@ -22,7 +22,7 @@
                     wire:navigate
                 >
                     <span class="relative z-10 text-base font-bold leading-tight text-orange-900">Comida<br>Rápida</span>
-                    <span class="absolute -bottom-1 -right-1 text-6xl drop-shadow-sm">🍔</span>
+                    <span class="absolute -bottom-1 -right-1 text-6xl drop-shadow-sm font-fluent">🍔</span>
                 </a>
             @endif
 
@@ -33,7 +33,7 @@
                     wire:navigate
                 >
                     <span class="relative z-10 text-base font-bold leading-tight text-emerald-900">Saludable<br>& Fit</span>
-                    <span class="absolute -bottom-1 -right-1 text-6xl drop-shadow-sm">🥗</span>
+                    <span class="absolute -bottom-1 -right-1 text-6xl drop-shadow-sm font-fluent">🥗</span>
                 </a>
             @endif
 
@@ -44,7 +44,7 @@
                     wire:navigate
                 >
                     <span class="relative z-10 text-base font-bold leading-tight text-amber-900">Bebidas<br>& Café</span>
-                    <span class="absolute -bottom-1 -right-1 text-6xl drop-shadow-sm">☕</span>
+                    <span class="absolute -bottom-1 -right-1 text-6xl drop-shadow-sm font-fluent">☕</span>
                 </a>
             @endif
 
@@ -55,7 +55,7 @@
                     wire:navigate
                 >
                     <span class="relative z-10 text-base font-bold leading-tight text-rose-900">Postres<br>& Dulces</span>
-                    <span class="absolute -bottom-1 -right-1 text-6xl drop-shadow-sm">🍰</span>
+                    <span class="absolute -bottom-1 -right-1 text-6xl drop-shadow-sm font-fluent">🍰</span>
                 </a>
             @endif
         </div>

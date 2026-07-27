@@ -32,7 +32,7 @@
     <div class="flex h-svh w-full flex-col overflow-hidden shadow-xl relative">
         <livewire:components.header-bar />
 
-        <main class="no-scrollbar max-w-[900px] mx-auto w-full relative flex-1 overflow-y-auto pb-32">
+        <main class="no-scrollbar max-w-[900px] mx-auto w-full relative flex-1 overflow-y-auto pb-26">
             {{ $slot }}
         </main>
 

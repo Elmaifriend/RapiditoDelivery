@@ -1,16 +1,7 @@
-<div class="flex flex-col gap-4 pt-6">
-    <div class="flex gap-4 items-center px-4">
-        <a
-            class="shadow-xs flex h-10 w-10 items-center justify-center rounded-2xl border border-gray-100 bg-white text-gray-800 transition-all active:scale-95"
-            href="{{ url()->previous() ?? '/' }}"
-            wire:navigate
-        >
-            <i class="bxf bx-chevron-left text-2xl"></i>
-        </a>
-        <h2 class="text-lg font-bold tracking-tight text-gray-900">{{ $tag->name }}</h2>
-    </div>
+@extends('layouts.page')
 
-    <div class="flex w-full flex-col gap-2 px-4">
+@section('content')
+    <div class="flex w-full flex-col gap-2">
         <div class="flex flex-col gap-4">
             @forelse($this->businesses as $restaurant)
                 <x-ui.restaurant-card
@@ -34,4 +25,4 @@
             @endforelse
         </div>
     </div>
-</div>
+@endsection

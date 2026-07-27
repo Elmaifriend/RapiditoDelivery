@@ -40,8 +40,6 @@ class BusinessOrdersDashboard extends Component
             // Filtramos para mantener los confirmados pero excluir los que ya fueron recogidos o entregados
             ->where('lifecycle_status', OrderLifecycleStatus::CONFIRMED)
             ->whereNotIn('delivery_status', [
-                DeliveryStatus::PICKED_UP,
-                DeliveryStatus::ON_THE_WAY,
                 DeliveryStatus::DELIVERED,
             ])
             ->whereNotIn('business_decision_status', [
@@ -102,6 +100,6 @@ class BusinessOrdersDashboard extends Component
         return view('livewire.pages.business-orders-dashboard', [
             'pedidosNuevos' => $this->orders,
             'pedidosAceptados' => $this->acceptedOrders,
-        ])->layout('layouts.app');
+        ]);
     }
 }

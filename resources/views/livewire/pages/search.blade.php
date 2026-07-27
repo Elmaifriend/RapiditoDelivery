@@ -17,45 +17,45 @@
         <div class="grid grid-cols-2 gap-4">
             @if ($tag = $this->topTags->firstWhere('name', 'Hamburguesas'))
                 <a
-                    class="rounded-4xl relative flex h-28 flex-col justify-center overflow-hidden border border-orange-200 bg-orange-100 p-5 transition-transform active:scale-[0.98]"
+                    class="relative flex h-28 flex-col justify-center overflow-hidden rounded-3xl border border-orange-200/60 bg-orange-50 p-5 shadow-sm transition-all active:scale-[0.98]"
                     href="/tag/{{ $tag->id }}"
                     wire:navigate
                 >
-                    <span class="relative z-10 text-lg font-bold leading-tight text-orange-900">Comida<br>Rápida</span>
-                    <i class="bxf bx-burger absolute -bottom-3 -right-3 text-7xl text-orange-300"></i>
+                    <span class="relative z-10 text-base font-bold leading-tight text-orange-900">Comida<br>Rápida</span>
+                    <span class="absolute -bottom-1 -right-1 text-6xl drop-shadow-sm">🍔</span>
                 </a>
             @endif
 
             @if ($tag = $this->topTags->firstWhere('name', 'Vegano'))
                 <a
-                    class="rounded-4xl relative flex h-28 flex-col justify-center overflow-hidden border border-emerald-200 bg-emerald-50 p-5 transition-transform active:scale-[0.98]"
+                    class="relative flex h-28 flex-col justify-center overflow-hidden rounded-3xl border border-emerald-200/60 bg-emerald-50 p-5 shadow-sm transition-all active:scale-[0.98]"
                     href="/tag/{{ $tag->id }}"
                     wire:navigate
                 >
-                    <span class="relative z-10 text-lg font-bold leading-tight text-emerald-900">Saludable<br>& Fit</span>
-                    <i class="bxf bx-carrot absolute -bottom-3 -right-3 text-7xl text-emerald-300"></i>
+                    <span class="relative z-10 text-base font-bold leading-tight text-emerald-900">Saludable<br>& Fit</span>
+                    <span class="absolute -bottom-1 -right-1 text-6xl drop-shadow-sm">🥗</span>
                 </a>
             @endif
 
             @if ($tag = $this->topTags->firstWhere('name', 'Café'))
                 <a
-                    class="rounded-4xl relative flex h-28 flex-col justify-center overflow-hidden border border-stone-200 bg-stone-100 p-5 transition-transform active:scale-[0.98]"
+                    class="relative flex h-28 flex-col justify-center overflow-hidden rounded-3xl border border-amber-200/60 bg-amber-50 p-5 shadow-sm transition-all active:scale-[0.98]"
                     href="/tag/{{ $tag->id }}"
                     wire:navigate
                 >
-                    <span class="relative z-10 text-lg font-bold leading-tight text-stone-900">Bebidas<br>& Café</span>
-                    <i class="bxf bx-cup-hot absolute -bottom-3 -right-3 text-7xl text-stone-300"></i>
+                    <span class="relative z-10 text-base font-bold leading-tight text-amber-900">Bebidas<br>& Café</span>
+                    <span class="absolute -bottom-1 -right-1 text-6xl drop-shadow-sm">☕</span>
                 </a>
             @endif
 
             @if ($tag = $this->topTags->firstWhere('name', 'Postres'))
                 <a
-                    class="rounded-4xl relative flex h-28 flex-col justify-center overflow-hidden border border-rose-200 bg-rose-100 p-5 transition-transform active:scale-[0.98]"
+                    class="relative flex h-28 flex-col justify-center overflow-hidden rounded-3xl border border-rose-200/60 bg-rose-50 p-5 shadow-sm transition-all active:scale-[0.98]"
                     href="/tag/{{ $tag->id }}"
                     wire:navigate
                 >
-                    <span class="relative z-10 text-lg font-bold leading-tight text-rose-900">Postres<br>& Dulces</span>
-                    <i class="bxf bx-icecream absolute -bottom-3 -right-3 text-7xl text-rose-300"></i>
+                    <span class="relative z-10 text-base font-bold leading-tight text-rose-900">Postres<br>& Dulces</span>
+                    <span class="absolute -bottom-1 -right-1 text-6xl drop-shadow-sm">🍰</span>
                 </a>
             @endif
         </div>

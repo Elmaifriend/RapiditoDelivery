@@ -12,6 +12,7 @@
     <link href='https://cdn.boxicons.com/3.0.8/fonts/basic/boxicons.min.css' rel='stylesheet'>
     <link href='https://cdn.boxicons.com/3.0.8/fonts/filled/boxicons-filled.min.css' rel='stylesheet'>
     <link href='https://cdn.boxicons.com/3.0.8/fonts/brands/boxicons-brands.min.css' rel='stylesheet'>
+    <link href='https://tetunori.github.io/fluent-emoji-webfont/dist/FluentEmojiColor.css' rel='stylesheet'>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
@@ -28,15 +29,15 @@
     <script src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google_maps.key') }}&libraries=places" async defer></script>
 </head>
 
-<body class="flex min-h-dvh justify-center bg-gray-50 font-sans text-gray-800">
-    <div class="mt-25 flex h-[85dvh] w-full flex-col overflow-hidden bg-gray-50 shadow-xl relative">
-        <livewire:header.bar />
+<body class="flex min-h-dvh justify-center bg-gray-100 font-sans text-gray-800">
+    <div class="flex h-svh w-full flex-col overflow-hidden shadow-xl relative">
+        <livewire:components.header-bar />
 
-        <main class="no-scrollbar max-w-[900px] mx-auto w-full relative flex-1 overflow-y-auto pb-32">
+        <main class="no-scrollbar max-w-[900px] mx-auto w-full relative flex-1 overflow-y-auto pb-26">
             {{ $slot }}
         </main>
 
-        <livewire:nav.bar />
+        <x-ui.nav-bar />
     </div>
 
     @livewireScripts

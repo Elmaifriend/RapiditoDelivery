@@ -3,9 +3,12 @@
 namespace App\Filament\Resources\Drivers\Tables;
 
 use App\Enums\DriverStatus;
-use Filament\Actions\BulkActionGroup;   // <-- CAMBIO AQUÍ
-use Filament\Actions\DeleteBulkAction; // <-- CAMBIO AQUÍ
-use Filament\Actions\EditAction;       // <-- CAMBIO AQUÍ
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Support\Enums\TextSize;
+use Filament\Tables\Columns\Layout\Split;
+use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -16,33 +19,40 @@ class DriversTable
     {
         return $table
             ->columns([
-                TextColumn::make('user.name')
-                    ->label('Nombre')
-                    ->searchable()
-                    ->sortable(),
+                Stack::make([
+                    Split::make([
+                        Stack::make([
+                            TextColumn::make('user.name')
+                                ->searchable()
+                                ->sortable()
+                                ->weight('bold')
+                                ->size(TextSize::Large),
 
-                TextColumn::make('user.email')
-                    ->label('Correo')
-                    ->searchable(),
+                            TextColumn::make('city.name')
+                                ->badge()
+                                ->color('gray'),
+                        ]),
+                    ]),
 
-                TextColumn::make('user.phone')
-                    ->label('Teléfono')
-                    ->searchable(),
+                    Stack::make([
+                        TextColumn::make('user.phone')
+                            ->icon('heroicon-m-phone')
+                            ->color('gray')
+                            ->size(TextSize::ExtraSmall)
+                            ->placeholder('Sin teléfono'),
 
-                TextColumn::make('city.name')
-                    ->label('Ciudad')
-                    ->sortable()
-                    ->searchable(),
+                        TextColumn::make('user.email')
+                            ->icon('heroicon-m-envelope')
+                            ->color('gray')
+                            ->size(TextSize::ExtraSmall),
+                    ]),
 
-                TextColumn::make('status')
-                    ->label('Estado')
-                    ->badge()
-                    ->sortable(),
-
-                TextColumn::make('created_at')
-                    ->label('Registrado')
-                    ->dateTime('d/m/Y H:i')
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    Split::make([
+                        TextColumn::make('status')
+                            ->badge()
+                            ->grow(false),
+                    ]),
+                ])->space(3),
             ])
             ->filters([
                 SelectFilter::make('city_id')
@@ -60,6 +70,11 @@ class DriversTable
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
+            ])
+            ->defaultSort('created_at', 'desc')
+            ->contentGrid([
+                'md' => 2,
+                'xl' => 3,
             ]);
     }
 }

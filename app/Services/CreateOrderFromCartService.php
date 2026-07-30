@@ -2,10 +2,10 @@
 
 namespace App\Services;
 
+use App\Enums\BusinessDecisionStatus;
 use App\Enums\DeliveryStatus;
 use App\Enums\OrderLifecycleStatus;
 use App\Enums\PaymentStatus;
-use App\Enums\RestaurantDecisionStatus;
 use App\Models\Cart;
 use App\Models\DeliveryAddress;
 use App\Models\Order;
@@ -43,7 +43,7 @@ class CreateOrderFromCartService
                 'customer_name' => $customerData['customer_name'],
                 'customer_phone' => $customerData['customer_phone'],
                 'lifecycle_status' => OrderLifecycleStatus::PENDING,
-                'business_decision_status' => RestaurantDecisionStatus::PENDING,
+                'business_decision_status' => BusinessDecisionStatus::PENDING,
                 'delivery_status' => DeliveryStatus::PENDING,
                 'payment_status' => PaymentStatus::PENDING,
                 'special_instructions' => $customerData['special_instructions'] ?? null,
@@ -51,8 +51,8 @@ class CreateOrderFromCartService
                 'subtotal' => $cart->subtotal,
                 'delivery_fee' => $cart->delivery_fee,
                 'total' => $cart->total,
-            ]); 
- 
+            ]);
+
             // 3. Duplicar la ubicación seleccionada en el Dropoff definitivo de la orden
             $order->dropoffLocations()->create([
                 'formatted_address' => $temporaryAddress->formatted_address,

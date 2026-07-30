@@ -5,6 +5,9 @@ namespace App\Filament\Resources\Users\Tables;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Support\Enums\TextSize;
+use Filament\Tables\Columns\Layout\Split;
+use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -14,27 +17,36 @@ class UsersTable
     {
         return $table
             ->columns([
-                TextColumn::make('id')
-                    ->sortable(),
+                Stack::make([
+                    Split::make([
+                        Stack::make([
+                            TextColumn::make('name')
+                                ->searchable()
+                                ->sortable()
+                                ->weight('bold')
+                                ->size(TextSize::Large),
 
-                TextColumn::make('name')
-                    ->searchable()
-                    ->sortable(),
+                            TextColumn::make('email')
+                                ->icon('heroicon-m-envelope')
+                                ->color('gray'),
+                        ]),
+                    ]),
 
-                TextColumn::make('email')
-                    ->searchable()
-                    ->sortable(),
+                    Stack::make([
+                        TextColumn::make('phone')
+                            ->icon('heroicon-m-phone')
+                            ->color('gray')
+                            ->size(TextSize::ExtraSmall)
+                            ->placeholder('Sin teléfono'),
 
-                // Mostramos el nombre del restaurante provisional asociado
-                TextColumn::make('business.name')
-                    ->label('Restaurante')
-                    ->placeholder('Sin restaurante asignado')
-                    ->sortable(),
-
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                        TextColumn::make('business.name')
+                            ->label('Restaurante')
+                            ->icon('heroicon-m-building-storefront')
+                            ->color('gray')
+                            ->size(TextSize::ExtraSmall)
+                            ->placeholder('Sin restaurante asignado'),
+                    ]),
+                ])->space(3),
             ])
             ->filters([
                 //
@@ -46,6 +58,11 @@ class UsersTable
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
+            ])
+            ->defaultSort('created_at', 'desc')
+            ->contentGrid([
+                'md' => 2,
+                'xl' => 3,
             ]);
     }
 }

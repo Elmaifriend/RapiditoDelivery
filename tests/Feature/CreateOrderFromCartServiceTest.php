@@ -1,9 +1,9 @@
 <?php
 
+use App\Enums\BusinessDecisionStatus;
 use App\Enums\DeliveryStatus;
 use App\Enums\OrderLifecycleStatus;
 use App\Enums\PaymentStatus;
-use App\Enums\RestaurantDecisionStatus;
 use App\Models\Business;
 use App\Models\Cart;
 use App\Models\CartItem;
@@ -12,8 +12,9 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
 use App\Services\CreateOrderFromCartService;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
-uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
+uses(RefreshDatabase::class);
 
 test('it successfully converts a cart and temporary address into an order', function () {
     // Arrange
@@ -97,7 +98,7 @@ test('it successfully converts a cart and temporary address into an order', func
         'customer_name' => 'John Doe',
         'customer_phone' => '+51999999999',
         'lifecycle_status' => OrderLifecycleStatus::PENDING->value,
-        'business_decision_status' => RestaurantDecisionStatus::PENDING->value,
+        'business_decision_status' => BusinessDecisionStatus::PENDING->value,
         'delivery_status' => DeliveryStatus::PENDING->value,
         'payment_status' => PaymentStatus::PENDING->value,
         'special_instructions' => 'Call when outside',

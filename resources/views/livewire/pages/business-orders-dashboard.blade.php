@@ -1,5 +1,9 @@
 @extends('layouts.page')
 
+@php
+    use App\Enums\DeliveryStatus;
+@endphp
+
 @section('content')
     <div
         class="flex flex-col gap-6 py-4"
@@ -7,10 +11,23 @@
     >
         <x-ui.page-section>
             <div class="flex items-center justify-between">
-                <p class="text-sm font-semibold text-gray-500">
-                    Panel de Negocio
-                    <span class="font-bold text-red-500">#{{ $businessId }}</span>
-                </p>
+                <div class="flex items-center gap-3">
+                    <p class="text-sm font-semibold text-gray-500">
+                        Panel de Negocio
+                        <span class="font-bold text-red-500">#{{ $businessId }}</span>
+                    </p>
+
+                    {{-- Botón / Ícono de Configuración del Perfil --}}
+                    <a 
+                        href="{{ route('businesses.profile', ['business' => $businessId]) }}" 
+                        class="flex h-8 w-8 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-500 shadow-2xs transition-all hover:bg-gray-50 hover:text-gray-900 active:scale-95"
+                        title="Configuración del restaurante"
+                        wire:navigate
+                    >
+                        <i class="bxf bx-cog text-lg"></i>
+                    </a>
+                </div>
+
                 <x-ui.badge
                     color="green"
                     :pulse="true"
@@ -41,7 +58,7 @@
                     <span
                         class="{{ $activeTab === 'nuevos' ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-500' }} ml-1 rounded-lg px-2 py-0.5 text-xs font-bold"
                     >
-                        {{ count($pedidosNuevos) }}
+                        {{ $pedidosNuevos?->count() ?? 0 }}
                     </span>
                 </button>
 
@@ -53,7 +70,7 @@
                     <span
                         class="{{ $activeTab === 'preparacion' ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-500' }} ml-1 rounded-lg px-2 py-0.5 text-xs font-bold"
                     >
-                        {{ count($pedidosAceptados) }}
+                        {{ $pedidosAceptados?->count() ?? 0 }}
                     </span>
                 </button>
             </div>
@@ -63,7 +80,7 @@
             <div class="pb-10">
                 @if ($activeTab === 'nuevos')
                     {{-- PESTAÑA: NUEVOS PEDIDOS --}}
-                    @if ($pedidosNuevos->isEmpty())
+                    @if (blank($pedidosNuevos) || $pedidosNuevos->isEmpty())
                         <div
                             class="my-4 flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-gray-200 bg-gray-50/50 p-10 text-center">
                             <div
@@ -72,13 +89,12 @@
                             </div>
                             <h3 class="text-lg font-bold text-gray-900">Sin órdenes por aceptar</h3>
                             <p class="mt-2 max-w-[250px] text-sm text-gray-500">No hay pedidos pendientes en este momento.
-                                Te
-                                avisaremos cuando llegue uno nuevo.</p>
+                                Te avisaremos cuando llegue uno nuevo.</p>
                         </div>
                     @else
                         <div class="space-y-6">
                             @foreach ($pedidosNuevos as $pedido)
-                                <x-ui.card>
+                                <x-ui.card wire:key="new-order-{{ $pedido->id }}">
                                     <div class="mb-4 flex items-start justify-between border-b border-gray-100 pb-4">
                                         <div class="flex items-center gap-3">
                                             <div
@@ -106,7 +122,7 @@
 
                                     <div class="mb-4 space-y-3 rounded-2xl border border-gray-100 bg-gray-50 p-4">
                                         <div class="divide-y divide-gray-100">
-                                            @foreach ($pedido->items as $item)
+                                            @foreach ($pedido->items ?? [] as $item)
                                                 <x-ui.product-item
                                                     :quantity="$item->quantity"
                                                     :name="$item->product_name_snapshot"
@@ -153,7 +169,7 @@
                     @endif
                 @else
                     {{-- PESTAÑA: EN COCINA --}}
-                    @if ($pedidosAceptados->isEmpty())
+                    @if (blank($pedidosAceptados) || $pedidosAceptados->isEmpty())
                         <div
                             class="my-4 flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-gray-200 bg-gray-50/50 p-10 text-center">
                             <div
@@ -169,51 +185,54 @@
                             @foreach ($pedidosAceptados as $pedido)
                                 @php
                                     $deliveryStatus = $pedido->delivery_status;
+
                                     $statusMap = [
-                                        \App\Enums\DeliveryStatus::PENDING->value => [
+                                        DeliveryStatus::PENDING->value => [
                                             'label' => 'Cocina',
                                             'color' => 'blue',
                                             'pulse' => true,
                                         ],
-                                        \App\Enums\DeliveryStatus::WAITING_DRIVER->value => [
+                                        DeliveryStatus::WAITING_DRIVER->value => [
                                             'label' => 'Buscando',
                                             'color' => 'amber',
                                             'pulse' => true,
                                         ],
-                                        \App\Enums\DeliveryStatus::DRIVER_HEADING_TO_RESTAURANT->value => [
+                                        DeliveryStatus::DRIVER_HEADING_TO_RESTAURANT->value => [
                                             'label' => 'En Camino',
                                             'color' => 'indigo',
                                             'pulse' => true,
                                         ],
-                                        \App\Enums\DeliveryStatus::PICKED_UP->value => [
+                                        DeliveryStatus::PICKED_UP->value => [
                                             'label' => 'Recogido',
                                             'color' => 'gray',
                                             'pulse' => false,
                                         ],
-                                        \App\Enums\DeliveryStatus::ON_THE_WAY->value => [
+                                        DeliveryStatus::ON_THE_WAY->value => [
                                             'label' => 'En Ruta',
                                             'color' => 'sky',
                                             'pulse' => true,
                                         ],
-                                        \App\Enums\DeliveryStatus::DELIVERED->value => [
+                                        DeliveryStatus::DELIVERED->value => [
                                             'label' => 'Entregado',
                                             'color' => 'green',
                                             'pulse' => false,
                                         ],
                                     ];
-                                    $statusDetails = $statusMap[$deliveryStatus->value] ?? [
+
+                                    $statusKey = $deliveryStatus instanceof DeliveryStatus ? $deliveryStatus->value : $deliveryStatus;
+
+                                    $statusDetails = $statusMap[$statusKey ?? ''] ?? [
                                         'label' => 'Estado Desconocido',
                                         'color' => 'gray',
                                         'pulse' => false,
                                     ];
 
-                                    $isPendingDriver =
-                                        $pedido->delivery_status->value === \App\Enums\DeliveryStatus::PENDING->value;
+                                    $isPendingDriver = $deliveryStatus === DeliveryStatus::PENDING;
                                 @endphp
 
                                 <x-ui.card
                                     class="{{ !$isPendingDriver ? 'opacity-90 border-indigo-100 bg-gray-50/50 shadow-none' : '' }} transition-all duration-300"
-                                    wire:key="order-{{ $pedido->id }}"
+                                    wire:key="accepted-order-{{ $pedido->id }}"
                                 >
                                     <div class="mb-4 flex items-start justify-between gap-6 border-b border-gray-100 pb-4">
                                         <div class="flex items-center gap-3">
@@ -243,7 +262,7 @@
 
                                     <div class="mb-4 space-y-3 rounded-2xl border border-gray-100 bg-gray-50 p-4">
                                         <div class="divide-y divide-gray-100">
-                                            @foreach ($pedido->items as $item)
+                                            @foreach ($pedido->items ?? [] as $item)
                                                 <x-ui.product-item
                                                     :quantity="$item->quantity"
                                                     :name="$item->product_name_snapshot"
@@ -268,7 +287,7 @@
                                     </div>
 
                                     <div>
-                                        @if ($pedido->delivery_status->value === \App\Enums\DeliveryStatus::PENDING->value)
+                                        @if ($pedido->delivery_status === DeliveryStatus::PENDING)
                                             <x-ui.button
                                                 class="w-full"
                                                 variant="primary"
@@ -277,22 +296,22 @@
                                                 <i class="bxf bx-rocket text-xl"></i>
                                                 Llamar Repartidor
                                             </x-ui.button>
-                                        @elseif ($pedido->delivery_status->value === \App\Enums\DeliveryStatus::WAITING_DRIVER->value)
+                                        @elseif ($pedido->delivery_status === DeliveryStatus::WAITING_DRIVER)
                                             <div
                                                 class="flex items-center justify-center gap-2 rounded-2xl border border-amber-200 bg-amber-50 px-3 py-4 text-center text-sm font-bold text-amber-700">
                                                 <span class="h-2 w-2 animate-pulse rounded-full bg-amber-500"></span>
                                                 Buscando repartidor...
                                             </div>
-                                        @elseif ($pedido->delivery_status->value === \App\Enums\DeliveryStatus::DRIVER_HEADING_TO_RESTAURANT->value)
+                                        @elseif ($pedido->delivery_status === DeliveryStatus::DRIVER_HEADING_TO_RESTAURANT)
                                             <div
                                                 class="flex items-center justify-center gap-2 rounded-2xl border border-indigo-200 bg-indigo-50 px-3 py-4 text-center text-sm font-bold text-indigo-700">
                                                 <span class="h-2 w-2 animate-pulse rounded-full bg-indigo-500"></span>
                                                 Repartidor en camino al local
                                             </div>
-                                        @elseif (in_array($pedido->delivery_status->value, [
-                                                \App\Enums\DeliveryStatus::PICKED_UP->value,
-                                                \App\Enums\DeliveryStatus::ON_THE_WAY->value,
-                                            ]))
+                                        @elseif (in_array($pedido->delivery_status, [
+                                                DeliveryStatus::PICKED_UP,
+                                                DeliveryStatus::ON_THE_WAY,
+                                            ], true))
                                             <div
                                                 class="flex items-center justify-center gap-2 rounded-2xl border border-sky-200 bg-sky-50 px-3 py-4 text-center text-sm font-bold text-sky-700">
                                                 <i class="bxf bx-cycling text-xl"></i>

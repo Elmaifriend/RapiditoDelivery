@@ -12,6 +12,9 @@ use App\Livewire\Pages\Profile;
 use App\Livewire\Pages\Search;
 use App\Livewire\Pages\TagPage;
 use Illuminate\Support\Facades\Route;
+use App\Livewire\Pages\DriverProfile;
+use App\Livewire\Pages\BusinessProfile;
+
 
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
@@ -35,3 +38,5 @@ Route::get('/checkout/address', Location::class)->name('checkout.address');
 Route::get('/kitchen/orders/{businessId}', BusinessOrdersDashboard::class)->name('kitchen.orders');
 Route::get('/checkout/success/{order}', CheckoutSuccess::class)->name('checkout.success');
 Route::get('/driver/{driver}', DriverTasksManager::class)->name('driver.tasks');
+Route::get('/driver/{driver}/profile', DriverProfile::class)->name('driver.profile');
+Route::get('/businesses/{business}/profile', BusinessProfile::class)->name('businesses.profile');

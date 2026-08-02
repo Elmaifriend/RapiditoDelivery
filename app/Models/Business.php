@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use App\Models\User;
 use App\Models\Tag;
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\Schedule;
 
 class Business extends Model
 {
@@ -45,6 +47,11 @@ class Business extends Model
         'lng' => 'float',
     ];
 
+    public function schedules(): MorphMany
+    {
+        return $this->morphMany(Schedule::class, 'scheduleable');
+    }
+
     public function products()
     {
         return $this->hasMany(Product::class, "business_id");
@@ -63,7 +70,7 @@ class Business extends Model
 
     public function users()
     {
-        return $this->belongsToMany(User::class, "business_user", "business_id", "user_id");
+        return $this->hasMany(User::class, 'business_id');
     }
 
     public function productCategories()

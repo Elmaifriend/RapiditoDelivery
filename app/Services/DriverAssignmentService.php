@@ -2,13 +2,13 @@
 
 namespace App\Services;
 
-use App\Models\Driver;
-use App\Models\Order;
-use App\Enums\DriverStatus;
-use App\Enums\DeliveryStatus;
 use App\Enums\DeliveryOutcome;
+use App\Enums\DeliveryStatus;
+use App\Enums\DriverOperationalStatus;
 use App\Enums\OrderLifecycleStatus;
 use App\Enums\PaymentStatus;
+use App\Models\Driver;
+use App\Models\Order;
 use Illuminate\Support\Facades\DB;
 
 class DriverAssignmentService
@@ -29,7 +29,34 @@ class DriverAssignmentService
 
             if ($order->driver) {
                 $order->driver->update([
-                    'status' => DriverStatus::DELIVERING,
+                    'operational_status' => DriverOperationalStatus::DELIVERING,
+                ]);
+            }
+        });
+    }
+
+    /**
+     * Finaliza la entrega sin buscar un siguiente pedido (ej. cuando el repartidor se desconectó).
+     */
+    public function completeDelivery(Order $order, DeliveryOutcome $outcome = DeliveryOutcome::PAID_CORRECTLY): void
+    {
+        DB::transaction(function () use ($order, $outcome) {
+            $driver = $order->driver;
+
+            $orderData = [
+                'delivery_status'  => DeliveryStatus::DELIVERED,
+                'lifecycle_status' => OrderLifecycleStatus::COMPLETED,
+            ];
+
+            if ($outcome === DeliveryOutcome::PAID_CORRECTLY) {
+                $orderData['payment_status'] = PaymentStatus::PAID;
+            }
+
+            $order->update($orderData);
+
+            if ($driver) {
+                $driver->update([
+                    'operational_status' => DriverOperationalStatus::IDLE,
                 ]);
             }
         });
@@ -46,17 +73,16 @@ class DriverAssignmentService
             // 1. Determinar datos a actualizar en la orden actual
             $orderData = [
                 'delivery_status'  => DeliveryStatus::DELIVERED,
-                'lifecycle_status' => OrderLifecycleStatus::COMPLETED, // Usa 'lifecycle_status' como espera el modelo
+                'lifecycle_status' => OrderLifecycleStatus::COMPLETED,
             ];
 
-            // Si el cliente pagó correctamente, marcamos el pago como PAID
             if ($outcome === DeliveryOutcome::PAID_CORRECTLY) {
                 $orderData['payment_status'] = PaymentStatus::PAID;
             }
 
             $order->update($orderData);
 
-            if (!$driver) {
+            if (! $driver) {
                 return;
             }
 
@@ -73,7 +99,7 @@ class DriverAssignmentService
                 $this->dispatchService->assignOrderToDriver($nextOrder, $driver);
             } else {
                 $driver->update([
-                    'status' => DriverStatus::AVAILABLE,
+                    'operational_status' => DriverOperationalStatus::IDLE,
                 ]);
             }
         });

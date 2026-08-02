@@ -2,10 +2,13 @@
 
 namespace App\Filament\Resources\Businesses\Schemas;
 
-use Filament\Forms\Components\Checkbox;
+use App\Enums\DayOfWeek;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\TimePicker;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
@@ -76,8 +79,8 @@ class BusinessForm
 
                                         TextInput::make('slug')
                                             ->label('URL (Slug)')
-                                            ->disabled()
-                                            ->formatStateUsing(fn ($state) => 'https://rapidito.com/business/'.$state)
+                                            ->prefix('https://rapidito.com/business/')
+                                            ->readOnly()
                                             ->copyable()
                                             ->dehydrated()
                                             ->required(),
@@ -110,8 +113,8 @@ class BusinessForm
                                                         'false' => 'heroicon-m-eye-slash',
                                                     ])
                                                     ->inline()
-                                                    ->formatStateUsing(fn($state) => $state ? 'true' : 'false')
-                                                    ->dehydrateStateUsing(fn($state) => $state === 'true')
+                                                    ->formatStateUsing(fn ($state) => $state ? 'true' : 'false')
+                                                    ->dehydrateStateUsing(fn ($state) => $state === 'true')
                                                     ->default('true'),
                                             ]),
 
@@ -238,49 +241,103 @@ class BusinessForm
 
                                         TextInput::make('web_site')
                                             ->label('Sitio Web')
-                                            ->required()
                                             ->url()
                                             ->columnSpanFull(),
+                                    ]),
+
+                                Tab::make('Horarios de Atención')
+                                    ->icon('heroicon-m-clock')
+                                    ->schema([
+                                        Repeater::make('schedules')
+                                            ->relationship('schedules')
+                                            ->schema([
+                                                Select::make('day_of_week')
+                                                    ->label('Día de la Semana')
+                                                    ->options(collect(DayOfWeek::cases())->mapWithKeys(fn ($day) => [
+                                                        $day->value => $day->label(),
+                                                    ]))
+                                                    ->enum(DayOfWeek::class)
+                                                    ->required()
+                                                    ->distinct()
+                                                    ->disableOptionsWhenSelectedInSiblingRepeaterItems(),
+
+                                                // 1. Cambiar open_time -> start_time
+                                                TimePicker::make('start_time')
+                                                    ->label('Apertura')
+                                                    ->seconds(false)
+                                                    ->default('09:00')
+                                                    ->required(),
+
+                                                // 2. Cambiar close_time -> end_time
+                                                TimePicker::make('end_time')
+                                                    ->label('Cierre')
+                                                    ->seconds(false)
+                                                    ->default('22:00')
+                                                    ->required(),
+
+                                                Toggle::make('is_active')
+                                                    ->label('Abierto')
+                                                    ->default(true)
+                                                    ->inline(false),
+                                            ])
+                                            ->columns(4)
+                                            ->defaultItems(0)
+                                            ->addActionLabel('Agregar Horario de Atención')
+                                            ->reorderable(false)
+                                            ->collapsible()
+                                            ->itemLabel(function (array $state): ?string {
+                                                if (! isset($state['day_of_week'])) {
+                                                    return 'Nuevo Horario';
+                                                }
+
+                                                $val = $state['day_of_week'];
+                                                $dayEnum = $val instanceof DayOfWeek
+                                                    ? $val
+                                                    : DayOfWeek::tryFrom($val);
+
+                                                $dayLabel = $dayEnum?->label() ?? 'Día no seleccionado';
+
+                                                if (isset($state['is_active']) && ! $state['is_active']) {
+                                                    return "{$dayLabel} - (Cerrado)";
+                                                }
+
+                                                // 3. Ajustar las variables aquí también
+                                                $openTime = $state['start_time'] ?? '--:--';
+                                                $closeTime = $state['end_time'] ?? '--:--';
+
+                                                return "{$dayLabel} ({$openTime} - {$closeTime})";
+                                            }),
                                     ]),
                             ]),
                     ])->grow(true),
 
                 Section::make('Configuración Adicional')
-                    ->description('Ajusta la visibilidad, el estado operativo y los servicios disponibles para tu restaurante.')
                     ->columnSpan(2)
                     ->schema([
-                        Section::make('Estado Operativo')
-                            ->compact()
-                            ->schema([
-                                ToggleButtons::make('status')
-                                    ->label('Visibilidad en App')
-                                    ->required()
-                                    ->options(['active' => 'Público', 'inactive' => 'Oculto'])
-                                    ->colors(['active' => 'success', 'inactive' => 'warning'])
-                                    ->icons(['active' => 'heroicon-m-eye', 'inactive' => 'heroicon-m-eye-slash'])
-                                    ->default('active')
-                                    ->inline(),
+                        Select::make('status')
+                            ->label('Estado del Negocio')
+                            ->options([
+                                'active' => 'Activo',
+                                'inactive' => 'Inactivo',
+                                'pending' => 'Pendiente',
+                            ])
+                            ->default('active')
+                            ->required()
+                            ->native(false),
 
-                                ToggleButtons::make('is_open')
-                                    ->label('Estatus Actual')
-                                    ->required()
-                                    ->options(['true' => 'Abierto', 'false' => 'Cerrado'])
-                                    ->colors(['true' => 'success', 'false' => 'gray'])
-                                    ->icons(['true' => 'heroicon-m-building-storefront', 'false' => 'heroicon-m-moon'])
-                                    ->formatStateUsing(fn ($state) => $state ? 'true' : 'false')
-                                    ->dehydrateStateUsing(fn ($state) => $state === 'true')
-                                    ->default('true')
-                                    ->inline(),
-                            ]),
+                        Toggle::make('is_open')
+                            ->label('¿Negocio Abierto?')
+                            ->helperText('Permite forzar la apertura/cierre independientemente del horario.')
+                            ->default(true),
 
-                        Section::make('Servicios')
-                            ->compact()
-                            ->schema([
-                                Checkbox::make('accepts_delivery')->label('Acepta Delivery'),
-                                Checkbox::make('accepts_pickup')->label('Acepta Pickup'),
-                            ]),
-                    ])
-                    ->grow(false),
+                        Toggle::make('accepts_delivery')
+                            ->label('Acepta Delivery')
+                            ->default(true),
+
+                        Toggle::make('accepts_pickup')
+                            ->label('Acepta Retiro en Tienda')
+                            ->default(true),
+                    ]),
             ]);
     }
 }

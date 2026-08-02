@@ -7,6 +7,7 @@
             map: null,
             lat: {{ $this->currentAddress?->lat ?? 32.5149 }},
             lng: {{ $this->currentAddress?->lng ?? -117.0382 }},
+            showNoDriversModal: false,
         
             init() {
                 this.$nextTick(() => { this.initMap(); });
@@ -29,6 +30,7 @@
                 }).addTo(this.map);
             }
         }"
+        @open-no-drivers-modal.window="showNoDriversModal = true"
     >
         {{-- 
 
@@ -90,8 +92,7 @@
                         />
 
                         <div class="space-y-1.5">
-                            <label class="block text-xs font-medium text-gray-400">WhatsApp /
-                                Teléfono*</label>
+                            <label class="block text-xs font-medium text-gray-400">WhatsApp / Teléfono*</label>
                             <div
                                 class="flex items-center gap-2 rounded-2xl border border-gray-100 bg-gray-50 px-3 py-1 transition-all duration-200 focus-within:border-red-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-red-500/10">
                                 <select
@@ -161,8 +162,7 @@
                             rows="4"
                             wire:model.blur="specialInstructions"
                             placeholder="Ej. Sin cebolla, aderezo aparte..."
-                        >
-                        </textarea>
+                        ></textarea>
                         @if ($errors->first('specialInstructions'))
                             <span
                                 class="mt-1 block text-xs font-bold text-red-500">{{ $errors->first('specialInstructions') }}</span>
@@ -210,8 +210,7 @@
                                 <h4 class="text-xs font-bold text-emerald-950">Pago en efectivo al entregar</h4>
                                 <p class="text-[11px] font-medium leading-relaxed text-emerald-800">
                                     Le entregarás el importe exacto o cambio en efectivo al repartidor al momento de recibir
-                                    tu
-                                    pedido.
+                                    tu pedido.
                                 </p>
                             </div>
                         </div>
@@ -277,37 +276,40 @@
         @endif
 
         <div class="fixed bottom-26 left-0 right-0 z-40 px-4">
-                <x-ui.button
-                    class="w-full"
-                    wire:click="confirmPayment"
-                    wire:loading.attr="disabled"
-                    :disabled="is_null($this->deliveryFee)"
-                >
-                    <div class="flex items-center gap-2 text-sm tracking-wide">
-                        <i
-                            class="bxf bx-lock-alt text-xs"
-                            wire:loading.remove
-                            wire:target="confirmPayment"
-                        ></i>
-                        <i
-                            class="bxf bx-loader-alt animate-spin text-xs"
-                            wire:loading
-                            wire:target="confirmPayment"
-                        ></i>
-                        <span
-                            wire:loading.remove
-                            wire:target="confirmPayment"
-                        >Hacer Pedido</span>
-                        <span
-                            wire:loading
-                            wire:target="confirmPayment"
-                        >Procesando...</span>
-                    </div>
+            <x-ui.button
+                class="w-full"
+                wire:click="confirmPayment"
+                wire:loading.attr="disabled"
+                :disabled="is_null($this->deliveryFee)"
+            >
+                <div class="flex items-center gap-2 text-sm tracking-wide">
+                    <i
+                        class="bxf bx-lock-alt text-xs"
+                        wire:loading.remove
+                        wire:target="confirmPayment"
+                    ></i>
+                    <i
+                        class="bxf bx-loader-alt animate-spin text-xs"
+                        wire:loading
+                        wire:target="confirmPayment"
+                    ></i>
+                    <span
+                        wire:loading.remove
+                        wire:target="confirmPayment"
+                    >Hacer Pedido</span>
+                    <span
+                        wire:loading
+                        wire:target="confirmPayment"
+                    >Procesando...</span>
+                </div>
 
-                    <div class="flex items-center gap-1 font-mono text-sm font-bold">
-                        <span>${{ number_format($this->totalAmount, 2) }}</span>
-                    </div>
-                </x-ui.button>
+                <div class="flex items-center gap-1 font-mono text-sm font-bold">
+                    <span>${{ number_format($this->totalAmount, 2) }}</span>
+                </div>
+            </x-ui.button>
         </div>
+        
+        <x-ui.no-drivers-modal />
+        <x-ui.max-amount-modal />
     </div>
 @endsection

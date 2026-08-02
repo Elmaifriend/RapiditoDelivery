@@ -8,11 +8,13 @@ use App\Models\Cart;
 use App\Models\DeliveryAddress;
 use App\Services\ConvertCartToOrderService;
 use App\Services\DeliveryFeeCalculatorService;
+use App\Services\DriverAvailabilityService;
 use App\Services\WhatsAppNotifierService;
 use Illuminate\Support\Facades\Cookie;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use App\Services\OrderLimitValidationService;
 
 #[Title('Checkout')]
 class Checkout extends Component
@@ -139,6 +141,17 @@ class Checkout extends Component
     }
 
     #[Computed]
+    public function hasAvailableDriver(): bool
+    {
+        if (! $this->cart || ! $this->cart->business) {
+            return false;
+        }
+
+        return app(DriverAvailabilityService::class)
+            ->hasAvailableDriversForBusiness($this->cart->business);
+    }
+
+    #[Computed]
     public function totalAmount()
     {
         if (! $this->cart) {
@@ -150,8 +163,8 @@ class Checkout extends Component
         return $this->cart->subtotal + $fee;
     }
 
-    public function confirmPayment(ConvertCartToOrderService $orderService)
-    {
+    public function confirmPayment( ConvertCartToOrderService $orderService, OrderLimitValidationService $limitValidationService ) {
+        // 1. Validaciones básicas de formulario
         $this->validate([
             'customerName' => 'required|string|max:100',
             'countryCode' => 'required|in:'.implode(',', array_column(CountryCode::cases(), 'name')),
@@ -178,39 +191,47 @@ class Checkout extends Component
 
         if (! $cart) {
             $this->addError('general', 'El carrito no es válido.');
-
             return;
         }
 
         if (! $address) {
             $this->addError('address', 'Por favor selecciona una dirección de entrega válida.');
-
             return;
         }
 
         if (is_null($this->deliveryFee)) {
             $this->addError('address', 'La dirección seleccionada está fuera de nuestra zona de cobertura.');
-
             return;
         }
 
-        // Armamos el número completo con su lada internacional
+        // 2. Validación de Límite Máximo de Compra
+        // Se detiene el proceso y abre el modal si excede el límite
+        if ($limitValidationService->exceedsLimit($cart)) {
+            $this->dispatch('open-max-amount-modal');
+            return;
+        }
+
+        // 3. Validación de disponibilidad de repartidores
+        if (! $this->hasAvailableDriver) {
+            // Disparar el evento para abrir el modal SOLAMENTE al presionar el botón
+            $this->dispatch('open-no-drivers-modal');
+            return;
+        }
+
+        // 4. Continuar con el proceso de creación del pedido...
         $selectedEnum = CountryCode::fromName($this->countryCode) ?? CountryCode::MX;
         $fullPhoneNumber = $selectedEnum->dialCode().preg_replace('/\D/', '', $this->customerPhone);
 
-        // 1. Guardamos la nueva referencia directamente en el modelo de la dirección
         $address->update([
             'reference' => $this->reference,
             'last_used_at' => now(),
         ]);
 
-        // 2. Actualizamos los totales del carrito actual
         $cart->update([
             'delivery_fee' => $this->deliveryFee,
             'total' => $this->totalAmount,
         ]);
 
-        // 3. Convertimos el carrito en una Orden (specialInstructions pasa al restaurante/cocina)
         $order = $orderService->execute(
             $cart,
             $address,
@@ -224,7 +245,6 @@ class Checkout extends Component
                 'customer_phone' => $fullPhoneNumber,
             ]);
 
-            // Guardamos las referencias e instrucciones de entrega en la tabla 'order_dropoff_locations'
             if (method_exists($order, 'dropoffLocations')) {
                 $order->dropoffLocations()->update([
                     'reference' => $this->reference,
@@ -232,7 +252,6 @@ class Checkout extends Component
                 ]);
             }
 
-            // 4. Mandar notificaciones de WhatsApp
             $notifier = new WhatsAppNotifierService;
             $notifier->notifyCustomerOrderCreated($order);
             $notifier->notifyRestaurantNewOrder($order);

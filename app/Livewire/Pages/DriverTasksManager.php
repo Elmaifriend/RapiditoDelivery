@@ -4,6 +4,7 @@ namespace App\Livewire\Pages;
 
 use App\Enums\DeliveryOutcome;
 use App\Enums\DeliveryStatus;
+use App\Enums\DriverAvailability;
 use App\Models\Driver;
 use App\Models\Order;
 use App\Services\DriverAssignmentService;
@@ -58,7 +59,6 @@ class DriverTasksManager extends Component
             return;
         }
 
-        // Si el repartidor dejó notas al recoger el paquete
         if (! empty($this->driverNotes)) {
             $this->currentOrder->update([
                 'delivery_notes' => trim(($this->currentOrder->delivery_notes ?? '').' | Recogida: '.$this->driverNotes),
@@ -80,10 +80,8 @@ class DriverTasksManager extends Component
             return;
         }
 
-        // Convertir el string del formulario al Enum
         $outcome = DeliveryOutcome::tryFrom($this->paymentOutcome) ?? DeliveryOutcome::PAID_CORRECTLY;
 
-        // Guardar las notas e incidentes en la orden si existen
         $this->currentOrder->update([
             'delivery_outcome' => $outcome,
             'delivery_notes' => ! empty($this->incidentNotes)
@@ -91,8 +89,14 @@ class DriverTasksManager extends Component
                 : $this->currentOrder->delivery_notes,
         ]);
 
-        // Delegar el cierre de la orden y la reasignación al servicio
-        $assignmentService->completeOrderAndPullNext($this->currentOrder, $outcome);
+        $this->driver->refresh();
+
+        // Evalúa la disponibilidad laboral para asignar nuevo pedido o solo cerrar la orden actual
+        if ($this->driver->availability === DriverAvailability::OFFLINE) {
+            $assignmentService->completeDelivery($this->currentOrder, $outcome);
+        } else {
+            $assignmentService->completeOrderAndPullNext($this->currentOrder, $outcome);
+        }
 
         $this->reset(['paymentOutcome', 'incidentNotes']);
         $this->loadActiveOrder();
@@ -100,6 +104,9 @@ class DriverTasksManager extends Component
 
     public function render()
     {
-        return view('livewire.pages.driver-tasks-manager');
+        return view('livewire.pages.driver-tasks-manager', [
+            'driverId' => $this->driver->id,
+            'driver'   => $this->driver,
+        ]);
     }
 }

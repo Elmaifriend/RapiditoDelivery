@@ -1,9 +1,10 @@
 <?php
 
+use App\Enums\DriverAvailability;
+use App\Enums\DriverOperationalStatus;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use App\Enums\DriverStatus;
 
 return new class extends Migration
 {
@@ -16,7 +17,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignId('city_id')->constrained();
-            $table->string('status')->default(DriverStatus::INACTIVE->value);
+            $table->string('availability_status')->default(DriverAvailability::OFFLINE->value);
+            $table->string('operational_status')->default(DriverOperationalStatus::IDLE->value);
+            
             $table->timestamps();
         });
     }

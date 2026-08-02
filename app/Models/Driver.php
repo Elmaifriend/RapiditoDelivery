@@ -2,19 +2,23 @@
 
 namespace App\Models;
 
+use App\Enums\DriverAvailability;
+use App\Enums\DriverOperationalStatus;
 use Illuminate\Database\Eloquent\Model;
-use App\Enums\DriverStatus;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Driver extends Model
 {
     protected $fillable = [
         'user_id', 
         'city_id', 
-        'status'
+        'availability_status',
+        'operational_status',
     ];
 
     protected $casts = [
-        'status' => DriverStatus::class,
+        'availability_status' => DriverAvailability::class,
+        'operational_status'  => DriverOperationalStatus::class,
     ];
 
     public function user()
@@ -30,5 +34,10 @@ class Driver extends Model
     public function orders()
     {
         return $this->hasMany(Order::class);
+    }
+
+    public function schedules()
+    {
+        return $this->morphMany(\App\Models\Schedule::class, 'scheduleable');
     }
 }

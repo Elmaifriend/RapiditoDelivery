@@ -26,10 +26,6 @@
                 @if ($business->category)
                     {{ $business->category?->name }} •
                 @endif
-                <a
-                    class="cursor-pointer select-none text-red-500 underline transition-transform active:scale-[0.98]"
-                    href="https://wa.me/{{ $business->phone }}"
-                >Contacto</a>
             </p>
         </div>
 

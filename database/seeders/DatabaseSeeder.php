@@ -35,6 +35,7 @@ class DatabaseSeeder extends Seeder
             //OrderSeeder::class,
             //OrderItemSeeder::class,
             //OrderDropoffLocationSeeder::class,
+            //ScheduleSeeder::class,
         ]);
     }
 }

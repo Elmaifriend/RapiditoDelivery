@@ -1,6 +1,21 @@
 @extends('layouts.page')
 
 @section('content')
+    <header class="flex items-center justify-between px-4 py-3 bg-white shadow-sm">
+        <div class="flex items-center gap-2">
+            <h1 class="text-base font-bold text-gray-800">Mi App</h1>
+        </div>
+
+        {{-- ACCESO AL PERFIL DEL REPARTIDOR --}}
+        <a 
+            href="{{ route('driver.profile', ['driver' => $driverId]) }}" 
+            wire:navigate
+            class="flex h-9 w-9 items-center justify-center rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition-colors"
+            title="Perfil de Repartidor"
+        >
+            <i class="bx bx-user-circle text-xl"></i>
+        </a>
+    </header>
     <div
         class="flex flex-col gap-6 py-4"
         wire:poll.5s="loadActiveOrder"

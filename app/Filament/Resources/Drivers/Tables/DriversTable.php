@@ -2,7 +2,8 @@
 
 namespace App\Filament\Resources\Drivers\Tables;
 
-use App\Enums\DriverStatus;
+use App\Enums\DriverAvailability;
+use App\Enums\DriverOperationalStatus;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -48,7 +49,11 @@ class DriversTable
                     ]),
 
                     Split::make([
-                        TextColumn::make('status')
+                        TextColumn::make('availability_status')
+                            ->badge()
+                            ->grow(false),
+
+                        TextColumn::make('operational_status')
                             ->badge()
                             ->grow(false),
                     ]),
@@ -59,9 +64,13 @@ class DriversTable
                     ->label('Ciudad')
                     ->relationship('city', 'name'),
 
-                SelectFilter::make('status')
-                    ->label('Estado')
-                    ->options(DriverStatus::class),
+                SelectFilter::make('availability_status')
+                    ->label('Disponibilidad')
+                    ->options(DriverAvailability::class),
+
+                SelectFilter::make('operational_status')
+                    ->label('Estado Operativo')
+                    ->options(DriverOperationalStatus::class),
             ])
             ->recordActions([
                 EditAction::make(),

@@ -19,6 +19,7 @@ return new class extends Migration
             $table->foreignId('city_id')->constrained();
             $table->string('availability_status')->default(DriverAvailability::OFFLINE->value);
             $table->string('operational_status')->default(DriverOperationalStatus::IDLE->value);
+            $table->boolean('is_active')->default(true);
             
             $table->timestamps();
         });

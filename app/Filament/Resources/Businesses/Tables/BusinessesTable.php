@@ -20,6 +20,11 @@ class BusinessesTable
     {
         return $table
             ->columns([
+                // Permite buscar por ID utilizando la clase CSS 'hidden' para mantener activa la consulta
+                TextColumn::make('id')
+                    ->searchable()
+                    ->extraAttributes(['class' => 'hidden']),
+
                 Stack::make([
                     Split::make([
                         ImageColumn::make('logo_path')
@@ -40,6 +45,12 @@ class BusinessesTable
                                 ->label('Categoría')
                                 ->badge()
                                 ->color('gray'),
+
+                            TextColumn::make('city.name')
+                                ->label('Ciudad')
+                                ->searchable()
+                                ->color('gray')
+                                ->size(TextSize::ExtraSmall),
                         ]),
                     ]),
 
@@ -85,15 +96,22 @@ class BusinessesTable
                 ])->space(3),
             ])
             ->filters([
+                SelectFilter::make('city_id')
+                    ->label('Ciudad')
+                    ->relationship('city', 'name')
+                    ->searchable()
+                    ->preload(),
+
                 SelectFilter::make('category_id')
                     ->label('Filtrar por Categoría')
                     ->relationship('category', 'name')
                     ->searchable()
                     ->preload(),
 
-                SelectFilter::make('city_id')
-                    ->label('Ciudad')
-                    ->relationship('city', 'name')
+                SelectFilter::make('tags')
+                    ->label('Etiquetas')
+                    ->relationship('tags', 'name')
+                    ->multiple()
                     ->searchable()
                     ->preload(),
 

@@ -68,7 +68,7 @@ class Checkout extends Component
 
     private function parsePhoneNumber(string $phone)
     {
-        // Intenta separar el prefijo si ya viene guardado con lada (ej: +526641234567)
+        // Intenta separar el prefijo si ya viene guardado con lada (ej: +526651234567)
         foreach (CountryCode::cases() as $code) {
             $dial = $code->dialCode();
             if (str_starts_with($phone, $dial)) {

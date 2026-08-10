@@ -1,3 +1,6 @@
+river-tasks-manager.blade.php
+
+
 @extends('layouts.page')
 
 @section('content')
@@ -8,7 +11,7 @@
 
         {{-- ACCESO AL PERFIL DEL REPARTIDOR --}}
         <a 
-            href="{{ route('driver.profile', ['driver' => $driverId]) }}" 
+            href="{{ route('driver.profile', ['driver' => $driver->id]) }}" 
             wire:navigate
             class="flex h-9 w-9 items-center justify-center rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition-colors"
             title="Perfil de Repartidor"
@@ -66,15 +69,7 @@
         @else
             {{-- SI HAY UN PEDIDO ASIGNADO --}}
             @php
-                $dropoff = $currentOrder->dropoffLocations->first();
                 $restaurant = $currentOrder->business;
-
-                // Generación de links de Google Maps
-                $restaurantAddressEnc = urlencode(($restaurant->address ?? '') . ' ' . ($restaurant->name ?? ''));
-                $restaurantMapsUrl = "https://www.google.com/maps/search/?api=1&query={$restaurantAddressEnc}";
-
-                $dropoffAddressEnc = urlencode($dropoff?->formatted_address ?? ($dropoff?->address_line ?? ''));
-                $dropoffMapsUrl = "https://www.google.com/maps/search/?api=1&query={$dropoffAddressEnc}";
 
                 // Estado de la entrega
                 $isHeadingToRestaurant =

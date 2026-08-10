@@ -112,7 +112,7 @@
                                     class="w-full border-0 bg-transparent px-1 py-2 text-sm font-semibold text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-0"
                                     type="tel"
                                     wire:model.blur="customerPhone"
-                                    placeholder="6641234567"
+                                    placeholder="6651234567"
                                 >
                             </div>
                             @error('customerPhone')
@@ -188,7 +188,7 @@
                             <span>Efectivo</span>
                         </button>
 
-                        <button
+                        {{-- <button
                             class="{{ $paymentMethod === 'card' ? 'bg-white text-blue-700 shadow-sm border border-gray-200' : 'text-gray-500 hover:text-gray-800' }} flex cursor-pointer items-center justify-center gap-2 rounded-xl px-3 py-3 text-sm font-extrabold transition-all duration-200"
                             type="button"
                             wire:click="setPaymentMethod('card')"
@@ -196,7 +196,7 @@
                             <i
                                 class="bxf bx-credit-card {{ $paymentMethod === 'card' ? 'text-blue-500' : 'text-gray-400' }} text-base"></i>
                             <span>Tarjeta</span>
-                        </button>
+                        </button> --}}
                     </div>
 
                     @if ($paymentMethod === 'cash')

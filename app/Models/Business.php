@@ -10,6 +10,7 @@ use App\Models\Tag;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\Schedule;
+use App\Enums\BusinessStatus;
 
 class Business extends Model
 {
@@ -40,6 +41,7 @@ class Business extends Model
     ];
 
     protected $casts = [
+        'status' => BusinessStatus::class,
         'is_open' => 'boolean',
         'accepts_delivery' => 'boolean',
         'accepts_pickup' => 'boolean',

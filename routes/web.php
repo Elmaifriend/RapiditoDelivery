@@ -14,7 +14,7 @@ use App\Livewire\Pages\TagPage;
 use Illuminate\Support\Facades\Route;
 use App\Livewire\Pages\DriverProfile;
 use App\Livewire\Pages\BusinessProfile;
-
+use App\Livewire\Pages\CityManagement;
 
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
@@ -40,3 +40,8 @@ Route::get('/checkout/success/{order}', CheckoutSuccess::class)->name('checkout.
 Route::get('/driver/{driver}', DriverTasksManager::class)->name('driver.tasks');
 Route::get('/driver/{driver}/profile', DriverProfile::class)->name('driver.profile');
 Route::get('/businesses/{business}/profile', BusinessProfile::class)->name('businesses.profile');
+
+
+Route::get('/admin/ciudades/{city?}', CityManagement::class)
+    ->middleware(['auth', 'role:admin'])
+    ->name('admin.cities.manage');

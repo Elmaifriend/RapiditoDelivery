@@ -12,13 +12,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        User::firstOrCreate([
-            'name' => 'Admin',
-            'email' => 'admin@admin.com',
-            "password" => "admin"
-        ]);
-
         $this->call([
+            UserSeeder::class,
+            RoleAndPermissionSeeder::class,
             CitySeeder::class,
             CategorySeeder::class,
             TagSeeder::class,

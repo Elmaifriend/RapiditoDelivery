@@ -7,7 +7,9 @@ use App\Enums\DeliveryStatus;
 use App\Enums\DriverAvailability;
 use App\Models\Driver;
 use App\Models\Order;
+use App\Models\OrderDropoffLocation;
 use App\Services\DriverAssignmentService;
+use Livewire\Attributes\Computed;
 use Livewire\Component;
 
 class DriverTasksManager extends Component
@@ -23,8 +25,6 @@ class DriverTasksManager extends Component
 
     // Campos de confirmación de entrega
     public string $paymentOutcome = DeliveryOutcome::PAID_CORRECTLY->value;
-
-    public string $incidentNotes = '';
 
     public function mount(Driver $driver): void
     {
@@ -46,8 +46,44 @@ class DriverTasksManager extends Component
                 DeliveryStatus::PICKED_UP,
                 DeliveryStatus::ON_THE_WAY,
             ])
-            ->with(['business', 'dropoffLocations', 'items.product'])
+            ->with(['business', 'dropoffLocations', 'items'])
             ->first();
+    }
+
+    /**
+     * Obtiene la ubicación principal de entrega (Dropoff Location)
+     */
+    #[Computed]
+    public function dropoff(): ?OrderDropoffLocation
+    {
+        return $this->currentOrder?->dropoffLocations->first();
+    }
+
+    /**
+     * Genera la URL dinámica para abrir la navegación en Google Maps
+     */
+    #[Computed]
+    public function dropoffMapsUrl(): string
+    {
+        $dropoff = $this->dropoff;
+
+        if (! $dropoff || ! $dropoff->lat || ! $dropoff->lng) {
+            return '#';
+        }
+
+        return "https://www.google.com/maps/dir/?api=1&destination={$dropoff->lat},{$dropoff->lng}&travelmode=driving";
+    }
+
+    #[Computed]
+    public function restaurantMapsUrl(): string
+    {
+        $restaurant = $this->currentOrder?->business;
+
+        if (! $restaurant || ! $restaurant->lat || ! $restaurant->lng) {
+            return '#';
+        }
+
+        return "https://www.google.com/maps/dir/?api=1&destination={$restaurant->lat},{$restaurant->lng}&travelmode=driving";
     }
 
     /**
@@ -82,31 +118,36 @@ class DriverTasksManager extends Component
 
         $outcome = DeliveryOutcome::tryFrom($this->paymentOutcome) ?? DeliveryOutcome::PAID_CORRECTLY;
 
-        $this->currentOrder->update([
-            'delivery_outcome' => $outcome,
-            'delivery_notes' => ! empty($this->incidentNotes)
-                ? trim(($this->currentOrder->delivery_notes ?? '').' | Entrega: '.$this->incidentNotes)
-                : $this->currentOrder->delivery_notes,
-        ]);
+        if (! empty($this->driverNotes)) {
+            $this->currentOrder->update([
+                'delivery_outcome' => $outcome,
+                'delivery_notes'   => trim(($this->currentOrder->delivery_notes ?? '').' | Entrega: '.$this->driverNotes),
+            ]);
+        } else {
+            $this->currentOrder->update([
+                'delivery_outcome' => $outcome,
+            ]);
+        }
 
         $this->driver->refresh();
 
-        // Evalúa la disponibilidad laboral para asignar nuevo pedido o solo cerrar la orden actual
         if ($this->driver->availability === DriverAvailability::OFFLINE) {
             $assignmentService->completeDelivery($this->currentOrder, $outcome);
         } else {
             $assignmentService->completeOrderAndPullNext($this->currentOrder, $outcome);
         }
 
-        $this->reset(['paymentOutcome', 'incidentNotes']);
+        $this->reset(['paymentOutcome', 'driverNotes']);
         $this->loadActiveOrder();
     }
 
     public function render()
     {
         return view('livewire.pages.driver-tasks-manager', [
-            'driverId' => $this->driver->id,
-            'driver'   => $this->driver,
+            'restaurant'        => $this->currentOrder?->business,
+            'dropoff'           => $this->dropoff,
+            'restaurantMapsUrl' => $this->restaurantMapsUrl,
+            'dropoffMapsUrl'    => $this->dropoffMapsUrl,
         ]);
     }
 }

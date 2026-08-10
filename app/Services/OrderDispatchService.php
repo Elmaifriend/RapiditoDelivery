@@ -21,7 +21,7 @@ class OrderDispatchService
 
             // Busca repartidores que estén CONECTADOS y LIBRES en esa ciudad
             $availableDriver = Driver::where('city_id', $cityId)
-                ->where('availability', DriverAvailability::ONLINE)
+                ->where('availability_status', DriverAvailability::ONLINE)
                 ->where('operational_status', DriverOperationalStatus::IDLE)
                 ->inRandomOrder()
                 ->first();

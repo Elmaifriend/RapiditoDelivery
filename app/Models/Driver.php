@@ -14,11 +14,13 @@ class Driver extends Model
         'city_id', 
         'availability_status',
         'operational_status',
+        'is_active',
     ];
 
     protected $casts = [
         'availability_status' => DriverAvailability::class,
         'operational_status'  => DriverOperationalStatus::class,
+        'is_active'           => 'boolean',
     ];
 
     public function user()

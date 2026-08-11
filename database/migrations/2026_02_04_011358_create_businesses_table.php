@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('slug')->unique();
             $table->string("phone")->index();
             $table->string("email")->index();
-            $table->string("web_site")->index();
+            $table->string("web_site")->index()->nullable();
             $table->string('status')->default('active'); // active, inactive, suspended, onboarding
             $table->foreignId('category_id')->nullable();
 

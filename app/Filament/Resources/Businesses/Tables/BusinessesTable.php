@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Businesses\Tables;
 
+use App\Enums\BusinessStatus;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -69,17 +70,17 @@ class BusinessesTable
                     Split::make([
                         TextColumn::make('status')
                             ->badge()
-                            ->formatStateUsing(fn (string $state): string => match ($state) {
+                            ->formatStateUsing(fn ($state): string => match ($state instanceof BusinessStatus ? $state->value : $state) {
                                 'active' => 'Público',
                                 'inactive' => 'Oculto',
-                                default => $state,
+                                default => (string) ($state?->value ?? $state),
                             })
-                            ->color(fn (string $state): string => match ($state) {
+                            ->color(fn ($state): string => match ($state instanceof BusinessStatus ? $state->value : $state) {
                                 'active' => 'info',
                                 'inactive' => 'danger',
                                 default => 'gray',
                             })
-                            ->icon(fn (string $state): string => match ($state) {
+                            ->icon(fn ($state): string => match ($state instanceof BusinessStatus ? $state->value : $state) {
                                 'active' => 'heroicon-m-eye',
                                 'inactive' => 'heroicon-m-eye-slash',
                                 default => 'heroicon-m-question-mark-circle',
@@ -127,8 +128,8 @@ class BusinessesTable
                     ->trueLabel('Solo Públicos')
                     ->falseLabel('Solo Ocultos')
                     ->queries(
-                        true: fn ($query) => $query->where('status', 'active'),
-                        false: fn ($query) => $query->where('status', 'inactive'),
+                        true: fn ($query) => $query->where('status', BusinessStatus::ACTIVE),
+                        false: fn ($query) => $query->where('status', BusinessStatus::INACTIVE),
                     ),
             ])
             ->recordActions([

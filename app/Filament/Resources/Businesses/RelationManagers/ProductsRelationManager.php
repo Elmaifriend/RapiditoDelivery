@@ -8,6 +8,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -221,71 +222,66 @@ class ProductsRelationManager extends RelationManager
             ])
             ->filters([])
             ->headerActions([
-                // Acción consolidada y corregida
                 Action::make('manageCategories')
-                    ->label('Gestionar Categorías')
+                    ->label('Categorías del Menú')
                     ->link()
                     ->color('gray')
-                    ->icon('heroicon-m-cog-6-tooth')
-                    ->modalWidth('lg')
-                    ->modalHeading('Gestionar Categorías de Menú')
-                    ->mountUsing(function (Schema $schema, $livewire) {
-                        // 1. Obtenemos las categorías de la base de datos
-                        $categories = $livewire->ownerRecord->productCategories()
-                            ->orderBy('name')
-                            ->get()
-                            ->map(fn ($cat) => [
-                                'id' => $cat->id,
-                                'name' => $cat->name,
-                            ])
-                            ->toArray();
-
-                        // 2. Rellenamos el schema/formulario utilizando ->fill()
-                        $schema->fill([
-                            'categories' => $categories,
-                        ]);
+                    ->icon('heroicon-m-tag')
+                    ->modalWidth('md')
+                    ->modalHeading('Administrar Categorías')
+                    ->fillForm(function ($livewire): array {
+                        return [
+                            'categories' => $livewire->ownerRecord
+                                ->productCategories()
+                                ->get(['id', 'name'])
+                                ->toArray(),
+                        ];
                     })
                     ->form([
                         Repeater::make('categories')
                             ->hiddenLabel()
                             ->schema([
-                                TextInput::make('id')
-                                    ->hidden(),
-                                    
+                                Hidden::make('id'),
+
                                 TextInput::make('name')
-                                    ->label('Nombre de la categoría')
-                                    ->placeholder('Ej. Entradas, Bebidas...')
+                                    ->hiddenLabel()
+                                    ->placeholder('Nombre de la categoría')
                                     ->required()
-                                    ->maxLength(255)
-                                    ->columnSpan(1),
+                                    ->maxLength(255),
                             ])
                             ->columns(1)
-                            ->addActionLabel('Agregar Categoría')
+                            ->addActionLabel('Agregar categoría')
                             ->reorderable(false)
-                            ->defaultItems(0),
+                            ->deleteAction(
+                                fn ($action) => $action->requiresConfirmation()
+                            ),
                     ])
                     ->action(function (array $data, $livewire): void {
                         $business = $livewire->ownerRecord;
-                        
-                        $submittedIds = collect($data['categories'] ?? [])
-                            ->pluck('id')
-                            ->filter()
-                            ->toArray();
+                        $submittedItems = collect($data['categories'] ?? []);
 
-                        // 1. Eliminamos las que el usuario borró en la interfaz
+                        // 1. ELIMINACIÓN:
+                        $submittedIds = $submittedItems->pluck('id')->filter()->toArray();
+
                         $business->productCategories()
                             ->whereNotIn('id', $submittedIds)
                             ->delete();
 
-                        // 2. Insertamos las nuevas o actualizamos las existentes
-                        foreach ($data['categories'] ?? [] as $categoryData) {
-                            if (!empty($categoryData['id'])) {
+                        // 2. ACTUALIZACIÓN Y CREACIÓN:
+                        foreach ($submittedItems as $item) {
+                            $name = trim($item['name'] ?? '');
+
+                            if (empty($name)) {
+                                continue;
+                            }
+
+                            if (!empty($item['id'])) {
                                 $business->productCategories()
-                                    ->where('id', $categoryData['id'])
-                                    ->update(['name' => $categoryData['name']]);
+                                    ->where('id', $item['id'])
+                                    ->update(['name' => $name]);
                             } else {
                                 $business->productCategories()->create([
-                                    'name' => $categoryData['name'],
+                                    'name' => $name,
                                 ]);
                             }
                         }
@@ -293,7 +289,7 @@ class ProductsRelationManager extends RelationManager
                         Notification::make()
                             ->success()
                             ->title('Categorías actualizadas')
-                            ->body('Los cambios en las categorías se han guardado correctamente.')
+                            ->body('Los cambios en el menú se guardaron correctamente.')
                             ->send();
                     }),
 

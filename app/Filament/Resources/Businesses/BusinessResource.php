@@ -49,7 +49,7 @@ class BusinessResource extends Resource
     {
         return [
             ProductsRelationManager::class,
-            ProductCategoriesRelationManager::class,
+            //ProductCategoriesRelationManager::class,
         ];
     }
 

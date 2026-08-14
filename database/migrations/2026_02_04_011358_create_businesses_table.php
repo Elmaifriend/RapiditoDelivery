@@ -24,7 +24,7 @@ return new class extends Migration
             $table->string('country')->default('MX');
             $table->string('state')->nullable();
             $table->unsignedBigInteger('city_id')->index();
-            $table->string('address')->nullable();
+            $table->text('address')->nullable();
             $table->string('postal_code')->nullable();
 
             $table->decimal('lat', 10, 7)->nullable();

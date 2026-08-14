@@ -21,7 +21,7 @@
         </div>
 
         <x-ui.button
-            href="https://wa.me/5216647921114?text=Hola!%20Quiero%20registrar%20mi%20negocio%20y%20aumentar%20mis%20ventas%20con%20Rapidito!"
+            href="https://wa.me/526383805436?text=Hola!%20Quiero%20registrar%20mi%20negocio%20y%20aumentar%20mis%20ventas%20con%20Rapidito!"
             variant="secondary"
         >
             <span>Registrar mi negocio</span>

@@ -63,7 +63,7 @@
     <x-ui.page-section title="Opciones" class="{{ auth()->check() ? 'mt-2' : 'mt-4' }}">
         <div class="flex flex-col gap-3">
             <a 
-                href="https://wa.me/5216647921114" 
+                href="https://wa.me/526383805436" 
                 target="_blank" 
                 class="flex cursor-pointer select-none items-center gap-4 rounded-3xl border border-gray-100 bg-white p-4 shadow-sm transition-transform active:scale-[0.98]"
             >

@@ -7,13 +7,17 @@ return [
     'variables' => [
         'driver_name',
         'order_id',
-        'restaurant_name'
+        'restaurant_name',
+        'url' // 👈 Agregar la variable
     ],
 
     'text' => "
 ¡Hola {{driver_name}}! 🛵
 
-Tienes una nueva orden asignada de *{{restaurant_name}}*. Por favor revisa tu aplicación para ver los detalles de recolección.
+Tienes una nueva orden asignada (#{{order_id}}) de *{{restaurant_name}}*. 
+
+Acepta o gestiona tu pedido en el siguiente enlace:
+{{url}}
 "
 
 ];

@@ -337,14 +337,22 @@ class WhatsAppNotifierService
             return false;
         }
 
+        // Generar la URL para el repartidor (firmada temporalmente o normal)
+        // Si usas Signed Route:
+        $driverUrl = URL::signedRoute('driver.tasks', ['driver' => $driver->id]);
+        
+        // Si prefieres URL normal sin firma, usa esta línea en su lugar:
+        // $driverUrl = route('driver.tasks', ['driver' => $driver->id]);
+
         $params = [
             'driver_name'     => $driver->user?->name ?? 'Repartidor',
             'order_id'        => $order->id,
             'restaurant_name' => $order->business?->name ?? 'el restaurante',
+            'url'             => $driverUrl, // 👈 Se agrega la URL aquí
         ];
 
         try {
-            Log::info("Notificando a repartidor {$driver->id} ({$cleanPhone}) asignación de orden #{$order->id}");
+            Log::info("Notificando a repartidor {$driver->id} ({$cleanPhone}) asignación de orden #{$order->id} | URL: {$driverUrl}");
 
             return WhatsApp::sendTemplate($cleanPhone, 'driver_new_order', $params);
         } catch (\Exception $e) {

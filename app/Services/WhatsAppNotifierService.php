@@ -2,10 +2,12 @@
 
 namespace App\Services;
 
+use App\Models\Business;
 use App\Models\Order;
 use App\WhatsApp\WhatsApp;
 use Illuminate\Support\Facades\Log;
-use App\Models\Business;
+use Illuminate\Support\Facades\URL;
+use App\Models\Driver;
 
 class WhatsAppNotifierService
 {
@@ -48,7 +50,7 @@ class WhatsAppNotifierService
         }
     }
     
-    /*
+    /**
      * Envía un mensaje al restaurante notificando el nuevo pedido usando la plantilla registrada.
      */
     public function notifyRestaurantNewOrder(Order $order): bool
@@ -90,10 +92,14 @@ class WhatsAppNotifierService
             $itemsSummary = "Detalles en la tablet / panel";
         }
 
-        // Generamos dinámicamente la URL absoluta para este negocio usando tu ruta con nombre
-        $dashboardUrl = route('kitchen.orders', ['businessId' => $business->id]);
+        // Generamos dinámicamente la URL firmada con expiración de 12 horas
+        $dashboardUrl = URL::temporarySignedRoute(
+            'kitchen.orders',
+            now()->addHours(12),
+            ['businessId' => $business->id]
+        );
 
-        // Parámetros de la plantilla de Meta (asegúrate de agregar la variable en tu plantilla de Meta si es necesario)
+        // Parámetros de la plantilla de Meta
         $params = [
             'restaurant_name'      => $business->name,
             'order_id'             => $order->id,
@@ -151,8 +157,12 @@ class WhatsAppNotifierService
             return false;
         }
 
-        // Ruta corregida: apunta al perfil del conductor pasando el ID en la clave 'driver'
-        $shiftUrl = route('driver.profile', ['driver' => $driver->id]);
+        // Generamos la URL firmada con expiración de 12 horas
+        $shiftUrl = URL::temporarySignedRoute(
+            'driver.profile',
+            now()->addHours(12),
+            ['driver' => $driver->id]
+        );
 
         $params = [
             'driver_name' => $user->name,
@@ -185,8 +195,12 @@ class WhatsAppNotifierService
 
         $statusLabel = ($action === 'open') ? 'ABIERTO 🟢' : 'CERRADO 🔴';
 
-        // Ruta corregida: apunta a la vista del negocio pasando el objeto/ID en 'business'
-        $dashboardUrl = route('businesses.profile', ['business' => $business->id]);
+        // Generamos la URL firmada con expiración de 12 horas
+        $dashboardUrl = URL::temporarySignedRoute(
+            'businesses.profile',
+            now()->addHours(12),
+            ['business' => $business->id]
+        );
 
         $params = [
             'restaurant_name' => $business->name,
@@ -218,5 +232,124 @@ class WhatsAppNotifierService
         }
 
         return $allSent;
+    }
+
+    /**
+     * Envía un mensaje al cliente informándole que el restaurante aceptó su orden.
+     */
+    public function notifyCustomerOrderAccepted(Order $order): bool
+    {
+        $phone = $order->customer_phone;
+
+        if (!$phone) {
+            Log::warning("No se pudo notificar al cliente sobre la orden {$order->id}: no hay número de teléfono asignado.");
+            return false;
+        }
+
+        if (!$order->relationLoaded('business')) {
+            $order->load('business');
+        }
+
+        $cleanPhone = preg_replace('/[^0-9]/', '', $phone);
+
+        if (empty($cleanPhone)) {
+            Log::error("Teléfono de cliente inválido en orden {$order->id}: '{$phone}'");
+            return false;
+        }
+
+        $params = [
+            'name'            => $order->customer_name ?? 'Cliente',
+            'restaurant_name' => $order->business?->name ?? 'el restaurante',
+            'order_id'        => $order->id,
+        ];
+
+        try {
+            Log::info("Notificando a cliente ({$cleanPhone}) aceptación de la orden #{$order->id}");
+
+            return WhatsApp::sendTemplate($cleanPhone, 'order_accepted_customer', $params);
+        } catch (\Exception $e) {
+            Log::error("Error al notificar al cliente aceptación de la orden {$order->id}: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Envía un mensaje al cliente informándole que el restaurante rechazó su orden.
+     */
+    public function notifyCustomerOrderRejected(Order $order): bool
+    {
+        $phone = $order->customer_phone;
+
+        if (!$phone) {
+            Log::warning("No se pudo notificar al cliente sobre el rechazo de la orden {$order->id}: no hay número de teléfono asignado.");
+            return false;
+        }
+
+        if (!$order->relationLoaded('business')) {
+            $order->load('business');
+        }
+
+        $cleanPhone = preg_replace('/[^0-9]/', '', $phone);
+
+        if (empty($cleanPhone)) {
+            Log::error("Teléfono de cliente inválido en orden {$order->id}: '{$phone}'");
+            return false;
+        }
+
+        $params = [
+            'name'            => $order->customer_name ?? 'Cliente',
+            'restaurant_name' => $order->business?->name ?? 'el restaurante',
+            'order_id'        => $order->id,
+        ];
+
+        try {
+            Log::info("Notificando a cliente ({$cleanPhone}) rechazo de la orden #{$order->id}");
+
+            return WhatsApp::sendTemplate($cleanPhone, 'order_rejected_customer', $params);
+        } catch (\Exception $e) {
+            Log::error("Error al notificar al cliente rechazo de la orden {$order->id}: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function notifyDriverNewOrderAssignment(Order $order, Driver $driver): bool
+    {
+        // Cargamos la relación user si no se ha cargado previamente
+        if (!$driver->relationLoaded('user')) {
+            $driver->load('user');
+        }
+
+        $phone = $driver->user?->phone;
+
+        if (!$phone) {
+            Log::warning("No se pudo notificar al repartidor {$driver->id} sobre la orden {$order->id}: el usuario asociado no tiene número asignado.");
+            return false;
+        }
+
+        if (!$order->relationLoaded('business')) {
+            $order->load('business');
+        }
+
+        $cleanPhone = preg_replace('/[^0-9]/', '', $phone);
+
+        if (empty($cleanPhone)) {
+            Log::error("Teléfono de repartidor inválido para el conductor {$driver->id}: '{$phone}'");
+            return false;
+        }
+
+        $params = [
+            'driver_name'     => $driver->user?->name ?? 'Repartidor',
+            'order_id'        => $order->id,
+            'restaurant_name' => $order->business?->name ?? 'el restaurante',
+        ];
+
+        try {
+            Log::info("Notificando a repartidor {$driver->id} ({$cleanPhone}) asignación de orden #{$order->id}");
+
+            return WhatsApp::sendTemplate($cleanPhone, 'driver_new_order', $params);
+        } catch (\Exception $e) {
+            Log::error("Error al notificar al repartidor {$driver->id} para la orden {$order->id}: " . $e->getMessage());
+            return false;
+        }
     }
 }

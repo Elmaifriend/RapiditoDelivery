@@ -6,6 +6,7 @@ use App\Enums\BusinessDecisionStatus;
 use App\Enums\OrderLifecycleStatus;
 use App\Models\Order;
 use App\Services\OrderDispatchService;
+use App\Services\WhatsAppNotifierService;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 
@@ -58,7 +59,7 @@ class BusinessOrdersDashboard extends Component
         }
     }
 
-    public function aceptarPedido(int $orderId): void
+    public function aceptarPedido(int $orderId, WhatsAppNotifierService $notifier): void
     {
         $order = Order::where('business_id', $this->businessId)->findOrFail($orderId);
 
@@ -67,10 +68,13 @@ class BusinessOrdersDashboard extends Component
             'lifecycle_status' => OrderLifecycleStatus::CONFIRMED,
         ]);
 
+        // Notificar al cliente vía WhatsApp
+        $notifier->notifyCustomerOrderAccepted($order);
+
         session()->flash('message', "Pedido #{$order->id} aceptado.");
     }
 
-    public function rechazarPedido(int $orderId): void
+    public function rechazarPedido(int $orderId, WhatsAppNotifierService $notifier): void
     {
         $order = Order::where('business_id', $this->businessId)->findOrFail($orderId);
 
@@ -78,6 +82,11 @@ class BusinessOrdersDashboard extends Component
             'business_decision_status' => BusinessDecisionStatus::REJECTED,
             'lifecycle_status' => OrderLifecycleStatus::CANCELLED,
         ]);
+
+        // Notificar al cliente vía WhatsApp el rechazo del pedido
+        $notifier->notifyCustomerOrderRejected($order);
+
+        session()->flash('message', "Pedido #{$order->id} rechazado.");
     }
 
     /**

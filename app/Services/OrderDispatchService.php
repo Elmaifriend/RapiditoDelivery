@@ -11,23 +11,36 @@ use Illuminate\Support\Facades\DB;
 
 class OrderDispatchService
 {
+    public function __construct(
+        protected WhatsAppNotifierService $notifier
+    ) {}
+
     /**
      * Procesa la orden cuando el restaurante la marca como lista.
      */
     public function dispatchOrder(Order $order): void
     {
-        DB::transaction(function () use ($order) {
+        $driverToNotify = null;
+
+        DB::transaction(function () use ($order, &$driverToNotify) {
+            // Aseguramos que la relación del negocio esté cargada
+            if (!$order->relationLoaded('business')) {
+                $order->load('business');
+            }
+
             $cityId = $order->business->city_id;
 
-            // Busca repartidores que estén CONECTADOS y LIBRES en esa ciudad
+            // Busca repartidores CONECTADOS y LIBRES con bloqueo para evitar condiciones de carrera
             $availableDriver = Driver::where('city_id', $cityId)
                 ->where('availability_status', DriverAvailability::ONLINE)
                 ->where('operational_status', DriverOperationalStatus::IDLE)
+                ->lockForUpdate()
                 ->inRandomOrder()
                 ->first();
 
             if ($availableDriver) {
                 $this->assignOrderToDriver($order, $availableDriver);
+                $driverToNotify = $availableDriver;
             } else {
                 $order->update([
                     'delivery_status' => DeliveryStatus::WAITING_DRIVER,
@@ -35,6 +48,11 @@ class OrderDispatchService
                 ]);
             }
         });
+
+        // Notificar por WhatsApp fuera de la transacción DB
+        if ($driverToNotify) {
+            $this->notifier->notifyDriverNewOrderAssignment($order, $driverToNotify);
+        }
     }
 
     /**

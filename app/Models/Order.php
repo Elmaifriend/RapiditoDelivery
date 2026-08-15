@@ -18,6 +18,7 @@ class Order extends Model
     protected $fillable = [
         'user_id',
         'business_id',
+        'city_id',
         'driver_id',
         'guest_token',
         'customer_name',
@@ -46,6 +47,11 @@ class Order extends Model
         "payment_method" => PaymentMethod::class,
         'delivery_outcome' => DeliveryOutcome::class,
     ];
+
+    public function city()
+    {
+        return $this->belongsTo(City::class);
+    }
 
     public function dropoffLocations()
     {

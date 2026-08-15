@@ -1,39 +1,54 @@
-@props(['business', 'name', 'stars', 'type', 'time', 'image'])
+@props([
+    'business',
+    'name',
+    'type',
+    'image',
+    'isOpen' => true,
+])
 
-<a
-    class="block transition-all active:scale-[0.98]"
-    href="{{ route('business', $business) }}"
-    wire:navigate
->
-    <x-ui.card padding="p-0">
-        <div class="relative flex w-full items-center justify-center">
+<div class="relative w-full">
+    <a
+        href="{{ $isOpen ? route('business', $business->id) : '#' }}"
+        @if($isOpen) wire:navigate @endif
+        @class([
+            'group block w-full overflow-hidden rounded-2xl border border-gray-100 bg-white transition-all shadow-sm',
+            'hover:shadow-md active:scale-[0.99]' => $isOpen,
+            'pointer-events-none cursor-not-allowed opacity-60 grayscale' => !$isOpen,
+        ])
+    >
+        {{-- Imagen del restaurante y Badge de estado --}}
+        <div class="relative h-36 w-full overflow-hidden bg-gray-100">
             <img
-            class="h-46 w-full object-cover object-center"
-            src="{{ $image }}"
-            alt="{{ $name }}"
+                src="{{ $image }}"
+                alt="{{ $name }}"
+                class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
             />
             
-            @isset($time)
-            <div class="absolute right-4 top-4 flex items-center gap-1 rounded-xl bg-white/80 px-2 py-1 text-xs font-bold">
-                <i class="bxf bx-clock text-red-400"></i>
-                <span>{{ $time }}</span>
-            </div>
-            @endisset
-        </div>
-        
-        <div class="flex flex-col gap-1 px-6 py-4">
-            <div class="flex justify-between">
-            <p class="font-bold text-gray-800">{{ $name }}</p>
-            @isset($stars)
-            <div class="flex items-center gap-1 rounded-2xl bg-green-50 px-2 py-1 text-xs font-bold text-green-700">
-                <span>{{ number_format($stars, 1) }}</span>
-                <i class="bxf bx-star"></i>
+            @if(!$isOpen)
+                <div class="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[1px]">
+                    <span class="rounded-full bg-gray-900/90 px-3 py-1 text-xs font-bold uppercase tracking-wider text-white shadow-md">
+                        Cerrado
+                    </span>
                 </div>
-                @endisset
-            </div>
-            <span class="self-start rounded-xl bg-gray-100 px-2 py-1 text-xs font-medium text-gray-500">
-                {{ $type }}
-            </span>
+            @endif
         </div>
-    </x-ui.card>
-</a>
+
+        {{-- Información --}}
+        <div class="flex items-center justify-between p-4">
+            <div class="flex flex-col gap-0.5">
+                <h3 class="font-bold text-gray-800 group-hover:text-red-500">
+                    {{ $name }}
+                </h3>
+                <span class="text-xs font-medium text-gray-400">
+                    {{ $type }}
+                </span>
+            </div>
+
+            @if($isOpen)
+                <span class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-50 text-gray-400 transition-colors group-hover:bg-red-50 group-hover:text-red-500">
+                    <i class="bx bx-chevron-right text-xl"></i>
+                </span>
+            @endif
+        </div>
+    </a>
+</div>

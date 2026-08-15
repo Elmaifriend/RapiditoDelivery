@@ -9,7 +9,7 @@ use App\Enums\OrderLifecycleStatus;
 use App\Enums\BusinessDecisionStatus;
 use App\Enums\DeliveryStatus;
 use App\Enums\PaymentStatus;
-use App\Enums\PaymentMethod; // <-- Importado para tipado estricto
+use App\Enums\PaymentMethod;
 use App\Enums\AddressSource;
 use Illuminate\Support\Facades\DB;
 
@@ -21,14 +21,18 @@ class ConvertCartToOrderService
     public function execute(
         Cart $cart, 
         DeliveryAddress $address, 
-        PaymentMethod $paymentMethod, // <-- Tipado estricto usando tu Enum
+        PaymentMethod $paymentMethod, 
         ?string $specialInstructions = null
     ): Order {
+        // Carga la relación 'business' si no viene pre-cargada para evitar queries extras durante la transacción
+        $cart->loadMissing('business');
+
         return DB::transaction(function () use ($cart, $address, $paymentMethod, $specialInstructions) {
             
-            // 1. Crear la Orden principal con la nueva lógica de estados independientes
+            // 1. Crear la Orden principal con la ciudad asignada directamente desde el negocio
             $order = Order::create([
                 'user_id' => $cart->user_id, // Soporta null para usuarios invitados (guests)
+                'city_id' => $cart->business->city_id,
                 'business_id' => $cart->business_id,
                 
                 // El cliente finalizó el checkout; la orden es real y válida en el sistema
@@ -46,7 +50,7 @@ class ConvertCartToOrderService
                 'payment_method' => $paymentMethod,
             ]);
 
-            // 2. Transferir los Items del carrito a la orden (Simple y seguro)
+            // 2. Transferir los Items del carrito a la orden
             foreach ($cart->items as $cartItem) {
                 $order->items()->create([
                     'product_id' => $cartItem->product_id,

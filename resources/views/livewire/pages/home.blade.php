@@ -13,7 +13,7 @@
             }
         }"
     >
-       {{-- No hay cobertura --}}
+        {{-- No hay cobertura --}}
         @if($noService)
             <div class="flex flex-col items-center justify-center gap-8 px-6 py-24 text-center">
                 <span class="text-6xl text-red-500">:(</span>
@@ -72,7 +72,7 @@
                 </div>
             </div>
 
-            {{-- Hay ciudad y cobertura --}}
+        {{-- Hay ciudad y cobertura --}}
         @elseif($city)
             <x-ui.page-section>
                 <x-ui.sell-banner />
@@ -136,6 +136,7 @@
                         :business="$restaurant"
                         :name="$restaurant->name"
                         :type="$restaurant->category?->name ?? 'General'"
+                        :isOpen="$restaurant->is_open"
                         :image="$restaurant->banner_path
                             ? Storage::temporaryUrl($restaurant->banner_path, now()->addMinutes(10))
                             : 'https://picsum.photos/300/200'"

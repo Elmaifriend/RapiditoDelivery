@@ -155,7 +155,11 @@ class Home extends Component
             return collect();
         }
 
-        return $this->city->businesses()->active()->get();
+        return $this->city->businesses()
+            ->active()
+            ->orderByDesc('is_open')
+            ->latest()
+            ->get();
     }
 
     public function render()

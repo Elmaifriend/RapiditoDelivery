@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands\Businesses;
 
+use App\Enums\BusinessStatus;
 use App\Enums\DayOfWeek;
 use App\Models\Business;
 use App\Models\Schedule;
@@ -19,19 +20,24 @@ class CloseBusinessesCommand extends Command
     {
         $now = Carbon::now();
         $currentDayEnum = DayOfWeek::from($now->dayOfWeekIso);
-        $currentTime = $now->format('H:i:00');
+        $currentTime = $now->format('H:i:s');
         $todayDate = $now->format('Y-m-d');
 
-        // Buscar horarios de Business que coincidan con la hora exacta de cierre
-        $schedules = Schedule::where('scheduleable_type', Business::class)
+        // Buscar negocios activos que están abiertos pero cuya hora actual alcanzó o superó el end_time
+        $schedules = Schedule::query()
+            ->where('scheduleable_type', Business::class)
             ->where('is_active', true)
             ->where('day_of_week', $currentDayEnum)
-            ->whereTime('end_time', $currentTime)
+            ->whereTime('end_time', '<=', $currentTime)
+            ->whereHasMorph('scheduleable', [Business::class], function ($query) {
+                $query->where('status', BusinessStatus::ACTIVE)
+                      ->where('is_open', true); // Solo los que están actualmente abiertos
+            })
             ->with(['scheduleable'])
             ->get();
 
         foreach ($schedules as $schedule) {
-            /** @var Business|null $business */
+            /** @var Business $business */
             $business = $schedule->scheduleable;
 
             if (!$business) {
@@ -41,9 +47,9 @@ class CloseBusinessesCommand extends Command
             // Cambiar estado a cerrado
             $business->update(['is_open' => false]);
 
-            // Prevenir doble notificación
-            $cacheKey = "business_close_notified_{$business->id}_{$todayDate}_{$schedule->end_time}";
-            $shouldNotify = Cache::add($cacheKey, true, now()->addHours(2));
+            // Evitar notificaciones duplicadas en el mismo día/horario
+            $cacheKey = "business_close_notified_{$business->id}_{$todayDate}_{$schedule->id}";
+            $shouldNotify = Cache::add($cacheKey, true, now()->addHours(12));
 
             if ($shouldNotify) {
                 $sent = $notifier->notifyBusinessStatusChange($business, 'close');

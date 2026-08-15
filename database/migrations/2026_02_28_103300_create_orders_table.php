@@ -13,6 +13,7 @@ return new class extends Migration
             
             // Relaciones (Llaves foráneas)
             $table->foreignId('user_id')->nullable()->constrained()->onDelete('set null');
+            $table->foreignId('city_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('business_id')->constrained();
             $table->foreignId('driver_id')->nullable()->constrained()->onDelete('set null');
             

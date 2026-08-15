@@ -137,48 +137,7 @@ class WhatsAppNotifierService
         return $allSentSuccessfully;
     }
 
-    public function notifyDriverShiftReminder(\App\Models\Driver $driver, string $startTime): bool
-    {
-        if (!$driver->relationLoaded('user')) {
-            $driver->load('user');
-        }
-
-        $user = $driver->user;
-
-        if (!$user || !$user->phone) {
-            Log::warning("No se pudo notificar al driver ID {$driver->id}: no tiene un usuario o teléfono asociado.");
-            return false;
-        }
-
-        $cleanPhone = preg_replace('/[^0-9]/', '', $user->phone);
-
-        if (empty($cleanPhone)) {
-            Log::error("Teléfono inválido para el repartidor {$user->name} (Driver ID: {$driver->id})");
-            return false;
-        }
-
-        // Generamos la URL firmada con expiración de 12 horas
-        $shiftUrl = URL::temporarySignedRoute(
-            'driver.profile',
-            now()->addHours(12),
-            ['driver' => $driver->id]
-        );
-
-        $params = [
-            'driver_name' => $user->name,
-            'start_time'  => $startTime,
-            'shift_url'   => $shiftUrl,
-        ];
-
-        try {
-            Log::info("Enviando recordatorio de turno a repartidor: {$user->name} ({$cleanPhone}) a las {$startTime}");
-            
-            return WhatsApp::sendTemplate($cleanPhone, 'driver_shift_reminder', $params);
-        } catch (\Exception $e) {
-            Log::error("Error al enviar recordatorio de turno por WhatsApp al driver ID {$driver->id}: " . $e->getMessage());
-            return false;
-        }
-    }
+    
 
     public function notifyBusinessStatusChange(Business $business, string $action): bool
     {
@@ -357,6 +316,92 @@ class WhatsAppNotifierService
             return WhatsApp::sendTemplate($cleanPhone, 'driver_new_order', $params);
         } catch (\Exception $e) {
             Log::error("Error al notificar al repartidor {$driver->id} para la orden {$order->id}: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function notifyDriverShiftStartReminder(\App\Models\Driver $driver, string $startTime): bool
+    {
+        if (!$driver->relationLoaded('user')) {
+            $driver->load('user');
+        }
+
+        $user = $driver->user;
+
+        if (!$user || !$user->phone) {
+            Log::warning("No se pudo notificar al driver ID {$driver->id}: no tiene un usuario o teléfono asociado.");
+            return false;
+        }
+
+        $cleanPhone = preg_replace('/[^0-9]/', '', $user->phone);
+
+        if (empty($cleanPhone)) {
+            Log::error("Teléfono inválido para el repartidor {$user->name} (Driver ID: {$driver->id})");
+            return false;
+        }
+
+        // URL firmada con expiración de 12 horas
+        $shiftUrl = URL::temporarySignedRoute(
+            'driver.profile',
+            now()->addHours(12),
+            ['driver' => $driver->id]
+        );
+
+        $params = [
+            'driver_name' => $user->name,
+            'start_time'  => $startTime,
+            'shift_url'   => $shiftUrl,
+        ];
+
+        try {
+            Log::info("Enviando aviso de inicio de turno a repartidor: {$user->name} ({$cleanPhone}) para las {$startTime}");
+            
+            return WhatsApp::sendTemplate($cleanPhone, 'driver_shift_start_reminder', $params);
+        } catch (\Exception $e) {
+            Log::error("Error al enviar aviso de inicio de turno por WhatsApp al driver ID {$driver->id}: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function notifyDriverShiftEndReminder(\App\Models\Driver $driver, string $endTime): bool
+    {
+        if (!$driver->relationLoaded('user')) {
+            $driver->load('user');
+        }
+
+        $user = $driver->user;
+
+        if (!$user || !$user->phone) {
+            Log::warning("No se pudo notificar al driver ID {$driver->id}: no tiene un usuario o teléfono asociado.");
+            return false;
+        }
+
+        $cleanPhone = preg_replace('/[^0-9]/', '', $user->phone);
+
+        if (empty($cleanPhone)) {
+            Log::error("Teléfono inválido para el repartidor {$user->name} (Driver ID: {$driver->id})");
+            return false;
+        }
+
+        // URL firmada con expiración de 12 horas
+        $shiftUrl = URL::temporarySignedRoute(
+            'driver.profile',
+            now()->addHours(12),
+            ['driver' => $driver->id]
+        );
+
+        $params = [
+            'driver_name' => $user->name,
+            'end_time'    => $endTime,
+            'shift_url'   => $shiftUrl,
+        ];
+
+        try {
+            Log::info("Enviando aviso de fin de turno a repartidor: {$user->name} ({$cleanPhone}) para las {$endTime}");
+            
+            return WhatsApp::sendTemplate($cleanPhone, 'driver_shift_end_reminder', $params);
+        } catch (\Exception $e) {
+            Log::error("Error al enviar aviso de fin de turno por WhatsApp al driver ID {$driver->id}: " . $e->getMessage());
             return false;
         }
     }

@@ -30,8 +30,10 @@
                 attributionControl: false
             }).setView([startLat, startLng], zoomLevel);
     
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-                maxZoom: 20
+            // Capa Satelital Híbrida de Google (Satelital + Calles)
+            L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+                maxZoom: 20,
+                subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
             }).addTo(this.map);
     
             setTimeout(() => this.map.invalidateSize(), 200);

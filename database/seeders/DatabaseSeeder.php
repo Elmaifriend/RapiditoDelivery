@@ -16,7 +16,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             RoleAndPermissionSeeder::class,
             CitySeeder::class,
-            //CategorySeeder::class,
+            CategorySeeder::class,
             TagSeeder::class,
             //BusinessSeeder::class, 
             //ProductCategorySeeder::class,

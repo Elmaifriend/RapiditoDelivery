@@ -39,6 +39,17 @@
 
 @layer base {
 
+    html,
+    body {
+        height: 100svh;
+        height: var(--app-height, 100svh);
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        overscroll-behavior: none;
+    }
+
     *,
     ::after,
     ::before,
@@ -70,6 +81,27 @@ select:focus[data-flux-control] {
   font-family: "Fluent Emoji Color", sans-serif !important;
 }
 
+@media screen and (max-width: 767px) {
+    input[type="text"],
+    input[type="password"],
+    input[type="email"],
+    input[type="number"],
+    input[type="tel"],
+    input[type="url"],
+    input[type="search"],
+    textarea,
+    select {
+        font-size: 16px !important;
+    }
+}
 /* \[:where(&)\]:size-4 {
     @apply size-4;
 } */
+
+@keyframes ios-focus-fix {
+    0% { opacity: 0.99; }
+    100% { opacity: 1; }
+}
+input:focus, textarea:focus {
+    animation: ios-focus-fix 0.1s forwards;
+}

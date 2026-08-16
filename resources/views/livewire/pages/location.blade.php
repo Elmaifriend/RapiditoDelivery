@@ -1,5 +1,5 @@
 <div
-    class="animate-fade-in fixed inset-0 z-[100] flex h-[100dvh] flex-col overflow-hidden bg-white"
+    class="animate-fade-in fixed top-0 left-0 z-[100] h-[var(--app-height,100svh)] w-full overflow-hidden bg-white"
     x-data="{
         map: null,
         autocomplete: null,
@@ -106,6 +106,42 @@
         }
     }"
 >
+    <!-- Map Container (Absolute Full Screen) -->
+    <div
+        class="absolute inset-0 z-0 h-full w-full"
+        wire:ignore
+    >
+        <div
+            class="h-full w-full"
+            id="map"
+        ></div>
+
+        <!-- Center Pin -->
+        <div
+            class="pointer-events-none absolute left-1/2 top-1/2 z-[1000] flex -translate-x-1/2 -translate-y-[90%] flex-col items-center">
+            <div class="group relative">
+                <div
+                    class="absolute -bottom-1 left-1/2 h-1.5 w-4 -translate-x-1/2 rounded-[100%] bg-black/20 blur-[1px]">
+                </div>
+                <x-ui.map-pin />
+            </div>
+        </div>
+
+        <!-- Locate Me Button -->
+        <button
+            class="absolute bottom-44 right-4 z-[1000] flex h-14 w-14 items-center justify-center rounded-2xl border border-gray-100 bg-white text-red-600 shadow-2xl transition-all active:scale-90"
+            x-on:click="locateMe()"
+        >
+            <template x-if="!loadingLocation">
+                <i class="bxf bx-location-pin text-2xl"></i>
+            </template>
+            <template x-if="loadingLocation">
+                <div class="h-6 w-6 animate-spin rounded-full border-2 border-orange-100 border-t-orange-600"></div>
+            </template>
+        </button>
+    </div>
+
+    <!-- Top Search Input Bar -->
     <div class="pointer-events-none absolute left-0 right-0 top-6 z-50 p-4">
         <div class="mx-auto flex max-w-md flex-col gap-3">
             <div class="pointer-events-auto flex items-center gap-2">
@@ -132,40 +168,9 @@
         </div>
     </div>
 
+    <!-- Bottom Selected Address Card -->
     <div
-        class="relative z-0 flex-1"
-        wire:ignore
-    >
-        <div
-            class="absolute inset-0"
-            id="map"
-        ></div>
-
-        <div
-            class="pointer-events-none absolute left-1/2 top-1/2 z-[1000] flex -translate-x-1/2 -translate-y-[90%] flex-col items-center">
-            <div class="group relative">
-                <div
-                    class="absolute -bottom-1 left-1/2 h-1.5 w-4 -translate-x-1/2 rounded-[100%] bg-black/20 blur-[1px]">
-                </div>
-                <x-ui.map-pin />
-            </div>
-        </div>
-
-        <button
-            class="absolute bottom-8 right-4 z-[1000] flex h-14 w-14 items-center justify-center rounded-2xl border border-gray-100 bg-white text-red-600 shadow-2xl transition-all active:scale-90"
-            x-on:click="locateMe()"
-        >
-            <template x-if="!loadingLocation">
-                <i class="bxf bx-location-pin text-2xl"></i>
-            </template>
-            <template x-if="loadingLocation">
-                <div class="h-6 w-6 animate-spin rounded-full border-2 border-orange-100 border-t-orange-600"></div>
-            </template>
-        </button>
-    </div>
-
-    <div
-        class="z-10 flex flex-shrink-0 flex-col gap-4 rounded-t-3xl bg-white p-4 shadow-[0_-10px_30px_rgba(0,0,0,0.08)]">
+        class="absolute bottom-0 left-0 right-0 z-40 flex flex-col gap-4 rounded-t-3xl bg-white p-4 shadow-[0_-10px_30px_rgba(0,0,0,0.08)]">
         <div class="flex items-start gap-3 p-2">
             <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-100">
                 <i class="bxf bx-location-plus text-xl text-red-500"></i>

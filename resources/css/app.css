@@ -39,6 +39,17 @@
 
 @layer base {
 
+    html,
+    body {
+        height: 100svh;
+        height: var(--app-height, 100svh);
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        overscroll-behavior: none;
+    }
+
     *,
     ::after,
     ::before,
@@ -86,3 +97,11 @@ select:focus[data-flux-control] {
 /* \[:where(&)\]:size-4 {
     @apply size-4;
 } */
+
+@keyframes ios-focus-fix {
+    0% { opacity: 0.99; }
+    100% { opacity: 1; }
+}
+input:focus, textarea:focus {
+    animation: ios-focus-fix 0.1s forwards;
+}

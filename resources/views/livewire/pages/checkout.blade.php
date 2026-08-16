@@ -275,38 +275,40 @@
             </x-ui.page-section>
         @endif
 
-        <div class="fixed bottom-26 left-0 right-0 z-40 px-4">
-            <x-ui.button
-                class="w-full"
-                wire:click="confirmPayment"
-                wire:loading.attr="disabled"
-                :disabled="is_null($this->deliveryFee)"
-            >
-                <div class="flex items-center gap-2 text-sm tracking-wide">
-                    <i
-                        class="bxf bx-lock-alt text-xs"
-                        wire:loading.remove
-                        wire:target="confirmPayment"
-                    ></i>
-                    <i
-                        class="bxf bx-loader-alt animate-spin text-xs"
-                        wire:loading
-                        wire:target="confirmPayment"
-                    ></i>
-                    <span
-                        wire:loading.remove
-                        wire:target="confirmPayment"
-                    >Hacer Pedido</span>
-                    <span
-                        wire:loading
-                        wire:target="confirmPayment"
-                    >Procesando...</span>
-                </div>
+        <div class="absolute bottom-26 left-0 right-0 z-40 px-4 pointer-events-none">
+            <div class="mx-auto max-w-md pointer-events-auto">
+                <x-ui.button
+                    class="w-full"
+                    wire:click="confirmPayment"
+                    wire:loading.attr="disabled"
+                    :disabled="is_null($this->deliveryFee)"
+                >
+                    <div class="flex items-center gap-2 text-sm tracking-wide">
+                        <i
+                            class="bxf bx-lock-alt text-xs"
+                            wire:loading.remove
+                            wire:target="confirmPayment"
+                        ></i>
+                        <i
+                            class="bxf bx-loader-alt animate-spin text-xs"
+                            wire:loading
+                            wire:target="confirmPayment"
+                        ></i>
+                        <span
+                            wire:loading.remove
+                            wire:target="confirmPayment"
+                        >Hacer Pedido</span>
+                        <span
+                            wire:loading
+                            wire:target="confirmPayment"
+                        >Procesando...</span>
+                    </div>
 
-                <div class="flex items-center gap-1 font-mono text-sm font-bold">
-                    <span>${{ number_format($this->totalAmount, 2) }}</span>
-                </div>
-            </x-ui.button>
+                    <div class="flex items-center gap-1 font-mono text-sm font-bold">
+                        <span>${{ number_format($this->totalAmount, 2) }}</span>
+                    </div>
+                </x-ui.button>
+            </div>
         </div>
         
         <x-ui.no-drivers-modal />

@@ -25,7 +25,7 @@ document.addEventListener('focusin', function(event) {
     if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
         setTimeout(() => {
             const mainContainer = document.querySelector('main.overflow-y-auto');
-            if (mainContainer) {
+            if (mainContainer && mainContainer.contains(activeElement)) {
                 const elementRect = activeElement.getBoundingClientRect();
                 const containerRect = mainContainer.getBoundingClientRect();
 
@@ -36,3 +36,22 @@ document.addEventListener('focusin', function(event) {
         }, 150);
     }
 });
+
+window.addEventListener('scroll', function() {
+    if (window.scrollY !== 0 || window.scrollX !== 0) {
+        window.scrollTo(0, 0);
+    }
+});
+
+const setAppHeight = () => {
+    document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
+};
+
+let currentWidth = window.innerWidth;
+window.addEventListener('resize', () => {
+    if (window.innerWidth !== currentWidth) {
+        setAppHeight();
+        currentWidth = window.innerWidth;
+    }
+});
+setAppHeight();

@@ -2,7 +2,7 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=overlays-content">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, interactive-widget=overlays-content">
     <title>{{ $title ?? config('app.name') }}</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -29,11 +29,11 @@
     <script src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google_maps.key') }}&libraries=places" async defer></script>
 </head>
 
-<body class="flex min-h-dvh justify-center bg-gray-100 font-sans text-gray-800">
-    <div class="flex h-svh w-full flex-col overflow-hidden shadow-xl relative">
+<body class="fixed top-0 left-0 h-[var(--app-height,100svh)] w-full flex justify-center bg-gray-100 font-sans text-gray-800 overflow-hidden select-none">
+    <div class="relative flex h-full w-full flex-col overflow-hidden shadow-xl">
         <livewire:components.header-bar />
 
-        <main class="no-scrollbar max-w-[900px] mx-auto w-full relative flex-1 overflow-y-auto pb-26">
+        <main class="no-scrollbar max-w-[900px] mx-auto w-full flex-1 overflow-y-auto pb-28">
             {{ $slot }}
         </main>
 

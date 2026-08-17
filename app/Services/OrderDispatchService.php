@@ -23,17 +23,28 @@ class OrderDispatchService
         $driverToNotify = null;
 
         DB::transaction(function () use ($order, &$driverToNotify) {
-            // Aseguramos que la relación del negocio esté cargada
+            // Aseguramos la carga de la relación del negocio/ciudad
             if (!$order->relationLoaded('business')) {
                 $order->load('business');
             }
 
-            $cityId = $order->business->city_id;
+            $cityId = $order->business?->city_id;
 
-            // Busca repartidores CONECTADOS y LIBRES con bloqueo para evitar condiciones de carrera
+            if (!$cityId) {
+                return;
+            }
+
+            // Repartidor ONLINE, IDLE y sin pedidos activos en curso
             $availableDriver = Driver::where('city_id', $cityId)
                 ->where('availability_status', DriverAvailability::ONLINE)
                 ->where('operational_status', DriverOperationalStatus::IDLE)
+                ->whereDoesntHave('orders', function ($query) {
+                    $query->whereIn('delivery_status', [
+                        DeliveryStatus::DRIVER_HEADING_TO_RESTAURANT,
+                        DeliveryStatus::PICKED_UP,
+                        DeliveryStatus::ON_THE_WAY,
+                    ]);
+                })
                 ->lockForUpdate()
                 ->inRandomOrder()
                 ->first();
@@ -42,14 +53,15 @@ class OrderDispatchService
                 $this->assignOrderToDriver($order, $availableDriver);
                 $driverToNotify = $availableDriver;
             } else {
+                // Si están ocupados, encolar pedido
                 $order->update([
                     'delivery_status' => DeliveryStatus::WAITING_DRIVER,
-                    'driver_id' => null,
+                    'driver_id'       => null,
                 ]);
             }
         });
 
-        // Notificar por WhatsApp fuera de la transacción DB
+        // Notificar por WhatsApp fuera del bloqueo de la transacción DB
         if ($driverToNotify) {
             $this->notifier->notifyDriverNewOrderAssignment($order, $driverToNotify);
         }
@@ -61,7 +73,7 @@ class OrderDispatchService
     public function assignOrderToDriver(Order $order, Driver $driver): void
     {
         $order->update([
-            'driver_id' => $driver->id,
+            'driver_id'       => $driver->id,
             'delivery_status' => DeliveryStatus::DRIVER_HEADING_TO_RESTAURANT,
         ]);
 

@@ -152,7 +152,7 @@
             </x-ui.page-section>
 
             <x-ui.card
-                class="pointer-events-none fixed bottom-24 left-1/2 z-50 flex w-[90%] max-w-sm -translate-x-1/2 items-start gap-3"
+                class="pointer-events-none absolute bottom-24 left-1/2 z-50 flex w-[90%] max-w-sm -translate-x-1/2 items-start gap-3"
                 style="display: none;"
                 x-show="showToast"
                 x-transition

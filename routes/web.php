@@ -50,7 +50,6 @@ Route::get('/kitchen/orders/{businessId}', BusinessOrdersDashboard::class)
     ->name('kitchen.orders');
 
 Route::get('/businesses/{business}/profile', BusinessProfile::class)
-    ->middleware('signed')
     ->name('businesses.profile');
 
 // Administración

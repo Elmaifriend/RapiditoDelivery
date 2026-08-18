@@ -42,7 +42,6 @@ Route::get('/checkout/success/{order}', CheckoutSuccess::class)->name('checkout.
 Route::get('/driver/{driver}', DriverTasksManager::class)->name('driver.tasks');
 
 Route::get('/driver/{driver}/profile', DriverProfile::class)
-    ->middleware('signed')
     ->name('driver.profile');
 
 // Rutas para Negocios / Cocina (Firmadas)
@@ -51,7 +50,6 @@ Route::get('/kitchen/orders/{businessId}', BusinessOrdersDashboard::class)
     ->name('kitchen.orders');
 
 Route::get('/businesses/{business}/profile', BusinessProfile::class)
-    ->middleware('signed')
     ->name('businesses.profile');
 
 // Administración

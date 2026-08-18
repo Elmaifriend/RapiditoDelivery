@@ -2,10 +2,10 @@
     
 
 ## Que no hice 
-    - aun no no he creado el template de wa para los repartidores
-    - aun no manda msj al driver cuando hay un nuevo pedido
+    --No he creado una solucion para evitar que el cron job vuelva a abrir o cerrar los locales que
+    se gestionaron manualmente
+    --No he corregido la imagen en la pagina de negocios 
+    
 
 
 ## Que debo hacer
-    - Debo crear un template de WA para los repartidores
-    - asegurarme de que llegue el msj por WA a los repartidores

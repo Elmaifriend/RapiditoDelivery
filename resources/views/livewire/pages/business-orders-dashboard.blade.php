@@ -143,7 +143,7 @@
                                     <div class="mb-4 flex items-center justify-between border-t border-gray-100 pt-2">
                                         <span class="text-sm font-bold text-gray-500">Total</span>
                                         <span
-                                            class="text-xl font-bold text-gray-900">${{ number_format($pedido->total, 2) }}</span>
+                                            class="text-xl font-bold text-gray-900">${{ number_format($pedido->subtotal, 2) }}</span>
                                     </div>
 
                                     <div class="flex gap-3">
@@ -283,7 +283,7 @@
                                     <div class="mb-4 flex items-center justify-between border-t border-gray-100 pt-2">
                                         <span class="text-sm font-bold text-gray-500">Total</span>
                                         <span
-                                            class="text-xl font-bold text-gray-900">${{ number_format($pedido->total, 2) }}</span>
+                                            class="text-xl font-bold text-gray-900">${{ number_format($pedido->subtotal, 2) }}</span>
                                     </div>
 
                                     <div>

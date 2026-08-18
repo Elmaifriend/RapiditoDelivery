@@ -34,19 +34,22 @@ class DriverTasksManager extends Component
 
     public function loadActiveOrder(): void
     {
-        if (! $this->driver) {
+        if (! $this->driver->exists) {
             $this->currentOrder = null;
 
             return;
         }
 
+        // Se contemplan tanto PICKED_UP como ON_THE_WAY para evitar perder la orden en transición
         $this->currentOrder = Order::where('driver_id', $this->driver->id)
             ->whereIn('delivery_status', [
+                DeliveryStatus::WAITING_DRIVER,
                 DeliveryStatus::DRIVER_HEADING_TO_RESTAURANT,
                 DeliveryStatus::PICKED_UP,
                 DeliveryStatus::ON_THE_WAY,
             ])
             ->with(['business', 'dropoffLocations', 'items'])
+            ->latest()
             ->first();
     }
 
@@ -56,7 +59,7 @@ class DriverTasksManager extends Component
     #[Computed]
     public function dropoff(): ?OrderDropoffLocation
     {
-        return $this->currentOrder?->dropoffLocations->first();
+        return $this->currentOrder?->dropoffLocations?->first();
     }
 
     /**
@@ -89,7 +92,7 @@ class DriverTasksManager extends Component
     /**
      * Paso 1: El repartidor confirma recogida en el restaurante.
      */
-    public function markAsPickedUp(DriverAssignmentService $assignmentService): void
+    public function markAsPickedUp(): void
     {
         if (! $this->currentOrder) {
             return;
@@ -101,16 +104,20 @@ class DriverTasksManager extends Component
             ]);
         }
 
+        /** @var DriverAssignmentService $assignmentService */
+        $assignmentService = app(DriverAssignmentService::class);
         $assignmentService->markAsPickedUp($this->currentOrder);
 
         $this->reset(['driverNotes', 'allItemsCorrect']);
         $this->loadActiveOrder();
+
+        unset($this->dropoff, $this->restaurantMapsUrl, $this->dropoffMapsUrl);
     }
 
     /**
      * Paso 2: El repartidor confirma entrega al cliente.
      */
-    public function completeDelivery(DriverAssignmentService $assignmentService): void
+    public function completeDelivery(): void
     {
         if (! $this->currentOrder) {
             return;
@@ -118,20 +125,22 @@ class DriverTasksManager extends Component
 
         $outcome = DeliveryOutcome::tryFrom($this->paymentOutcome) ?? DeliveryOutcome::PAID_CORRECTLY;
 
-        if (! empty($this->driverNotes)) {
-            $this->currentOrder->update([
-                'delivery_outcome' => $outcome,
-                'delivery_notes'   => trim(($this->currentOrder->delivery_notes ?? '').' | Entrega: '.$this->driverNotes),
-            ]);
-        } else {
-            $this->currentOrder->update([
-                'delivery_outcome' => $outcome,
-            ]);
-        }
+        $notes = ! empty($this->driverNotes)
+            ? trim(($this->currentOrder->delivery_notes ?? '').' | Entrega: '.$this->driverNotes)
+            : $this->currentOrder->delivery_notes;
+
+        $this->currentOrder->update([
+            'delivery_outcome' => $outcome,
+            'delivery_notes'   => $notes,
+        ]);
 
         $this->driver->refresh();
 
-        if ($this->driver->availability === DriverAvailability::OFFLINE) {
+        /** @var DriverAssignmentService $assignmentService */
+        $assignmentService = app(DriverAssignmentService::class);
+
+        // Corrección de la columna: 'availability_status'
+        if ($this->driver->availability_status === DriverAvailability::OFFLINE) {
             $assignmentService->completeDelivery($this->currentOrder, $outcome);
         } else {
             $assignmentService->completeOrderAndPullNext($this->currentOrder, $outcome);
@@ -139,6 +148,8 @@ class DriverTasksManager extends Component
 
         $this->reset(['paymentOutcome', 'driverNotes']);
         $this->loadActiveOrder();
+
+        unset($this->dropoff, $this->restaurantMapsUrl, $this->dropoffMapsUrl);
     }
 
     public function render()

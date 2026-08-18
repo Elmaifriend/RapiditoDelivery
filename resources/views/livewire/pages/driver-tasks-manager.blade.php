@@ -1,6 +1,3 @@
-river-tasks-manager.blade.php
-
-
 @extends('layouts.page')
 
 @assets

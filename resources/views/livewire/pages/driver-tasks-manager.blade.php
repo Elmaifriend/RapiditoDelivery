@@ -127,15 +127,15 @@ river-tasks-manager.blade.php
                         >
                             <x-ui.card>
                                 <div class="mb-4 flex items-start justify-between border-b border-gray-100 pb-4">
-                                    <div class="flex items-center gap-3">
+                                    <div class="flex min-w-0 flex-1 items-center gap-3">
                                         <div
-                                            class="flex h-12 w-12 flex-col items-center justify-center rounded-xl bg-gray-100 font-extrabold text-gray-900">
+                                            class="flex h-12 w-12 flex-none flex-col items-center justify-center rounded-xl bg-gray-100 font-extrabold text-gray-900">
                                             <i class="bxf bx-store-alt text-xl text-gray-400"></i>
                                         </div>
-                                        <div>
-                                            <h3 class="text-base font-bold text-gray-900">
+                                        <div class="min-w-0 flex-1">
+                                            <h3 class="line-clamp-2 break-words text-base font-bold text-gray-900">
                                                 {{ $restaurant->name ?? 'Restaurante' }}</h3>
-                                            <p class="mt-0.5 text-xs font-semibold text-gray-500">
+                                            <p class="mt-0.5 line-clamp-2 break-words text-xs font-semibold text-gray-500">
                                                 {{ $restaurant->address ?? 'Sin dirección' }}</p>
                                         </div>
                                     </div>
@@ -293,15 +293,15 @@ river-tasks-manager.blade.php
                             {{-- TARJETA DEL CLIENTE --}}
                             <x-ui.card>
                                 <div class="mb-4 flex items-start justify-between gap-4 border-b border-gray-100 pb-4">
-                                    <div class="flex items-center gap-3">
+                                    <div class="flex min-w-0 flex-1 items-center gap-3">
                                         <div
-                                            class="flex h-12 w-12 flex-col items-center justify-center rounded-xl bg-gray-100 font-extrabold text-gray-900">
+                                            class="flex h-12 w-12 flex-none flex-col items-center justify-center rounded-xl bg-gray-100 font-extrabold text-gray-900">
                                             <i class="bxf bx-user text-xl text-gray-400"></i>
                                         </div>
-                                        <div>
-                                            <h3 class="text-base font-bold text-gray-900">
+                                        <div class="min-w-0 flex-1">
+                                            <h3 class="line-clamp-2 break-words text-base font-bold text-gray-900">
                                                 {{ $currentOrder->customer_name ?? 'Cliente' }}</h3>
-                                            <p class="mt-0.5 text-xs font-semibold text-gray-500">
+                                            <p class="mt-0.5 line-clamp-2 break-words text-xs font-semibold text-gray-500">
                                                 {{ $dropoff?->formatted_address ?? ($dropoff?->address_line ?? 'Sin dirección disponible') }}
                                             </p>
                                         </div>
@@ -379,7 +379,7 @@ river-tasks-manager.blade.php
                                     <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Tienda de
                                         origen
                                     </p>
-                                    <p class="mt-0.5 text-sm font-bold text-gray-900">
+                                    <p class="mt-0.5 line-clamp-2 break-words text-sm font-bold text-gray-900">
                                         {{ $restaurant->name ?? 'Restaurante' }}
                                     </p>
                                 </div>

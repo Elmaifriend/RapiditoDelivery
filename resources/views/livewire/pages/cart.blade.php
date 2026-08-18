@@ -26,7 +26,7 @@
                             <div
                                 class="group relative flex items-center justify-between gap-4 rounded-2xl border border-transparent bg-white transition-all hover:border-gray-100">
 
-                                <div class="flex items-center gap-3">
+                                <div class="flex min-w-0 flex-1 items-center gap-3">
                                     <div class="h-14 w-14 flex-none overflow-hidden rounded-xl bg-gray-50">
                                         <img
                                             class="h-full w-full object-cover"
@@ -48,7 +48,7 @@
                                     </div>
                                 </div>
 
-                                <div class="flex flex-col items-end gap-2">
+                                <div class="flex shrink-0 flex-col items-end gap-2">
                                     <div class="flex items-center gap-2 rounded-lg border border-gray-100 bg-gray-50 p-1">
                                         <button
                                             class="flex h-7 w-7 items-center justify-center rounded-md bg-white text-xs font-bold text-gray-500 shadow-sm transition-all active:scale-90 disabled:opacity-50"

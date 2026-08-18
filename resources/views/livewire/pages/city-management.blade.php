@@ -212,8 +212,8 @@
                                                 <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-gray-100 text-xl font-bold text-gray-700">
                                                     <i class="bxf bx-restaurant"></i>
                                                 </div>
-                                                <div>
-                                                    <h3 class="text-base font-bold text-gray-900">
+                                                <div class="min-w-0 flex-1">
+                                                    <h3 class="line-clamp-2 break-words text-base font-bold text-gray-900">
                                                         {{ $business->name }}
                                                     </h3>
                                                     <p class="text-xs font-semibold text-gray-500">

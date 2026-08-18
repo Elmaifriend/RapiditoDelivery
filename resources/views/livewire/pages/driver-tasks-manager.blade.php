@@ -1,37 +1,42 @@
 @extends('layouts.page')
 
 @assets
-<link rel="preconnect" href="https://unpkg.com" crossorigin>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
+    <link
+        href="https://unpkg.com"
+        rel="preconnect"
+        crossorigin
+    >
+    <link
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        rel="stylesheet"
+    />
+    <script
+        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        defer
+    ></script>
 @endassets
 
 @section('content')
-    <header class="flex items-center justify-between px-4 py-3 bg-white shadow-sm">
-        <div class="flex items-center gap-2">
-            <h1 class="text-base font-bold text-gray-800">Mi App</h1>
-        </div>
-
-        {{-- ACCESO AL PERFIL DEL REPARTIDOR --}}
-        <a 
-            href="{{ route('driver.profile', ['driver' => $driver->id]) }}" 
-            wire:navigate
-            class="flex h-9 w-9 items-center justify-center rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition-colors"
-            title="Perfil de Repartidor"
-        >
-            <i class="bx bx-user-circle text-xl"></i>
-        </a>
-    </header>
     <div
         class="flex flex-col gap-6 py-4"
         wire:poll.5s="loadActiveOrder"
     >
         <x-ui.page-section>
             <div class="flex items-center justify-between">
-                <p class="text-sm font-semibold text-gray-500">
-                    Panel Repartidor
-                    <span class="font-bold text-red-500">{{ $driver->name ?? 'ID #' . $driver->id }}</span>
-                </p>
+                <div class="flex items-center gap-3">
+                    <a
+                        class="shadow-2xs flex h-8 w-8 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-500 transition-all hover:bg-gray-50 hover:text-gray-900 active:scale-95"
+                        href="{{ route('driver.profile', ['driver' => $driver->id]) }}"
+                        title="Perfil de Repartidor"
+                        wire:navigate
+                    >
+                        <i class="bxf bx-user-circle text-lg"></i>
+                    </a>
+                    <p class="text-sm font-semibold text-gray-500">
+                        Panel de Repartidor
+                        <span class="font-bold text-red-500">{{ $driver->name ?? 'ID #' . $driver->id }}</span>
+                    </p>
+                </div>
                 <x-ui.badge
                     color="green"
                     :pulse="true"

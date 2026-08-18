@@ -1,3 +1,11 @@
+@assets
+<link rel="preconnect" href="https://unpkg.com" crossorigin>
+<link rel="preconnect" href="https://maps.googleapis.com" crossorigin>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
+<script src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google_maps.key') }}&libraries=places" async defer></script>
+@endassets
+
 <div
     class="animate-fade-in fixed top-0 left-0 z-[100] h-[var(--app-height,100svh)] w-full overflow-hidden bg-white"
     x-data="{
@@ -16,7 +24,12 @@
         initLeaflet() {
             const container = document.getElementById('map');
             if (!container) return;
-    
+
+            if (typeof L === 'undefined') {
+                setTimeout(() => this.initLeaflet(), 100);
+                return;
+            }
+
             if (container._leaflet_id) {
                 container._leaflet_id = null;
             }

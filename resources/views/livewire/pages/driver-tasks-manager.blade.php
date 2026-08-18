@@ -3,6 +3,12 @@ river-tasks-manager.blade.php
 
 @extends('layouts.page')
 
+@assets
+<link rel="preconnect" href="https://unpkg.com" crossorigin>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
+@endassets
+
 @section('content')
     <header class="flex items-center justify-between px-4 py-3 bg-white shadow-sm">
         <div class="flex items-center gap-2">

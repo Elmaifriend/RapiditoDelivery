@@ -30,6 +30,7 @@
                                     <div class="h-14 w-14 flex-none overflow-hidden rounded-xl bg-gray-50">
                                         <img
                                             class="h-full w-full object-cover"
+                                            loading="lazy"
                                             src="{{ $item->product_image_url_snapshot ? Storage::temporaryUrl($item->product_image_url_snapshot, now()->addMinutes(10)) : 'https://placehold.co/100x100' }}"
                                         >
                                     </div>

@@ -68,6 +68,7 @@
                                 <div class="relative h-20 w-20 overflow-hidden rounded-xl bg-gray-200">
                                     <img
                                         class="h-full w-full object-cover"
+                                        loading="lazy"
                                         src="{{ $product->image_path ? Storage::temporaryUrl($product->image_path, now()->addMinutes(10)) : 'https://placehold.co/150x150' }}"
                                     >
                                 </div>
@@ -118,6 +119,7 @@
                     <div class="relative h-64 w-full overflow-hidden rounded-2xl bg-gray-100">
                         <img
                             class="h-full w-full object-cover"
+                            loading="lazy"
                             src="{{ $selectedProduct->image_path ? Storage::temporaryUrl($selectedProduct->image_path, now()->addMinutes(10)) : 'https://placehold.co/600x400' }}"
                         >
                         <button

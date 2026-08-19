@@ -90,7 +90,9 @@
                     wire:key="header-order-{{ $currentOrder->id }}-{{ $currentOrder->delivery_status->value }}"
                 >
                     <x-ui.badge>
-                        <span class="font-bold">Orden #{{ $currentOrder->id }}</span>
+                        <span class="font-bold">Orden #{{ $currentOrder->id }} </span>
+                        <span class="font-bold"> | {{ $currentOrder->customer_name }}</span>
+                        
                     </x-ui.badge>
 
                     @if ($isHeadingToRestaurant)

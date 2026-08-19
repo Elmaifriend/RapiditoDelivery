@@ -21,6 +21,7 @@
             <img
                 src="{{ $image }}"
                 alt="{{ $name }}"
+                loading="lazy"
                 class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
             />
             
@@ -35,8 +36,8 @@
 
         {{-- Información --}}
         <div class="flex items-center justify-between p-4">
-            <div class="flex flex-col gap-0.5">
-                <h3 class="font-bold text-gray-800 group-hover:text-red-500">
+            <div class="flex min-w-0 flex-1 flex-col gap-0.5">
+                <h3 class="truncate font-bold text-gray-800 group-hover:text-red-500">
                     {{ $name }}
                 </h3>
                 <span class="text-xs font-medium text-gray-400">

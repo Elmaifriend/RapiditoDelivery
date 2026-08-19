@@ -6,7 +6,7 @@
                 {{-- LOGO O IMAGEN DE REFERENCIA --}}
                 <div class="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-red-500 text-xl font-bold text-white shadow-sm">
                     @if($business->logo_path)
-                        <img src="{{ Storage::url($business->logo_path) }}" alt="{{ $business->name }}" class="h-full w-full object-cover" />
+                        <img src="{{ Storage::url($business->logo_path) }}" alt="{{ $business->name }}" loading="lazy" class="h-full w-full object-cover" />
                     @else
                         {{ strtoupper(substr($business->name, 0, 2)) }}
                     @endif
@@ -156,7 +156,7 @@
                             {{-- IMAGEN DEL PRODUCTO --}}
                             <div class="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gray-100 text-gray-400">
                                 @if($product->image_path)
-                                    <img src="{{ Storage::url($product->image_path) }}" alt="{{ $product->name }}" class="h-full w-full object-cover" />
+                                    <img src="{{ Storage::url($product->image_path) }}" alt="{{ $product->name }}" loading="lazy" decoding="async" class="h-full w-full object-cover" />
                                 @else
                                     <span class="text-xs font-bold">{{ substr($product->name, 0, 1) }}</span>
                                 @endif

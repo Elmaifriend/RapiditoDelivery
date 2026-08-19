@@ -20,8 +20,8 @@
         
         --}}
 
-        <div class="flex flex-col items-center gap-1 pt-4">
-            <h2 class="text-3xl font-bold text-gray-800">{{ $business->name }}</h2>
+        <div class="flex w-full flex-col items-center gap-1 px-4 pt-4">
+            <h2 class="w-full max-w-full line-clamp-3 break-words text-center text-3xl font-bold text-gray-800">{{ $business->name }}</h2>
             <p class="text-sm text-gray-500">
                 @if ($business->category)
                     {{ $business->category?->name }} •
@@ -55,8 +55,8 @@
                             class="flex cursor-pointer items-center justify-center transition-all active:scale-[0.98]"
                             wire:click="openProductModal({{ $product->id }})"
                         >
-                            <div class="flex-1 pr-4">
-                                <h3 class="text-sm font-bold text-gray-800">{{ $product->name }}</h3>
+                            <div class="min-w-0 flex-1 pr-4">
+                                <h3 class="line-clamp-2 break-words text-sm font-bold text-gray-800">{{ $product->name }}</h3>
                                 @if ($product->description)
                                     <p class="mt-1 line-clamp-2 text-xs text-gray-400">{{ $product->description }}
                                     </p>
@@ -68,6 +68,7 @@
                                 <div class="relative h-20 w-20 overflow-hidden rounded-xl bg-gray-200">
                                     <img
                                         class="h-full w-full object-cover"
+                                        loading="lazy"
                                         src="{{ $product->image_path ? Storage::temporaryUrl($product->image_path, now()->addMinutes(10)) : 'https://placehold.co/150x150' }}"
                                     >
                                 </div>
@@ -108,16 +109,17 @@
                 x-on:click="open = false"
             ></div>
             <div
-                class="relative w-full max-w-lg overflow-hidden rounded-t-3xl bg-white p-6 pb-28 shadow-xl sm:rounded-3xl"
+                class="relative flex max-h-[90dvh] w-full max-w-lg flex-col overflow-y-auto rounded-t-3xl bg-white p-6 pb-28 shadow-xl sm:rounded-3xl"
                 x-show="open"
                 x-transition:enter="transition ease-out duration-300 transform"
                 x-transition:enter-start="translate-y-full sm:translate-y-0 sm:scale-95"
                 x-transition:enter-end="translate-y-0 sm:scale-100"
             >
                 @if ($selectedProduct)
-                    <div class="relative h-64 w-full overflow-hidden rounded-2xl bg-gray-100">
+                    <div class="relative h-64 w-full shrink-0 overflow-hidden rounded-2xl bg-gray-100">
                         <img
                             class="h-full w-full object-cover"
+                            loading="lazy"
                             src="{{ $selectedProduct->image_path ? Storage::temporaryUrl($selectedProduct->image_path, now()->addMinutes(10)) : 'https://placehold.co/600x400' }}"
                         >
                         <button
@@ -126,12 +128,12 @@
                         >✕</button>
                     </div>
                     <div class="mt-4">
-                        <h3 class="text-xl font-bold text-gray-800">{{ $selectedProduct->name }}</h3>
-                        <p class="mt-2 text-sm leading-relaxed text-gray-500">{{ $selectedProduct->description }}</p>
+                        <h3 class="line-clamp-3 break-words text-xl font-bold text-gray-800">{{ $selectedProduct->name }}</h3>
+                        <p class="mt-2 break-words text-sm leading-relaxed text-gray-500">{{ $selectedProduct->description }}</p>
                         <span
                             class="mt-4 block text-lg font-extrabold text-gray-900">${{ number_format($selectedProduct->price, 2) }}</span>
                     </div>
-                    <div class="mt-8 flex items-center justify-between">
+                    <div class="mt-8 flex shrink-0 items-center justify-between">
                         <div class="flex items-center gap-4 rounded-xl border border-gray-200 p-1">
                             <button
                                 class="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-50 font-bold text-gray-600 active:bg-gray-200"

@@ -96,14 +96,14 @@
                             @foreach ($pedidosNuevos as $pedido)
                                 <x-ui.card wire:key="new-order-{{ $pedido->id }}">
                                     <div class="mb-4 flex items-start justify-between border-b border-gray-100 pb-4">
-                                        <div class="flex items-center gap-3">
+                                        <div class="flex min-w-0 flex-1 items-center gap-3">
                                             <div
-                                                class="flex h-12 w-12 flex-col items-center justify-center rounded-xl bg-gray-100 font-extrabold text-gray-900">
+                                                class="flex h-12 w-12 flex-none flex-col items-center justify-center rounded-xl bg-gray-100 font-extrabold text-gray-900">
                                                 <span class="-mb-1 text-[10px] uppercase text-gray-400">#</span>
                                                 <span class="text-base leading-none">{{ $pedido->id }}</span>
                                             </div>
-                                            <div>
-                                                <h3 class="text-base font-bold text-gray-900">
+                                            <div class="min-w-0 flex-1">
+                                                <h3 class="line-clamp-2 break-words text-base font-bold text-gray-900">
                                                     {{ $pedido->customer_name ?? 'Cliente Invitado' }}</h3>
                                                 <p
                                                     class="mt-0.5 flex items-center gap-1 text-xs font-semibold text-gray-500">
@@ -235,14 +235,14 @@
                                     wire:key="accepted-order-{{ $pedido->id }}"
                                 >
                                     <div class="mb-4 flex items-start justify-between gap-6 border-b border-gray-100 pb-4">
-                                        <div class="flex items-center gap-3">
+                                        <div class="flex min-w-0 flex-1 items-center gap-3">
                                             <div
-                                                class="flex h-12 w-12 flex-col items-center justify-center rounded-xl bg-gray-100 font-extrabold text-gray-900">
+                                                class="flex h-12 w-12 flex-none flex-col items-center justify-center rounded-xl bg-gray-100 font-extrabold text-gray-900">
                                                 <span class="-mb-1 text-[10px] uppercase text-gray-400">#</span>
                                                 <span class="text-base leading-none">{{ $pedido->id }}</span>
                                             </div>
-                                            <div>
-                                                <h3 class="text-base font-bold text-gray-900">
+                                            <div class="min-w-0 flex-1">
+                                                <h3 class="line-clamp-2 break-words text-base font-bold text-gray-900">
                                                     {{ $pedido->customer_name ?? 'Cliente Invitado' }}</h3>
                                                 <p
                                                     class="mt-0.5 flex items-center gap-1 text-xs font-semibold text-gray-500">

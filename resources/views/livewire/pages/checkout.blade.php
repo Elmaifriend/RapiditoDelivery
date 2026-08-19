@@ -1,5 +1,11 @@
 @extends('layouts.page')
 
+@assets
+<link rel="preconnect" href="https://unpkg.com" crossorigin>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
+@endassets
+
 @section('content')
     <div
         class="flex flex-col gap-4 pb-20"
@@ -15,7 +21,12 @@
         
             initMap() {
                 if (this.map) return;
-        
+
+                if (typeof L === 'undefined') {
+                    setTimeout(() => this.initMap(), 100);
+                    return;
+                }
+
                 this.map = L.map('delivery-map', {
                     zoomControl: false,
                     attributionControl: false,

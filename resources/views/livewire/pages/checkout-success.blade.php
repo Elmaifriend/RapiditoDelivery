@@ -47,7 +47,7 @@
                 <x-ui.page-section title="Datos de la tienda">
 
                     <div class="space-y-1">
-                        <p class="text-sm font-bold text-gray-800">{{ $order->business->name }}</p>
+                        <p class="break-words text-sm font-bold text-gray-800">{{ $order->business->name }}</p>
                         @if ($order->business->address)
                             <p class="text-xs font-semibold text-gray-500">{{ $order->business->address }}</p>
                         @endif

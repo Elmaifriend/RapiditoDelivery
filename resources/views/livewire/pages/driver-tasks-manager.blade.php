@@ -1,4 +1,5 @@
-@extends('layouts.page')
+<div>
+    
 
 @assets
     <link
@@ -16,7 +17,6 @@
     ></script>
 @endassets
 
-@section('content')
     <div
         class="flex flex-col gap-6 py-4"
         wire:poll.5s="loadActiveOrder"
@@ -145,13 +145,7 @@
                                     </div>
                                 </div>
 
-                                {{-- MAPA DEL RESTAURANTE --}}
-                                <div class="mb-4 overflow-hidden rounded-2xl border border-gray-100">
-                                    <x-ui.map
-                                        :lat="$restaurant->lat ?? 32.5149"
-                                        :lng="$restaurant->lng ?? -117.0382"
-                                    />
-                                </div>
+                                
 
                                 {{-- LINK A GOOGLE MAPS GPS --}}
                                 <a
@@ -343,13 +337,7 @@
                                     </div>
                                 @endif
 
-                                {{-- MAPA DEL CLIENTE --}}
-                                <div class="mb-4 overflow-hidden rounded-2xl border border-gray-100">
-                                    <x-ui.map
-                                        :lat="$dropoff->lat ?? 32.5149"
-                                        :lng="$dropoff->lng ?? -117.0382"
-                                    />
-                                </div>
+                                
 
                                 {{-- LINK A GOOGLE MAPS GPS CLIENTE --}}
                                 <a
@@ -548,4 +536,6 @@
             </x-ui.page-section>
         @endif
     </div>
-@endsection
+
+
+</div>

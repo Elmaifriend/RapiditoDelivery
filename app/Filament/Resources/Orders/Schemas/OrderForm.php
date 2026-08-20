@@ -8,6 +8,7 @@ use App\Enums\DeliveryStatus;
 use App\Enums\OrderLifecycleStatus;
 use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
+use App\Models\Driver;
 use Filament\Forms;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -39,7 +40,8 @@ class OrderForm
                             ->relationship('city', 'name')
                             ->searchable()
                             ->required(),
-                    ])->columns(2),
+                    ])
+                    ->columns(2),
 
                 Section::make('Negocio y Repartidor')
                     ->schema([
@@ -51,10 +53,61 @@ class OrderForm
 
                         Forms\Components\Select::make('driver_id')
                             ->label('Repartidor')
-                            ->relationship('driver', 'name')
                             ->searchable()
+                            ->searchPrompt('Buscar por ID, nombre o ciudad...')
+                            ->getSearchResultsUsing(function (string $search): array {
+                                return Driver::query()
+                                    ->with(['user', 'city'])
+                                    ->where(function ($query) use ($search) {
+                                        $query
+                                            ->where('drivers.id', $search)
+                                            ->orWhereHas('user', function ($query) use ($search) {
+                                                $query->where(
+                                                    'name',
+                                                    'like',
+                                                    "%{$search}%"
+                                                );
+                                            })
+                                            ->orWhereHas('city', function ($query) use ($search) {
+                                                $query->where(
+                                                    'name',
+                                                    'like',
+                                                    "%{$search}%"
+                                                );
+                                            });
+                                    })
+                                    ->get()
+                                    ->mapWithKeys(function (Driver $driver) {
+                                        return [
+                                            $driver->id => sprintf(
+                                                '#%d — %s — %s',
+                                                $driver->id,
+                                                $driver->user?->name ?? 'Sin nombre',
+                                                $driver->city?->name ?? 'Sin ciudad'
+                                            ),
+                                        ];
+                                    })
+                                    ->toArray();
+                            })
+                            ->getOptionLabelUsing(function ($value): ?string {
+                                $driver = Driver::query()
+                                    ->with(['user', 'city'])
+                                    ->find($value);
+
+                                if (! $driver) {
+                                    return null;
+                                }
+
+                                return sprintf(
+                                    '#%d — %s — %s',
+                                    $driver->id,
+                                    $driver->user?->name ?? 'Sin nombre',
+                                    $driver->city?->name ?? 'Sin ciudad'
+                                );
+                            })
                             ->nullable(),
-                    ])->columns(2),
+                    ])
+                    ->columns(2),
 
                 Section::make('Estados del Pedido')
                     ->schema([
@@ -87,7 +140,8 @@ class OrderForm
                             ->label('Resultado de Entrega')
                             ->options(DeliveryOutcome::class)
                             ->nullable(),
-                    ])->columns(3),
+                    ])
+                    ->columns(3),
 
                 Section::make('Montos')
                     ->schema([
@@ -109,7 +163,8 @@ class OrderForm
                             ->numeric()
                             ->prefix('$')
                             ->required(),
-                    ])->columns(3),
+                    ])
+                    ->columns(3),
 
                 Section::make('Notas Adicionales')
                     ->schema([

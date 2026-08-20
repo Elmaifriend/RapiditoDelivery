@@ -159,6 +159,6 @@ class DriverTasksManager extends Component
             'dropoff'           => $this->dropoff,
             'restaurantMapsUrl' => $this->restaurantMapsUrl,
             'dropoffMapsUrl'    => $this->dropoffMapsUrl,
-        ]);
+        ])->layout('layouts.driver');
     }
 }

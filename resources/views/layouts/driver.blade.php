@@ -8,7 +8,7 @@
 
     @livewireStyles
 </head>
-<body>
+<body class="overflow-auto">
     {{ $slot }}
 
     @livewireScripts

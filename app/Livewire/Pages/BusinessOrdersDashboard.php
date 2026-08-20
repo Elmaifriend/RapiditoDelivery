@@ -9,6 +9,7 @@ use App\Services\OrderDispatchService;
 use App\Services\WhatsAppNotifierService;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
+use App\Services\WhatsAppCustomerNotificationService;
 
 class BusinessOrdersDashboard extends Component
 {
@@ -92,11 +93,14 @@ class BusinessOrdersDashboard extends Component
     /**
      * Solicita la asignación de repartidor a través del servicio de despacho.
      */
-    public function llamarRepartidor(int $orderId, OrderDispatchService $dispatchService): void
-    {
+    public function llamarRepartidor(int $orderId, OrderDispatchService $dispatchService, WhatsAppCustomerNotificationService $customerNotificationService ): void {
         $order = Order::where('business_id', $this->businessId)->findOrFail($orderId);
 
+        // 1. Solicitud/Despacho del repartidor
         $dispatchService->dispatchOrder($order);
+
+        // 2. Notificación vía WhatsApp al cliente
+        $customerNotificationService->notifyCustomerOrderIsReady($order);
 
         session()->flash('message', "Solicitud de repartidor enviada para el pedido #{$order->id}.");
     }

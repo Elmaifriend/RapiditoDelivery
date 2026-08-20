@@ -2,12 +2,15 @@
 
 namespace App\Filament\Resources\Orders\Tables;
 
+use App\Enums\BusinessDecisionStatus;
+use App\Enums\DeliveryStatus;
+use App\Enums\OrderLifecycleStatus;
+use App\Enums\PaymentStatus;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Tables\Table;
 use Filament\Tables;
-use App\Enums\OrderStatus;
+use Filament\Tables\Table;
 
 class OrdersTable
 {
@@ -15,68 +18,88 @@ class OrdersTable
     {
         return $table
             ->columns([
-
                 Tables\Columns\TextColumn::make('id')
                     ->label('#')
-                    ->sortable(),
+                    ->sortable()
+                    ->searchable(),
 
                 Tables\Columns\TextColumn::make('user.name')
                     ->label('Cliente')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->default(fn ($record) => $record->customer_name ?? 'Invitado'),
 
-                Tables\Columns\TextColumn::make('restaurant.name')
-                    ->label('Restaurante')
+                Tables\Columns\TextColumn::make('business.name')
+                    ->label('Restaurante / Negocio')
                     ->searchable()
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('driver.name')
                     ->label('Repartidor')
+                    ->sortable()
+                    ->placeholder('Sin asignar'),
+
+                Tables\Columns\TextColumn::make('lifecycle_status')
+                    ->label('Ciclo de Vida')
+                    ->badge()
+                    ->color(fn (OrderLifecycleStatus $state): string => match ($state) {
+                        OrderLifecycleStatus::PENDING => 'warning',
+                        OrderLifecycleStatus::CONFIRMED => 'info',
+                        OrderLifecycleStatus::COMPLETED => 'success',
+                        OrderLifecycleStatus::CANCELLED => 'danger',
+                    })
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('status')
-                    ->label('Estado')
+                Tables\Columns\TextColumn::make('business_decision_status')
+                    ->label('Decisión Negocio')
                     ->badge()
-                    ->color(fn ($state) => match ($state) {
-                        OrderStatus::DRAFT->value => 'gray',
-                        OrderStatus::CONFIRMING_ORDER->value => 'gray',
-                        OrderStatus::CONFIRMED->value => 'primary',
-                        OrderStatus::CONFIRMING_LOCATION->value => 'warning',
-                        OrderStatus::LOCATION_CONFIRMED->value => 'info',
-                        OrderStatus::RESTAURANT_PENDING->value => 'warning',
-                        OrderStatus::RESTAURANT_ACCEPTED->value => 'primary',
-                        OrderStatus::PREPARING->value => 'warning',
-                        OrderStatus::READY_FOR_PICKUP->value => 'info',
-                        OrderStatus::ON_THE_WAY->value => 'success',
-                        OrderStatus::DELIVERED->value => 'success',
-                        OrderStatus::CANCELLED->value => 'danger',
-                        OrderStatus::RESTAURANT_REJECTED->value => 'danger',
-                        OrderStatus::PARTIAL_UNAVAILABLE->value => 'warning',
-                        OrderStatus::REFUND_PENDING->value => 'danger',
-                        default => 'gray',
-                    }),
+                    ->color(fn (BusinessDecisionStatus $state): string => match ($state) {
+                        BusinessDecisionStatus::PENDING => 'gray',
+                        BusinessDecisionStatus::ACCEPTED => 'success',
+                        BusinessDecisionStatus::REJECTED => 'danger',
+                        BusinessDecisionStatus::PARTIAL_PROPOSAL => 'warning',
+                    })
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                Tables\Columns\TextColumn::make('delivery_status')
+                    ->label('Envío')
+                    ->badge()
+                    ->color(fn (DeliveryStatus $state): string => match ($state) {
+                        DeliveryStatus::PENDING, DeliveryStatus::WAITING_DRIVER => 'gray',
+                        DeliveryStatus::DRIVER_HEADING_TO_RESTAURANT, DeliveryStatus::PICKED_UP => 'warning',
+                        DeliveryStatus::ON_THE_WAY => 'info',
+                        DeliveryStatus::DELIVERED => 'success',
+                    })
+                    ->sortable(),
+
+                Tables\Columns\TextColumn::make('payment_status')
+                    ->label('Pago')
+                    ->badge()
+                    ->color(fn (PaymentStatus $state): string => match ($state) {
+                        PaymentStatus::PENDING => 'gray',
+                        PaymentStatus::PAID => 'success',
+                        PaymentStatus::REFUND_PENDING => 'warning',
+                        PaymentStatus::REFUNDED => 'danger',
+                    })
+                    ->sortable(),
 
                 Tables\Columns\TextColumn::make('total')
                     ->label('Total')
                     ->money('MXN')
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('payment_status')
-                    ->badge()
-                    ->colors([
-                        'gray' => 'pending',
-                        'success' => 'paid',
-                        'danger' => 'failed',
-                        'warning' => 'refunded',
-                    ]),
-
                 Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime('d/m/Y H:i')
                     ->label('Fecha')
+                    ->dateTime('d/m/Y H:i')
                     ->sortable(),
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('lifecycle_status')
+                    ->label('Estado')
+                    ->options(OrderLifecycleStatus::class),
+                Tables\Filters\SelectFilter::make('payment_status')
+                    ->label('Estado de Pago')
+                    ->options(PaymentStatus::class),
             ])
             ->recordActions([
                 EditAction::make(),

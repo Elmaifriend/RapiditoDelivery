@@ -15,6 +15,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use App\Filament\Resources\Businesses\RelationManagers\UsersRelationManager;
 
 class BusinessResource extends Resource
 {
@@ -49,6 +50,7 @@ class BusinessResource extends Resource
     {
         return [
             ProductsRelationManager::class,
+            UsersRelationManager::class,
             //ProductCategoriesRelationManager::class,
         ];
     }
